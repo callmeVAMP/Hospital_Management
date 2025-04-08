@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 
 import patient from './routes/patient.js'
+import appointment from './routes/appointment.js'
+import occupancy from './routes/occupancy.js'
 
 const app = express();
 dotenv.config();
@@ -45,7 +47,8 @@ console.log(err);
 }
 
 
-
+//middleware
+app.use(express.json())
 
 
 app.get('/',async(req,res)=>{
@@ -53,6 +56,8 @@ app.get('/',async(req,res)=>{
 })
 
 app.use('/patient',patient)
+app.use('/appointment',appointment)
+app.use('/occupancy',occupancy);
 
 
 
