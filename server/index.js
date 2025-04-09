@@ -1,13 +1,17 @@
 import express from 'express';
+//const express = require( 'express');
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
 
 import patient from './routes/patient.js'
+import appoinment from './routes/appointment.js'
+import labtech from './routes/LabTechnician.js'
+
 
 const app = express();
 dotenv.config();
-
+app.use(express.json());
 let connection;
 
 
@@ -16,6 +20,8 @@ const PORT=process.env.PORT
 const DB_PORT=process.env.DB_PORT;
 const DB_PASSWORD=process.env.DB_PASSWORD;
 
+
+console.log(DB_PORT);
 //Might be needed to experiment
 // export const pool = mysql.createPool({
 //     host: 'localhost',
@@ -53,7 +59,8 @@ app.get('/',async(req,res)=>{
 })
 
 app.use('/patient',patient)
-
+app.use('/appointment',appoinment)
+app.use('/labTechnician',labtech)
 
 
   
