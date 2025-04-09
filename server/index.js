@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 
 
 import patient from './routes/patient.js'
+import admin from './routes/admin_from_starting.js'
 
 const app = express();
 dotenv.config();
@@ -53,7 +54,7 @@ app.get('/',async(req,res)=>{
 })
 
 app.use('/patient',patient)
-
+app.use('/admin',admin)
 
 
   
