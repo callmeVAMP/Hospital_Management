@@ -14,8 +14,8 @@ import BasicBasic from './components/Basic';
 import { DataGrid } from '@mui/x-data-grid';
 import DataGridExample  from './components/t';
 import SxProp from './components/test';
-import AppointmentsTable from './components/d_appointment';
-import AppointmentForm from './components/appointment_form';
+import AppointmentsTable from './components/d_appointment_nikki';
+import AppointmentForm from './components/appointment_form_nikki';
 
 function App() {
   const [count, setCount] = useState(0)
