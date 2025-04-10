@@ -2,7 +2,7 @@ import express from 'express';
 //const express = require( 'express');
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
-
+import otpRoutes from './auth/otpRouter.js'
 
 import patient from './routes/patient.js'
 import appoinment from './routes/appointment.js'
@@ -63,7 +63,7 @@ app.use('/appointment',appoinment)
 app.use('/labTechnician',labtech)
 
 
-  
+app.use("/auth", otpRoutes);
 
 app.listen(PORT,()=>{
   console.log(`Server Running on PORT ${PORT}`);
