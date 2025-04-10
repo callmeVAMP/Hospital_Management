@@ -11,7 +11,11 @@ import BasicTable from './components/Table';
 import DataTable from './components/Table2';
 import DenseTable from './components/Table3';
 import BasicBasic from './components/Basic';
-
+import { DataGrid } from '@mui/x-data-grid';
+import DataGridExample  from './components/t';
+import SxProp from './components/test';
+import AppointmentsTable from './components/d_appointment';
+import AppointmentForm from './components/appointment_form';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -19,9 +23,12 @@ function App() {
   return (
     <div className='mt-4 text-2xl'>
       {/* hELLO */}
-      <Button variant='contained'>Hello</Button>
-      {/* <BasicTable /> */}
-      <DataTable />
+      {/* <Button variant='contained'>Hello</Button>
+      <DataGridExample /> */}
+      {/* <SxProp/> */}
+      {/* <AppointmentsTable/> */}
+      <AppointmentForm/>
+      {/* <DataTable /> */}
       {/* <DenseTable /> */}
       {/* <BasicBasic /> */}
     </div>
