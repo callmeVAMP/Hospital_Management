@@ -6,11 +6,9 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Button } from '@mui/material';
-import BasicTable from './components/Table';
-import DataTable from './components/Table2';
-import DenseTable from './components/Table3';
-import BasicBasic from './components/Basic';
+import DoctorsTable from './components/DoctorList';
+
+
 import { DataGrid } from '@mui/x-data-grid';
 import DataGridExample  from './components/t';
 import SxProp from './components/test';
@@ -31,6 +29,12 @@ function App() {
       {/* <DataTable /> */}
       {/* <DenseTable /> */}
       {/* <BasicBasic /> */}
+      {/* <AppointmentForm /> */}
+      {/* <AppointmentsTable /> */}
+      <DoctorsTable />
+      {/* <DoctorForm open={true} /> */}
+      
+      
     </div>
   )
 }
