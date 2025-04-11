@@ -7,7 +7,10 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import DoctorsTable from './components/DoctorList';
-
+// import AppointmentTable from './components/appointment';
+// import PatientsTable from './components/rough/r1';
+import PatientDashboard from './components/Doctor/PatientList';
+import AppointmentTable from './components/Receptionist/appointmentstable';
 
 import { DataGrid } from '@mui/x-data-grid';
 import DataGridExample  from './components/t';
@@ -25,13 +28,15 @@ function App() {
       <DataGridExample /> */}
       {/* <SxProp/> */}
       {/* <AppointmentsTable/> */}
-      <AppointmentForm/>
+      {/* <AppointmentForm/> */}
       {/* <DataTable /> */}
       {/* <DenseTable /> */}
       {/* <BasicBasic /> */}
       {/* <AppointmentForm /> */}
-      {/* <AppointmentsTable /> */}
-      <DoctorsTable />
+      <AppointmentTable />
+      <PatientDashboard/>
+      {/* <PatientsTable/> */}
+      {/* <DoctorsTable /> */}
       {/* <DoctorForm open={true} /> */}
       
       
