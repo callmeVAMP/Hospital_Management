@@ -14,6 +14,13 @@ import DataGridExample  from './components/t';
 import SxProp from './components/test';
 import AppointmentsTable from './components/d_appointment_nikki';
 import AppointmentForm from './components/appointment_form_nikki';
+import ScheduledTestsTable from './components/LabTechnician/ScheduledTests';
+import PreviousTestsTable from './components/LabTechnician/PreviousTests';
+import AllotmentListTable from './components/Admin/RoomOccupancy';
+import RoomInfoTable from './components/Admin/RoomInfo';
+import BookRoomForm from './components/Admin/BookOrEditRoom';
+import { DeleteRoomDialog } from './components/Admin/DeleteRoomDialog';
+import LabInfoTable from './components/Admin/LabAndTestInfo';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -25,14 +32,21 @@ function App() {
       <DataGridExample /> */}
       {/* <SxProp/> */}
       {/* <AppointmentsTable/> */}
-      <AppointmentForm/>
+      {/* <AppointmentForm/> */}
       {/* <DataTable /> */}
       {/* <DenseTable /> */}
       {/* <BasicBasic /> */}
       {/* <AppointmentForm /> */}
       {/* <AppointmentsTable /> */}
-      <DoctorsTable />
+      {/* <DoctorsTable /> */}
       {/* <DoctorForm open={true} /> */}
+      {/* <ScheduledTestsTable /> */}
+      {/* <PreviousTestsTable /> */}
+      {/* <AllotmentListTable /> */}
+      {/* <RoomInfoTable /> */}
+      {/* <DeleteRoomDialog open={true} /> */}
+      {/* <BookRoomForm open={true}/> */}
+      <LabInfoTable />
       
       
     </div>
