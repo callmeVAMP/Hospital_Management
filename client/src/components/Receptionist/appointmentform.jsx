@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -12,7 +12,8 @@ import {
 
 const doctors = ["Dr. Smith", "Dr. Johnson", "Dr. Williams"];
 
-export default function AppointmentForm() {
+// Modified to accept props for integration with parent component
+export default function AppointmentForm({ initialData = {}, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     patientName: "",
     phone: "",
@@ -22,19 +23,37 @@ export default function AppointmentForm() {
     priority: "",
   });
 
+  // Load initial data when editing
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData({
+        patientName: initialData.patientName || "",
+        phone: initialData.phone || "",
+        gender: initialData.gender || "",
+        doctor: initialData.doctor || "",
+        problem: initialData.problem || "",
+        priority: initialData.priority || "",
+      });
+    }
+  }, [initialData]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    // Call parent component's onSave function
+    if (onSave) {
+      onSave(formData);
+    } else {
+      console.log(formData);
+    }
   };
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         backgroundColor: "#f5f6fa",
         display: "flex",
         justifyContent: "center",
@@ -82,8 +101,7 @@ export default function AppointmentForm() {
               />
             </Grid>
 
-            {/* Gender & Priority */}
-            {/* <Grid item xs={12} sm={6}>
+            <Grid item size={4}>
               <TextField
                 select
                 label="Gender"
@@ -92,6 +110,7 @@ export default function AppointmentForm() {
                 onChange={handleChange}
                 fullWidth
                 required
+                size="medium"
               >
                 <MenuItem value="Male">Male</MenuItem>
                 <MenuItem value="Female">Female</MenuItem>
@@ -99,7 +118,7 @@ export default function AppointmentForm() {
               </TextField>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item size={4}>
               <TextField
                 select
                 label="Priority"
@@ -108,14 +127,15 @@ export default function AppointmentForm() {
                 onChange={handleChange}
                 fullWidth
                 required
+                size="medium"
+                sx={{ '& .MuiInputBase-root': { height: 56 } }}
               >
                 <MenuItem value="Emergency">Emergency</MenuItem>
                 <MenuItem value="Normal">Normal</MenuItem>
               </TextField>
-            </Grid> */}
+            </Grid>
 
-            {/* Doctor */}
-            {/* <Grid item xs={12}>
+            <Grid item size={4}>
               <TextField
                 select
                 label="Choose Doctor"
@@ -124,6 +144,8 @@ export default function AppointmentForm() {
                 onChange={handleChange}
                 fullWidth
                 required
+                size="medium"
+                sx={{ '& .MuiInputBase-root': { height: 56 } }}
               >
                 {doctors.map((doc, index) => (
                   <MenuItem key={index} value={doc}>
@@ -131,66 +153,10 @@ export default function AppointmentForm() {
                   </MenuItem>
                 ))}
               </TextField>
-            </Grid> */}
-
-<Grid item size={4}>
-  <TextField
-    select
-    label="Gender"
-    name="gender"
-    value={formData.gender}
-    onChange={handleChange}
-    fullWidth
-    required
-    size="large"
-    // sx={{ '& .MuiInputBase-root': { height: 56 } }} // makes it taller
-  >
-    <MenuItem value="Male">Male</MenuItem>
-    <MenuItem value="Female">Female</MenuItem>
-    <MenuItem value="Other">Other</MenuItem>
-  </TextField>
-</Grid>
-
-<Grid item size={4} >
-  <TextField
-    select
-    label="Priority"
-    name="priority"
-    value={formData.priority}
-    onChange={handleChange}
-    fullWidth
-    required
-    size="medium"
-    sx={{ '& .MuiInputBase-root': { height: 56 } }}
-  >
-    <MenuItem value="Emergency">Emergency</MenuItem>
-    <MenuItem value="Normal">Normal</MenuItem>
-  </TextField>
-</Grid>
-
-<Grid item size={4} >
-  <TextField
-    select
-    label="Choose Doctor"
-    name="doctor"
-    value={formData.doctor}
-    onChange={handleChange}
-    fullWidth
-    required
-    size="medium"
-    sx={{ '& .MuiInputBase-root': { height: 56 } }}
-  >
-    {doctors.map((doc, index) => (
-      <MenuItem key={index} value={doc}>
-        {doc}
-      </MenuItem>
-    ))}
-  </TextField>
-</Grid>
-
+            </Grid>
 
             {/* Problem */}
-            <Grid item size={12} >
+            <Grid item size={12}>
               <TextField
                 label="Describe the Problem"
                 name="problem"
@@ -202,17 +168,32 @@ export default function AppointmentForm() {
               />
             </Grid>
 
-            {/* Submit */}
-            <Grid item size={6}>
-              <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                size="large"
-                sx={{ py: 1.5 }}
-              >
-                Submit Appointment
-              </Button>
+            {/* Submit and Cancel Buttons */}
+            <Grid item xs={12} container spacing={2} justifyContent="flex-end">
+              {onCancel && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button
+                    onClick={onCancel}
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    sx={{ py: 1.5 }}
+                  >
+                    Cancel
+                  </Button>
+                </Grid>
+              )}
+              <Grid item xs={12} sm={6} md={3}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  sx={{ py: 1.5 }}
+                >
+                  Submit Appointment
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
         </Box>
@@ -220,3 +201,5 @@ export default function AppointmentForm() {
     </Box>
   );
 }
+
+
