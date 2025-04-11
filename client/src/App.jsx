@@ -7,13 +7,14 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import DoctorsTable from './components/DoctorList';
-
-
+import RoomBookingForm from './components/Receptionist/RoomBedBooking';
+import PatientRegistrationForm from './components/Receptionist/PatientRegistration';
 import { DataGrid } from '@mui/x-data-grid';
 import DataGridExample  from './components/t';
 import SxProp from './components/test';
 import AppointmentsTable from './components/d_appointment_nikki';
-import AppointmentForm from './components/appointment_form_nikki';
+import AppointmentForm from './components/Receptionist/BookAppointment';
+import PatientEnquiry from './components/Receptionist/PatientEnquiry';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -31,10 +32,12 @@ function App() {
       {/* <BasicBasic /> */}
       {/* <AppointmentForm /> */}
       {/* <AppointmentsTable /> */}
-      <DoctorsTable />
+      {/* <DoctorsTable /> */}
       {/* <DoctorForm open={true} /> */}
       
-      
+      <PatientRegistrationForm />
+      <RoomBookingForm />
+      <PatientEnquiry />
     </div>
   )
 }
