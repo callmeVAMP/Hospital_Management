@@ -21,14 +21,33 @@ export default function AppointmentForm() {
     problem: "",
     priority: "",
   });
-
+  const [appointments, setAppointments] = useState([]); // 👈 new state
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    console.log("Patient Registered:", formData);
+
+    console.log("Submitted:", formData); // log current submission
+
+    // Add current form data to appointments list
+    setAppointments((prev) => [...prev, formData]);
+
+    // Optional: log all appointments
+    console.log("All Appointments:", [...appointments, formData]);
+
+    // Reset form
+    setFormData({
+      patientName: "",
+      phone: "",
+      gender: "",
+      doctor: "",
+      problem: "",
+      priority: "",
+    });
+    
   };
 
   return (
@@ -55,6 +74,7 @@ export default function AppointmentForm() {
           Book an Appointment
         </Typography>
 
+        
         <Divider sx={{ mb: 3 }} />
 
         <Box component="form" onSubmit={handleSubmit}>
