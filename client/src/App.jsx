@@ -6,17 +6,17 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import DoctorsTable from './components/DoctorList';
+// import DoctorsTable from './components/DoctorList';
 // import AppointmentTable from './components/appointment';
 // import PatientsTable from './components/rough/r1';
 import PatientDashboard from './components/Doctor/PatientList';
 import AppointmentTable from './components/Receptionist/appointmentstable';
 
 import { DataGrid } from '@mui/x-data-grid';
-import DataGridExample  from './components/t';
-import SxProp from './components/test';
-import AppointmentsTable from './components/d_appointment_nikki';
-import AppointmentForm from './components/appointment_form_nikki';
+// import DataGridExample  from './components/t';
+// import SxProp from './components/test';
+// import AppointmentsTable from './components/d_appointment_nikki';
+// import AppointmentForm from './components/appointment_form_nikki';
 import ScheduledTestsTable from './components/LabTechnician/ScheduledTests';
 import PreviousTestsTable from './components/LabTechnician/PreviousTests';
 import AllotmentListTable from './components/Admin/RoomOccupancy';
@@ -40,10 +40,11 @@ function App() {
       {/* <DenseTable /> */}
       {/* <BasicBasic /> */}
       {/* <AppointmentForm /> */}
+      <LabInfoTable />
       <AppointmentTable />
-      <PatientDashboard/>
+      {/* <PatientDashboard/> */}
       {/* <PatientsTable/> */}
-      {/* {/* <DoctorsTable /> */} */}
+      {/* {/* <DoctorsTable /> */} 
       {/* <DoctorForm open={true} /> */}
       {/* <ScheduledTestsTable /> */}
       {/* <PreviousTestsTable /> */}
@@ -51,7 +52,7 @@ function App() {
       {/* <RoomInfoTable /> */}
       {/* <DeleteRoomDialog open={true} /> */}
       {/* <BookRoomForm open={true}/> */}
-      <LabInfoTable />
+      
       
       
     </div>
