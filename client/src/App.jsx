@@ -6,13 +6,13 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import DoctorsTable from './components/DoctorList';
+import DoctorsTable from './components/Misc/DoctorList';
 import RoomBookingForm from './components/Receptionist/RoomBedBooking';
 import PatientRegistrationForm from './components/Receptionist/PatientRegistration';
 import { DataGrid } from '@mui/x-data-grid';
-import DataGridExample  from './components/t';
-import SxProp from './components/test';
-import AppointmentsTable from './components/d_appointment_nikki';
+import DataGridExample  from './components/Misc/t';
+import SxProp from './components/Misc/test';
+import AppointmentsTable from './components/Misc/d_appointment_nikki';
 import AppointmentForm from './components/Receptionist/BookAppointment';
 import PatientEnquiry from './components/Receptionist/PatientEnquiry';
 
