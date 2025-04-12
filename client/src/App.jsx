@@ -1,22 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-// import DoctorsTable from './components/DoctorList';
+// import DoctorsTable from './components/Misc/DoctorList';
 // import AppointmentTable from './components/appointment';
 // import PatientsTable from './components/rough/r1';
+import DoctorsTable from './components/admin/DoctorList';
+import PatientsTable from './components/Admin/PatientsList';
 import PatientDashboard from './components/Doctor/PatientList';
-import AppointmentTable from './components/Receptionist/appointmentstable';
-
+import AppointmentTable from './components/Receptionist/appointmentstable';import RoomBookingForm from './components/Receptionist/RoomBedBooking';
+import PatientRegistrationForm from './components/Receptionist/PatientRegistration';
 import { DataGrid } from '@mui/x-data-grid';
-// import DataGridExample  from './components/t';
-// import SxProp from './components/test';
-// import AppointmentsTable from './components/d_appointment_nikki';
-// import AppointmentForm from './components/appointment_form_nikki';
+// import DataGridExample  from './components/Misc/t';
+// import SxProp from './components/Misc/test';
+// import AppointmentsTable from './components/Misc/d_appointment_nikki';
+// import AppointmentForm from './components/Receptionist/BookAppointment';
+import PatientEnquiry from './components/Receptionist/PatientEnquiry';
 import ScheduledTestsTable from './components/LabTechnician/ScheduledTests';
 import PreviousTestsTable from './components/LabTechnician/PreviousTests';
 import AllotmentListTable from './components/Admin/RoomOccupancy';
@@ -24,29 +25,27 @@ import RoomInfoTable from './components/Admin/RoomInfo';
 import BookRoomForm from './components/Admin/BookOrEditRoom';
 import { DeleteRoomDialog } from './components/Admin/DeleteRoomDialog';
 import LabInfoTable from './components/Admin/LabAndTestInfo';
+// import {PatientsLis}
+import PatientsList from './components/Admin/PatientsList';
+
+import {
+  Box,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Divider,
+} from '@mui/material';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import AdminPage from './pages/AdminPage';
-import PatientsList from './components/Admin/PatientsList';
 import EmployeeList from './components/Admin/EmployeeList';
-import RoomOccupancy from './components/Admin/RoomOccupancy';
 import LabAndTestInfo from './components/Admin/LabAndTestInfo';
-import OperationInfo from './components/Admin/OperationInfo';
-import {createBrowserRouter, RouterProvider, Outlet, useLocation, Navigate} from 'react-router-dom'
 import TreatmentInfo from './components/Admin/TreatmentInfo';
+import OperationInfo from './components/Admin/OperationInfo';
+import RoomOccupancy from './components/Admin/RoomOccupancy';
 
-
-const ROLES={
-  'USER':2001,
-  'ADMIN':5000
-}
-
-const LayoutComponent=()=>{
-  return (
-    <div className=''>
-      <Outlet />
-    </div>
-  )
-}
 
 const router=createBrowserRouter([
   {
@@ -58,7 +57,7 @@ const router=createBrowserRouter([
     path: "/admin",
     element: <AdminPage />,
     children:[{
-      path: "/admin/patient",
+      path: "patient",
       element: <PatientsList />
     },
     {
@@ -106,4 +105,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

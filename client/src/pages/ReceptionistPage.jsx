@@ -1,4 +1,4 @@
-import { Outlet } from '@mui/icons-material'
+import { Outlet } from 'react-router-dom'
 import React from 'react'
 
 const ReceptionistPage = () => {
