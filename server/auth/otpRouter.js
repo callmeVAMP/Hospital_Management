@@ -1,10 +1,10 @@
-import express from "express";
+
+
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import connection from "../index.js";
 
 dotenv.config();
-const router = express.Router();
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -14,15 +14,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// SEND OTP
-router.post("/send-otp", (req, res) => {
+// Send OTP
+export const sendOtp = (req, res) => {
   const { HID, password } = req.body;
 
   connection.query(
-    "SELECT HID, email FROM users WHERE HID = ? AND Password = ?",
+    "SELECT HID, Email FROM users WHERE HID = ? AND Password = ?",
     [HID, password],
     (err, results) => {
-      if (err) return res.status(500).send("DB error");
+      if (err) return res.status(500).send("Database error");
       if (results.length === 0)
         return res.status(401).send("Invalid HID or password. Try again.");
 
@@ -31,7 +31,7 @@ router.post("/send-otp", (req, res) => {
       const expiry = new Date(Date.now() + 5 * 60 * 1000);
 
       connection.query(
-        "REPLACE INTO otp_store (user_id, otp_code, expiry_time) VALUES (?, ?, ?)",
+        "REPLACE INTO otp_store (HID, otp_code, expiry_time) VALUES (?, ?, ?)",
         [HID, otp, expiry],
         (err) => {
           if (err) return res.status(500).send("Error storing OTP");
@@ -43,10 +43,10 @@ router.post("/send-otp", (req, res) => {
             text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
           };
 
-          transporter.sendMail(mailOptions, (error) => {
+          transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
               console.error(error);
-              return res.status(500).send("Failed to send email");
+              return res.status(500).send("Failed to send OTP email");
             }
             res.send("OTP sent successfully");
           });
@@ -54,10 +54,10 @@ router.post("/send-otp", (req, res) => {
       );
     }
   );
-});
+};
 
-// VERIFY OTP
-router.post("/verify-otp", (req, res) => {
+// Verify OTP
+export const verifyOtp = (req, res) => {
   const { HID, password, otp } = req.body;
 
   connection.query(
@@ -67,11 +67,13 @@ router.post("/verify-otp", (req, res) => {
       if (err || results.length === 0)
         return res.status(401).send("Invalid HID or password. Try again.");
 
+      const userId = results[0].HID;
+
       connection.query(
         "SELECT * FROM otp_store WHERE HID = ? AND otp_code = ? AND expiry_time > NOW()",
-        [HID, otp],
+        [userId, otp],
         (err, results) => {
-          if (err) return res.status(500).send("DB error");
+          if (err) return res.status(500).send("Database error");
           if (results.length === 0)
             return res.status(401).send("Invalid or expired OTP");
 
@@ -80,9 +82,102 @@ router.post("/verify-otp", (req, res) => {
       );
     }
   );
-});
+};
 
-export default router;
+
+
+
+
+
+
+
+
+
+// import express from "express";
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+// import connection from "../index.js";
+
+// dotenv.config();
+// const router = express.Router();
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// // SEND OTP
+// router.post("/send-otp", (req, res) => {
+//   const { HID, password } = req.body;
+
+//   connection.query(
+//     "SELECT HID, email FROM users WHERE HID = ? AND Password = ?",
+//     [HID, password],
+//     (err, results) => {
+//       if (err) return res.status(500).send("DB error");
+//       if (results.length === 0)
+//         return res.status(401).send("Invalid HID or password. Try again.");
+
+//       const { HID, email } = results[0];
+//       const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//       const expiry = new Date(Date.now() + 5 * 60 * 1000);
+
+//       connection.query(
+//         "REPLACE INTO otp_store (user_id, otp_code, expiry_time) VALUES (?, ?, ?)",
+//         [HID, otp, expiry],
+//         (err) => {
+//           if (err) return res.status(500).send("Error storing OTP");
+
+//           const mailOptions = {
+//             from: process.env.EMAIL_USER,
+//             to: email,
+//             subject: "Your OTP for Hospital Login",
+//             text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
+//           };
+
+//           transporter.sendMail(mailOptions, (error) => {
+//             if (error) {
+//               console.error(error);
+//               return res.status(500).send("Failed to send email");
+//             }
+//             res.send("OTP sent successfully");
+//           });
+//         }
+//       );
+//     }
+//   );
+// });
+
+// // VERIFY OTP
+// router.post("/verify-otp", (req, res) => {
+//   const { HID, password, otp } = req.body;
+
+//   connection.query(
+//     "SELECT HID FROM users WHERE HID = ? AND Password = ?",
+//     [HID, password],
+//     (err, results) => {
+//       if (err || results.length === 0)
+//         return res.status(401).send("Invalid HID or password. Try again.");
+
+//       connection.query(
+//         "SELECT * FROM otp_store WHERE HID = ? AND otp_code = ? AND expiry_time > NOW()",
+//         [HID, otp],
+//         (err, results) => {
+//           if (err) return res.status(500).send("DB error");
+//           if (results.length === 0)
+//             return res.status(401).send("Invalid or expired OTP");
+
+//           res.send("OTP verified. Login successful!");
+//         }
+//       );
+//     }
+//   );
+// });
+
+// export default router;
 
 // import express from "express";
 // import nodemailer from "nodemailer";
