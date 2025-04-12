@@ -6,7 +6,6 @@ import patient from './routes/patient.js'
 import appointment from './routes/appointment.js'
 import occupancy from './routes/occupancy.js'
 import auth from './routes/authRoutes.js'
-
 const app = express();
 dotenv.config();
 
