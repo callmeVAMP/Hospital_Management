@@ -24,38 +24,85 @@ import RoomInfoTable from './components/Admin/RoomInfo';
 import BookRoomForm from './components/Admin/BookOrEditRoom';
 import { DeleteRoomDialog } from './components/Admin/DeleteRoomDialog';
 import LabInfoTable from './components/Admin/LabAndTestInfo';
+import LandingPage from './pages/LandingPage';
+import AdminPage from './pages/AdminPage';
+import PatientsList from './components/Admin/PatientsList';
+import EmployeeList from './components/Admin/EmployeeList';
+import RoomOccupancy from './components/Admin/RoomOccupancy';
+import LabAndTestInfo from './components/Admin/LabAndTestInfo';
+import OperationInfo from './components/Admin/OperationInfo';
+import {createBrowserRouter, RouterProvider, Outlet, useLocation, Navigate} from 'react-router-dom'
+import TreatmentInfo from './components/Admin/TreatmentInfo';
+
+
+const ROLES={
+  'USER':2001,
+  'ADMIN':5000
+}
+
+const LayoutComponent=()=>{
+  return (
+    <div className=''>
+      <Outlet />
+    </div>
+  )
+}
+
+const router=createBrowserRouter([
+  {
+    path: "/",
+    element: <LandingPage />,
+  },
+
+  {
+    path: "/admin",
+    element: <AdminPage />,
+    children:[{
+      path: "/admin/patient",
+      element: <PatientsList />
+    },
+    {
+      path:"employees",
+      element:<EmployeeList />
+    },
+    {
+      path:"rooms",
+      element: <RoomInfoTable />
+    },
+    {
+      path:"occupancy",
+      element: <RoomOccupancy />
+    },
+    {
+      path:"labTest",
+      element: <LabAndTestInfo />
+    },
+    {
+      path:"treatment",
+      element: <TreatmentInfo />
+    },
+    {
+      path:"operations",
+      element: <OperationInfo />
+    },
+
+
+  
+  ]
+  }
+
+
+
+
+
+])
+
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
-    <div className='mt-4 text-2xl'>
-      {/* hELLO */}
-      {/* <Button variant='contained'>Hello</Button>
-      <DataGridExample /> */}
-      {/* <SxProp/> */}
-      {/* <AppointmentsTable/> */}
-      {/* <AppointmentForm/> */}
-      {/* <DataTable /> */}
-      {/* <DenseTable /> */}
-      {/* <BasicBasic /> */}
-      {/* <AppointmentForm /> */}
-      <LabInfoTable />
-      <AppointmentTable />
-      {/* <PatientDashboard/> */}
-      {/* <PatientsTable/> */}
-      {/* {/* <DoctorsTable /> */} 
-      {/* <DoctorForm open={true} /> */}
-      {/* <ScheduledTestsTable /> */}
-      {/* <PreviousTestsTable /> */}
-      {/* <AllotmentListTable /> */}
-      {/* <RoomInfoTable /> */}
-      {/* <DeleteRoomDialog open={true} /> */}
-      {/* <BookRoomForm open={true}/> */}
-      
-      
-      
-    </div>
+    <RouterProvider router={router} />
   )
 }
 

@@ -64,7 +64,7 @@ function CustomToolbar() {
   );
 }
 
-export default function AllotmentListTable() {
+export default function RoomOccupancy() {
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
