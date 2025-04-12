@@ -45,7 +45,7 @@ function App() {
       <AppointmentTable />
       {/* <PatientDashboard/> */}
       {/* <PatientsTable/> */}
-      {/* {/* {/* <DoctorsTable /> */}  */}
+      {/* {/* {/* <DoctorsTable /> */}  */
       {/* <DoctorForm open={true} /> */}
       
       <PatientRegistrationForm />
