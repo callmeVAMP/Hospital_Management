@@ -26,6 +26,9 @@ import BookRoomForm from './components/Admin/BookOrEditRoom';
 import { DeleteRoomDialog } from './components/Admin/DeleteRoomDialog';
 import LabInfoTable from './components/Admin/LabAndTestInfo';
 
+//import  LandingPage  from './pages/LandingPage.jsx'
+import { ReceptionistView } from './pages/ReceptionistView';
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -41,16 +44,18 @@ function App() {
       {/* <DenseTable /> */}
       {/* <BasicBasic /> */}
       {/* <AppointmentForm /> */}
-      <LabInfoTable />
-      <AppointmentTable />
+      {/* <LabInfoTable />
+      <AppointmentTable /> */}
       {/* <PatientDashboard/> */}
       {/* <PatientsTable/> */}
-      {/* {/* {/* <DoctorsTable /> */}  */
+      {/* {/* {/* <DoctorsTable /> */} 
       {/* <DoctorForm open={true} /> */}
-      
+{/*       
       <PatientRegistrationForm />
       <RoomBookingForm />
-      <PatientEnquiry />
+      <PatientEnquiry /> */}
+      <ReceptionistView />
+      {/* <LandingPage /> */}
     </div>
   )
 }
