@@ -1,7 +1,5 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import './App.css';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -9,6 +7,8 @@ import '@fontsource/roboto/700.css';
 // import DoctorsTable from './components/Misc/DoctorList';
 // import AppointmentTable from './components/appointment';
 // import PatientsTable from './components/rough/r1';
+import DoctorsTable from './components/admin/DoctorList';
+import PatientsTable from './components/Admin/PatientsList';
 import PatientDashboard from './components/Doctor/PatientList';
 import AppointmentTable from './components/Receptionist/appointmentstable';import RoomBookingForm from './components/Receptionist/RoomBedBooking';
 import PatientRegistrationForm from './components/Receptionist/PatientRegistration';
@@ -25,39 +25,87 @@ import RoomInfoTable from './components/Admin/RoomInfo';
 import BookRoomForm from './components/Admin/BookOrEditRoom';
 import { DeleteRoomDialog } from './components/Admin/DeleteRoomDialog';
 import LabInfoTable from './components/Admin/LabAndTestInfo';
+// import {PatientsLis}
+import PatientsList from './components/Admin/PatientsList';
+
+import {
+  Box,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Divider,
+} from '@mui/material';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import AdminPage from './pages/AdminPage';
+import EmployeeList from './components/Admin/EmployeeList';
+import LabAndTestInfo from './components/Admin/LabAndTestInfo';
+import TreatmentInfo from './components/Admin/TreatmentInfo';
+import OperationInfo from './components/Admin/OperationInfo';
+import RoomOccupancy from './components/Admin/RoomOccupancy';
+
+
+const router=createBrowserRouter([
+  {
+    path: "/",
+    element: <LandingPage />,
+  },
+
+  {
+    path: "/admin",
+    element: <AdminPage />,
+    children:[{
+      path: "patient",
+      element: <PatientsList />
+    },
+    {
+      path:"employees",
+      element:<EmployeeList />
+    },
+    {
+      path:"rooms",
+      element: <RoomInfoTable />
+    },
+    {
+      path:"occupancy",
+      element: <RoomOccupancy />
+    },
+    {
+      path:"labTest",
+      element: <LabAndTestInfo />
+    },
+    {
+      path:"treatment",
+      element: <TreatmentInfo />
+    },
+    {
+      path:"operations",
+      element: <OperationInfo />
+    },
+
+
+  
+  ]
+  }
+
+
+
+
+
+])
+
 
 //import  LandingPage  from './pages/LandingPage.jsx'
 import { ReceptionistView } from './pages/ReceptionistView';
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
-    <div className='mt-4 text-2xl'>
-      {/* hELLO */}
-      {/* <Button variant='contained'>Hello</Button>
-      <DataGridExample /> */}
-      {/* <SxProp/> */}
-      {/* <AppointmentsTable/> */}
-      {/* <AppointmentForm/> */}
-      {/* <DataTable /> */}
-      {/* <DenseTable /> */}
-      {/* <BasicBasic /> */}
-      {/* <AppointmentForm /> */}
-      {/* <LabInfoTable />
-      <AppointmentTable /> */}
-      {/* <PatientDashboard/> */}
-      {/* <PatientsTable/> */}
-      {/* {/* {/* <DoctorsTable /> */} 
-      {/* <DoctorForm open={true} /> */}
-{/*       
-      <PatientRegistrationForm />
-      <RoomBookingForm />
-      <PatientEnquiry /> */}
-      <ReceptionistView />
-      {/* <LandingPage /> */}
-    </div>
+    <RouterProvider router={router} />
   )
 }
 
-export default App
+export default App;

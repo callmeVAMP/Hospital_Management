@@ -2,19 +2,16 @@ import React, { useState } from "react";
 import {
   Box,
   Typography,
-  TextField,
   IconButton,
   Tooltip,
   Stack,
   Menu,
   MenuItem,
+  TextField,
   Checkbox,
-  Chip,
 } from "@mui/material";
 import {
   DataGrid,
-  GridToolbarContainer,
-  GridToolbarExport,
   useGridApiRef,
 } from "@mui/x-data-grid";
 import {
@@ -26,137 +23,107 @@ import {
   ViewColumn,
   Search as SearchIcon,
 } from "@mui/icons-material";
+import DoctorForm from "../admin/DoctorForm";
 
-const allotments = [
+const initialDoctors = [
   {
-    id: 1,
-    roomNo: "101",
-    patientName: "John Doe",
-    roomType: "Delux",
-    bedNo: 1,
-    admissionDate: "02/25/2018",
-    gender: "male",
-    mobile: "12345678...",
-    doctor: "Dr. Jane Smith",
-    status: "Discharged",
-    amount: 15000,
-  },
-  {
-    id: 2,
-    roomNo: "102",
-    patientName: "Alice Johnson",
-    roomType: "Standard",
-    bedNo: 5,
-    admissionDate: "03/01/2018",
-    gender: "female",
-    mobile: "23456789...",
-    doctor: "Dr. Mark Taylor",
-    status: "Reserved",
-    amount: 8000,
+    id: "1",
+    name: "Dr. Alice",
+    department: "Cardiology",
+    specialization: "Heart Specialist",
+    degree: "MD",
+    mobile: "9876543210",
+    email: "alice@example.com",
+    joiningDate: "2022-01-10",
+    experience: 10,
+    consultationFee: 1000,
+    rating: 4.5,
+    availability: "Morning",
+    clinicLocation: "Clinic A",
   },
 ];
 
-function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
-}
-
-export default function RoomOccupancy() {
+export default function EmployeeList() {
+  const [doctors, setDoctors] = useState(initialDoctors);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const apiRef = useGridApiRef();
-
+  const [openForm, setOpenForm] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState(null);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    roomNo: true,
-    patientName: true,
-    roomType: true,
-    bedNo: true,
-    admissionDate: true,
-    gender: true,
+    name: true,
+    department: true,
+    specialization: true,
+    degree: true,
     mobile: true,
-    doctor: true,
-    status: true,
-    amount: true,
+    email: true,
+    experience: true,
+    consultationFee: true,
+    rating: true,
+    availability: true,
+    clinicLocation: true,
   });
 
+  const apiRef = useGridApiRef();
+  const open = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const filteredRows = allotments.filter((row) =>
-    row.patientName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const renderLabel = (value, color, textColor) => (
-    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
-  );
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Available": return ["#d1fae5", "#065f46"];
-      case "Discharged": return ["#ffe4b5", "#92400e"];
-      case "Reserved": return ["#ede9fe", "#5b21b6"];
-      case "Maintenance": return ["#fee2e2", "#991b1b"];
-      default: return ["#f3f4f6", "#374151"];
-    }
+  const handleSave = (data) => {
+    setDoctors((prev) => {
+      const exists = prev.find((d) => d.id === data.id);
+      if (exists) {
+        return prev.map((d) => (d.id === data.id ? data : d));
+      }
+      return [...prev, { ...data, id: Date.now().toString() }];
+    });
+    setEditingDoctor(null);
   };
 
-  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+  const filteredDoctors = doctors.filter((d) =>
+    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const getRoomTypeColor = (type) => type === "Delux" ? ["#fef9c3", "#92400e"] : ["#dbeafe", "#1e3a8a"];
+  const handleDelete = (id) => {
+    setDoctors((prev) => prev.filter((d) => d.id !== id));
+  };
 
   const columns = [
-    { field: "roomNo", headerName: "Room No", flex: 1 },
-    { field: "patientName", headerName: "Patient Name", flex: 1.5 },
-    {
-      field: "roomType",
-      headerName: "Room Type",
-      flex: 1,
-      renderCell: (params) => {
-        const [bg, text] = getRoomTypeColor(params.row.roomType);
-        return renderLabel(params.row.roomType, bg, text);
-      },
-    },
-    { field: "bedNo", headerName: "Bed No", flex: 1 },
-    { field: "admissionDate", headerName: "Admission Date", flex: 1 },
-    {
-      field: "gender",
-      headerName: "Gender",
-      flex: 1,
-      renderCell: (params) => {
-        const [bg, text] = getGenderColor(params.row.gender);
-        return renderLabel(params.row.gender, bg, text);
-      },
-    },
-    { field: "mobile", headerName: "Mobile", flex: 1.5 },
-    { field: "doctor", headerName: "Doctor Assigned", flex: 1.5 },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params) => {
-        const [bg, text] = getStatusColor(params.row.status);
-        return renderLabel(params.row.status, bg, text);
-      },
-    },
-    { field: "amount", headerName: "Amount Charged", flex: 1 },
+    { field: "name", headerName: "Name", flex: 1 },
+    { field: "department", headerName: "Department", flex: 1 },
+    { field: "specialization", headerName: "Specialization", flex: 1 },
+    { field: "degree", headerName: "Degree", flex: 1 },
+    { field: "mobile", headerName: "Mobile", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "experience", headerName: "Experience", flex: 0.7 },
+    { field: "consultationFee", headerName: "Fee", flex: 0.7 },
+    { field: "rating", headerName: "Rating", flex: 0.7 },
+    { field: "availability", headerName: "Availability", flex: 1 },
+    { field: "clinicLocation", headerName: "Clinic", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 0.5,
+      flex: 0.6,
       sortable: false,
-      renderCell: () => (
-        <Box display="flex" flexDirection="row" gap={0.5}>
+      renderCell: (params) => (
+        <Box display="flex" gap={0.5}>
           <Tooltip title="Edit">
-            <IconButton size="small" sx={{ color: "#4f46e5" }}>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setEditingDoctor(params.row);
+                setOpenForm(true);
+              }}
+              sx={{ color: "#0288d1" }}
+            >
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" sx={{ color: "#f43f5e" }}>
+            <IconButton
+              size="small"
+              onClick={() => handleDelete(params.row.id)}
+              sx={{ color: "#e53935" }}
+            >
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -169,7 +136,7 @@ export default function RoomOccupancy() {
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
       <Box
         sx={{
-          backgroundColor: "#dbe3f4",
+          backgroundColor: "#e8f5e9",
           p: 2,
           borderTopLeftRadius: 12,
           borderTopRightRadius: 12,
@@ -178,7 +145,7 @@ export default function RoomOccupancy() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6">Allotment List</Typography>
+        <Typography variant="h6">Doctors</Typography>
         <Box display="flex" alignItems="center" gap={2}>
           <Box
             sx={{
@@ -201,7 +168,7 @@ export default function RoomOccupancy() {
               size="small"
             />
           </Box>
-          <Tooltip title="Show/Hide Columns">
+          <Tooltip title="Toggle Columns">
             <IconButton onClick={handleClick}>
               <ViewColumn />
             </IconButton>
@@ -219,26 +186,37 @@ export default function RoomOccupancy() {
                   }
                 />
                 <Typography>
-                  {columns.find((c) => c.field === field)?.headerName}
+                  {columns.find((col) => col.field === field)?.headerName}
                 </Typography>
               </MenuItem>
             ))}
           </Menu>
+          <Tooltip title="Add New Doctor">
+            <IconButton
+              onClick={() => {
+                setEditingDoctor(null);
+                setOpenForm(true);
+              }}
+            >
+              <Add sx={{ color: "green" }} />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Refresh">
-            <IconButton>
+            <IconButton onClick={() => console.log("Refreshed")}>
               <Refresh />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Download XLSX">
+          <Tooltip title="Download CSV">
             <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
               <Download sx={{ color: "#3b82f6" }} />
             </IconButton>
           </Tooltip>
         </Box>
       </Box>
+
       <DataGrid
         apiRef={apiRef}
-        rows={filteredRows}
+        rows={filteredDoctors}
         columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10, 15]}
@@ -251,11 +229,22 @@ export default function RoomOccupancy() {
         sx={{
           backgroundColor: "white",
           borderRadius: 2,
+          mt: 1,
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: "#f3f6f9",
             fontWeight: "bold",
           },
         }}
+      />
+
+      <DoctorForm
+        open={openForm}
+        onClose={() => {
+          setOpenForm(false);
+          setEditingDoctor(null);
+        }}
+        onSave={handleSave}
+        initialData={editingDoctor}
       />
     </Box>
   );
