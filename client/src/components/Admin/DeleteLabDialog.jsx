@@ -16,8 +16,8 @@ export const DeleteLabDialog = ({ open, labTest, onCancel, onConfirm }) => {
     >
       <DialogTitle sx={{ fontSize: "2rem" }}>Are you sure?</DialogTitle>
       <DialogContent>
-        <p><strong>Room ID:</strong> {room?.id}</p>
-        <p><strong>Bed Capacity:</strong> {room?.row?.bedCapacity}</p>
+        <p><strong>Lab Room No:</strong> {labTest?.labName}</p>
+        <p><strong>Lab Name:</strong> {room?.row?.bedCapacity}</p>
         <p><strong>Room Category:</strong> {room?.row?.roomCategory}</p>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center", gap: 2, pb: 2 }}>

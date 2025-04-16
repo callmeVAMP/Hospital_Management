@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, MenuItem, Grid, Box, Chip, Select, InputLabel, FormControl
@@ -14,15 +14,25 @@ const testOptions = [
   'X-Ray',
 ];
 
-const AddOrEditLabAndTestForm = ({ open, onClose, onSave, labData }) => {
+const AddOrEditLabAndTestForm = ({ open, onClose, onSave, labTestData }) => {
+  console.log("in ",labTestData);
   const [formData, setFormData] = useState({
-    labRoomNo: labData?.labRoomNo || '',
-    labName: labData?.labName || '',
-    testsPerformed: labData?.testsPerformed || [],
-    floor: labData?.floor || '',
+    labRoomNo: labTestData?.labRoomNo || '',
+    labName: labTestData?.labName || '',
+    testsPerformed: labTestData?.testsPerformed || [],
+    floor: labTestData?.floor || '',
   });
+  useEffect(labTestData,()=>{
+    setFormData({
+      labRoomNo: labTestData?.labRoomNo || '',
+      labName: labTestData?.labName || '',
+      testsPerformed: labTestData?.testsPerformed || [],
+      floor: labTestData?.floor || '',
+    })
+  })
+  console.log("form: ",formData);
 
-  const type = labData ? "edit" : "add";
+  const type = labTestData ? "edit" : "add";
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -68,6 +68,7 @@ export default function LabAndTestInfo() {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     const handleEditClick=(labTestData)=>{
+        console.log("out ",labTestData);
         setSelectedLabTest(labTestData);
         setEditDilaogOpen(true);
     }
@@ -153,7 +154,7 @@ export default function LabAndTestInfo() {
       renderCell: (params) => (
         <Box display="flex" flexDirection="row" gap={0.5}>
           <Tooltip title="Edit">
-            <IconButton size="small" sx={{ color: "#4f46e5" }}>
+            <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={()=>handleEditClick(params)}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -227,7 +228,7 @@ export default function LabAndTestInfo() {
             </Menu>
           </Tooltip>
           <Tooltip title="Add New Lab">
-            <IconButton>
+            <IconButton onClick={()=>setAddOpenTest(true)}>
               <Add sx={{ color: "green" }} />
             </IconButton>
           </Tooltip>
