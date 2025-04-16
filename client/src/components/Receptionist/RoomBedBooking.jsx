@@ -39,22 +39,29 @@ export default function RoomBookingForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({ ...formData, [name]: value });
-
     if (name === "roomType") {
-      const rooms = roomsData[value].filter(
-        (room) => room.beds.some((bed) => bed.available)
+      const rooms = roomsData[value].filter((room) =>
+        room.beds.some((bed) => bed.available)
       );
       setAvailableRooms(rooms);
-      setFormData({ ...formData, roomType: value, selectedRoom: "", selectedBed: "" });
       setAvailableBeds([]);
-    }
-
-    if (name === "selectedRoom") {
+      setFormData((prev) => ({
+        ...prev,
+        roomType: value,
+        selectedRoom: "",
+        selectedBed: "",
+      }));
+    } else if (name === "selectedRoom") {
       const selected = availableRooms.find((room) => room.roomNumber === value);
       const beds = selected?.beds.filter((bed) => bed.available) || [];
       setAvailableBeds(beds);
-      setFormData({ ...formData, selectedRoom: value, selectedBed: "" });
+      setFormData((prev) => ({
+        ...prev,
+        selectedRoom: value,
+        selectedBed: "",
+      }));
+    } else {
+      setFormData({ ...formData, [name]: value });
     }
   };
 
@@ -76,21 +83,30 @@ export default function RoomBookingForm() {
 
   return (
     <Box
+    sx={{
+      minHeight: "90vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "start", // changed from center to start
+      mt: 0, // added margin-top
+      backgroundColor: "#f0f4ff",
+      pt: 10,
+    }}
+  >
+    <Paper
+      elevation={6}
       sx={{
-        minHeight: "100vh",
-        backgroundColor: "#f0f4ff",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        p: 3,
+        maxWidth: 800, // increased from 700
+        width: "100%",
+        p: 5, // increased padding
+        borderRadius: 3,
       }}
     >
-      <Paper elevation={4} sx={{ maxWidth: 700, width: "100%", p: 4, borderRadius: 3 }}>
-        <Typography variant="h5" align="center" gutterBottom>
+        <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 600 }}>
           Room & Bed Booking
         </Typography>
 
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{ my: 3 }} />
 
         <Collapse in={success}>
           <Alert severity="success" sx={{ mb: 3 }}>
@@ -99,7 +115,7 @@ export default function RoomBookingForm() {
         </Collapse>
 
         <Box component="form" onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             <Grid item size={6}>
               <TextField
                 label="Patient Name"
@@ -108,6 +124,7 @@ export default function RoomBookingForm() {
                 onChange={handleChange}
                 fullWidth
                 required
+                variant="outlined"
               />
             </Grid>
 
@@ -119,6 +136,7 @@ export default function RoomBookingForm() {
                 onChange={handleChange}
                 fullWidth
                 required
+                variant="outlined"
               />
             </Grid>
 
@@ -131,6 +149,7 @@ export default function RoomBookingForm() {
                 onChange={handleChange}
                 fullWidth
                 required
+                variant="outlined"
               >
                 <MenuItem value="Public">Public</MenuItem>
                 <MenuItem value="Private">Private</MenuItem>
@@ -138,7 +157,7 @@ export default function RoomBookingForm() {
             </Grid>
 
             {availableRooms.length > 0 && (
-              <Grid item size ={4}>
+              <Grid item size={4}>
                 <TextField
                   select
                   label="Select Room"
@@ -147,6 +166,7 @@ export default function RoomBookingForm() {
                   onChange={handleChange}
                   fullWidth
                   required
+                  variant="outlined"
                 >
                   {availableRooms.map((room) => (
                     <MenuItem key={room.roomNumber} value={room.roomNumber}>
@@ -167,6 +187,7 @@ export default function RoomBookingForm() {
                   onChange={handleChange}
                   fullWidth
                   required
+                  variant="outlined"
                 >
                   {availableBeds.map((bed) => (
                     <MenuItem key={bed.number} value={bed.number}>
@@ -183,6 +204,14 @@ export default function RoomBookingForm() {
                 variant="contained"
                 fullWidth
                 size="large"
+                sx={{
+                  py: 1.5,
+                  fontWeight: "bold",
+                  backgroundColor: "#3f51b5",
+                  "&:hover": {
+                    backgroundColor: "#2c387e",
+                  },
+                }}
                 disabled={
                   !formData.patientName ||
                   !formData.phone ||
@@ -200,6 +229,210 @@ export default function RoomBookingForm() {
     </Box>
   );
 }
+
+
+// import React, { useState } from "react";
+// import {
+//   TextField,
+//   Button,
+//   Grid,
+//   MenuItem,
+//   Typography,
+//   Paper,
+//   Box,
+//   Divider,
+//   Alert,
+//   Collapse,
+// } from "@mui/material";
+
+// const initialData = {
+//   Public: [
+//     { roomNumber: "P101", beds: [{ number: "B1", available: true }, { number: "B2", available: false }] },
+//     { roomNumber: "P102", beds: [{ number: "B1", available: true }] },
+//   ],
+//   Private: [
+//     { roomNumber: "PV201", beds: [{ number: "B1", available: true }] },
+//   ],
+// };
+
+// export default function RoomBookingForm() {
+//   const [formData, setFormData] = useState({
+//     patientName: "",
+//     phone: "",
+//     roomType: "",
+//     selectedRoom: "",
+//     selectedBed: "",
+//   });
+
+//   const [roomsData] = useState(initialData);
+//   const [availableRooms, setAvailableRooms] = useState([]);
+//   const [availableBeds, setAvailableBeds] = useState([]);
+//   const [success, setSuccess] = useState(false);
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+
+//     setFormData({ ...formData, [name]: value });
+
+//     if (name === "roomType") {
+//       const rooms = roomsData[value].filter(
+//         (room) => room.beds.some((bed) => bed.available)
+//       );
+//       setAvailableRooms(rooms);
+//       setFormData({ ...formData, roomType: value, selectedRoom: "", selectedBed: "" });
+//       setAvailableBeds([]);
+//     }
+
+//     if (name === "selectedRoom") {
+//       const selected = availableRooms.find((room) => room.roomNumber === value);
+//       const beds = selected?.beds.filter((bed) => bed.available) || [];
+//       setAvailableBeds(beds);
+//       setFormData({ ...formData, selectedRoom: value, selectedBed: "" });
+//     }
+//   };
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     console.log("Room Booked:", formData);
+//     setSuccess(true);
+//     setTimeout(() => setSuccess(false), 3000);
+//     setFormData({
+//       patientName: "",
+//       phone: "",
+//       roomType: "",
+//       selectedRoom: "",
+//       selectedBed: "",
+//     });
+//     setAvailableRooms([]);
+//     setAvailableBeds([]);
+//   };
+
+//   return (
+//     <Box
+//       sx={{
+//         minHeight: "100vh",
+//         backgroundColor: "#f0f4ff",
+//         display: "flex",
+//         justifyContent: "center",
+//         alignItems: "center",
+//         p: 3,
+//       }}
+//     >
+//       <Paper elevation={4} sx={{ maxWidth: 700, width: "100%", p: 4, borderRadius: 3 }}>
+//         <Typography variant="h5" align="center" gutterBottom>
+//           Room & Bed Booking
+//         </Typography>
+
+//         <Divider sx={{ mb: 3 }} />
+
+//         <Collapse in={success}>
+//           <Alert severity="success" sx={{ mb: 3 }}>
+//             Room successfully booked!
+//           </Alert>
+//         </Collapse>
+
+//         <Box component="form" onSubmit={handleSubmit}>
+//           <Grid container spacing={2}>
+//             <Grid item size={6}>
+//               <TextField
+//                 label="Patient Name"
+//                 name="patientName"
+//                 value={formData.patientName}
+//                 onChange={handleChange}
+//                 fullWidth
+//                 required
+//               />
+//             </Grid>
+
+//             <Grid item size={6}>
+//               <TextField
+//                 label="Phone Number"
+//                 name="phone"
+//                 value={formData.phone}
+//                 onChange={handleChange}
+//                 fullWidth
+//                 required
+//               />
+//             </Grid>
+
+//             <Grid item size={4}>
+//               <TextField
+//                 select
+//                 label="Room Type"
+//                 name="roomType"
+//                 value={formData.roomType}
+//                 onChange={handleChange}
+//                 fullWidth
+//                 required
+//               >
+//                 <MenuItem value="Public">Public</MenuItem>
+//                 <MenuItem value="Private">Private</MenuItem>
+//               </TextField>
+//             </Grid>
+
+//             {availableRooms.length > 0 && (
+//               <Grid item size ={4}>
+//                 <TextField
+//                   select
+//                   label="Select Room"
+//                   name="selectedRoom"
+//                   value={formData.selectedRoom}
+//                   onChange={handleChange}
+//                   fullWidth
+//                   required
+//                 >
+//                   {availableRooms.map((room) => (
+//                     <MenuItem key={room.roomNumber} value={room.roomNumber}>
+//                       Room {room.roomNumber}
+//                     </MenuItem>
+//                   ))}
+//                 </TextField>
+//               </Grid>
+//             )}
+
+//             {availableBeds.length > 0 && (
+//               <Grid item size={4}>
+//                 <TextField
+//                   select
+//                   label="Select Bed"
+//                   name="selectedBed"
+//                   value={formData.selectedBed}
+//                   onChange={handleChange}
+//                   fullWidth
+//                   required
+//                 >
+//                   {availableBeds.map((bed) => (
+//                     <MenuItem key={bed.number} value={bed.number}>
+//                       Bed {bed.number}
+//                     </MenuItem>
+//                   ))}
+//                 </TextField>
+//               </Grid>
+//             )}
+
+//             <Grid item size={12}>
+//               <Button
+//                 type="submit"
+//                 variant="contained"
+//                 fullWidth
+//                 size="large"
+//                 disabled={
+//                   !formData.patientName ||
+//                   !formData.phone ||
+//                   !formData.roomType ||
+//                   !formData.selectedRoom ||
+//                   !formData.selectedBed
+//                 }
+//               >
+//                 Book Room
+//               </Button>
+//             </Grid>
+//           </Grid>
+//         </Box>
+//       </Paper>
+//     </Box>
+//   );
+// }
 
 
 
