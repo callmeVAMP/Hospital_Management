@@ -57,7 +57,7 @@ const getColor = (text) => {
   return colorMap[text] || { bg: "#eceff1", text: "#263238" };
 };
 
-export default function LabInfoTable() {
+export default function LabAndTestInfo() {
     const [openAddTest, setAddOpenTest] = useState(false);
  
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

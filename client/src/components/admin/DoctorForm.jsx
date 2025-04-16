@@ -375,4 +375,6 @@ export default function DoctorForm({ open, onClose, onSave, initialData }) {
       </Dialog>
     </>
   );
-}
+};
+
+export default DoctorForm;
