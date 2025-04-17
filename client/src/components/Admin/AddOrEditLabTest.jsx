@@ -17,19 +17,31 @@ const testOptions = [
 const AddOrEditLabAndTestForm = ({ open, onClose, onSave, labTestData }) => {
   console.log("in ",labTestData);
   const [formData, setFormData] = useState({
-    labRoomNo: labTestData?.labRoomNo || '',
-    labName: labTestData?.labName || '',
-    testsPerformed: labTestData?.testsPerformed || [],
-    floor: labTestData?.floor || '',
+    labRoomNo: labTestData?.labRoomNo? labTestData?.labRoomNo : '',
+    labName: labTestData?.labName? labTestData?.labName : '',
+    testsPerformed:  Array.isArray(labTestData?.testsPerformed) ? labTestData?.testsPerformed : [],
+    floor: labTestData?.floor? labTestData?.floor : '',
   });
-  useEffect(labTestData,()=>{
-    setFormData({
-      labRoomNo: labTestData?.labRoomNo || '',
-      labName: labTestData?.labName || '',
-      testsPerformed: labTestData?.testsPerformed || [],
-      floor: labTestData?.floor || '',
-    })
-  })
+  
+ 
+  useEffect(() => {
+    if (labTestData) {
+      setFormData({
+        labRoomNo: labTestData.labRoomNo || '',
+        labName: labTestData.labName || '',
+        testsPerformed: Array.isArray(labTestData.testsPerformed) ? labTestData.testsPerformed : [],
+        floor: labTestData.floor || ''
+      });
+    } else {
+      setFormData({
+        labRoomNo: '',
+        labName: '',
+        testsPerformed: [],
+        floor: ''
+      });
+    }
+  }, [labTestData]);
+  
   console.log("form: ",formData);
 
   const type = labTestData ? "edit" : "add";
@@ -95,7 +107,7 @@ const AddOrEditLabAndTestForm = ({ open, onClose, onSave, labTestData }) => {
                 <InputLabel>Tests Performed</InputLabel>
                 <Select
                   multiple
-                  value={formData.testsPerformed}
+                  value={formData?.testsPerformed}
                   onChange={handleTestsChange}
                   name="testsPerformed"
                   renderValue={(selected) => (

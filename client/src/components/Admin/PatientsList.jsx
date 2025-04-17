@@ -47,6 +47,7 @@ const initialPatients = [
 ];
 
 export default function PatientsList() {
+  
   const [patients, setPatients] = useState(initialPatients);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);

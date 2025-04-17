@@ -26,6 +26,9 @@ import {
   ViewColumn,
   Search as SearchIcon,
 } from "@mui/icons-material";
+import { DeleteOccupancyDialog } from "./DeleteOccupancyDialog";
+import AlertBar from "../Common/AlertBar";
+import BookOrEditRoomOccupancy from "./BookOrEditRoomOccupancy";
 
 const allotments = [
   {
@@ -36,7 +39,7 @@ const allotments = [
     bedNo: 1,
     admissionDate: "02/25/2018",
     gender: "male",
-    mobile: "12345678...",
+    mobile: "1234567890",
     doctor: "Dr. Jane Smith",
     status: "Discharged",
     amount: 15000,
@@ -49,7 +52,7 @@ const allotments = [
     bedNo: 5,
     admissionDate: "03/01/2018",
     gender: "female",
-    mobile: "23456789...",
+    mobile: "2345678990",
     doctor: "Dr. Mark Taylor",
     status: "Reserved",
     amount: 8000,
@@ -65,6 +68,48 @@ function CustomToolbar() {
 }
 
 export default function RoomOccupancy() {
+  const [openAddOccupancy, setAddOpenOccuoancy] = useState(false);
+   
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedOccupancy, setSelectedOccupancy] = useState(null);
+  const [editDialogOpen, setEditDilaogOpen]=useState(false);
+
+  const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleEditClick=(occupancyData)=>{
+      console.log("clicked edit ",occupancyData);
+      setSelectedOccupancy(occupancyData);
+      setEditDilaogOpen(true);
+  }
+
+  const handleDeleteClick = (occupancyData) => {
+      console.log("clicked delete",occupancyData);
+      setSelectedOccupancy(occupancyData);
+      setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+      // perform delete using selectedRoom.id or something
+      console.log("Deleting Occupancy:", selectedOccupancy);
+      setDeleteDialogOpen(false);
+      setSnackbarOpen(true);
+      setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
+      
+  };
+
+      
+  const handleSave = (data, type) => {
+      console.log('Occupancy Data:', data);  
+      if(type=="add"){
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Added Occupancy Data Successfully','severity':'success'})
+      }   
+      else{
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Updated Occupancy Data Successfully','severity':'success'})
+      }
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -148,15 +193,15 @@ export default function RoomOccupancy() {
       headerName: "Actions",
       flex: 0.5,
       sortable: false,
-      renderCell: () => (
+      renderCell: (params) => (
         <Box display="flex" flexDirection="row" gap={0.5}>
           <Tooltip title="Edit">
-            <IconButton size="small" sx={{ color: "#4f46e5" }}>
+            <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={()=>handleEditClick(params.row)}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" sx={{ color: "#f43f5e" }}>
+            <IconButton size="small" sx={{ color: "#f43f5e" }} onClick={()=>handleDeleteClick(params.row)}>
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -256,6 +301,29 @@ export default function RoomOccupancy() {
             fontWeight: "bold",
           },
         }}
+      />
+
+      {/* Book Room */}
+      <BookOrEditRoomOccupancy open={openAddOccupancy} onClose={() => setAddOpenOccuoancy(false)} onSave={handleSave}/>
+
+        {/* Edit Occupancy */}
+      <BookOrEditRoomOccupancy open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} occupancyData={selectedOccupancy?.row}/>
+
+      {/* Delete Dialog */}
+      <DeleteOccupancyDialog
+          open={deleteDialogOpen}
+          occupancy={selectedOccupancy}
+          onCancel={() => setDeleteDialogOpen(false)}
+          onConfirm={handleDeleteConfirm}
+      />
+
+       {/* Snackbar code */}
+      <AlertBar
+          open={snackbarOpen}
+          onClose={() => setSnackbarOpen(false)}
+          message={snackBarInfo?.message}
+          severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
+          duration={3000}
       />
     </Box>
   );

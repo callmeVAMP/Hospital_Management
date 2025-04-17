@@ -10,7 +10,8 @@ import '@fontsource/roboto/700.css';
 import DoctorsTable from './components/admin/DoctorList';
 import PatientsTable from './components/Admin/PatientsList';
 import PatientDashboard from './components/Doctor/PatientList';
-import AppointmentTable from './components/Receptionist/appointmentstable';import RoomBookingForm from './components/Receptionist/RoomBedBooking';
+import AppointmentTable from './components/Receptionist/appointmentstable';
+import RoomBookingForm from './components/Receptionist/RoomBedBooking';
 import PatientRegistrationForm from './components/Receptionist/PatientRegistration';
 import { DataGrid } from '@mui/x-data-grid';
 // import DataGridExample  from './components/Misc/t';
@@ -22,7 +23,7 @@ import ScheduledTestsTable from './components/LabTechnician/ScheduledTests';
 import PreviousTestsTable from './components/LabTechnician/PreviousTests';
 import AllotmentListTable from './components/Admin/RoomOccupancy';
 import RoomInfoTable from './components/Admin/RoomInfo';
-import BookRoomForm from './components/Admin/BookOrEditRoom';
+import BookRoomForm from './components/Admin/AddOrEditRoom';
 import { DeleteRoomDialog } from './components/Admin/DeleteRoomDialog';
 import LabInfoTable from './components/Admin/LabAndTestInfo';
 // import {PatientsLis}
@@ -45,6 +46,7 @@ import LabAndTestInfo from './components/Admin/LabAndTestInfo';
 import TreatmentInfo from './components/Admin/TreatmentInfo';
 import OperationInfo from './components/Admin/OperationInfo';
 import RoomOccupancy from './components/Admin/RoomOccupancy';
+import ReceptionistPage from './pages/ReceptionistPage';
 
 
 const router=createBrowserRouter([
@@ -85,6 +87,21 @@ const router=createBrowserRouter([
       element: <OperationInfo />
     },
 
+
+  
+  ]
+  },
+  {
+    path: "/receptionist",
+    element: <ReceptionistPage />,
+    children:[{
+      path: "check-occupancy",
+      element: <PatientEnquiry />
+    },
+    {
+      path: "book-room",
+      element: <RoomBookingForm />
+    }
 
   
   ]
