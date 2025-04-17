@@ -19,6 +19,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Chip,
 } from "@mui/material";
 import {
   DataGrid,
@@ -41,6 +42,7 @@ const initialDoctors = [
   {
     id: "1",
     name: "Dr. Alice",
+    gender: "male",
     department: "Cardiology",
     specialization: "Heart Specialist",
     degree: "MD",
@@ -64,7 +66,10 @@ export default function DoctorsTable() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    id: true,
     name: true,
     department: true,
     specialization: true,
@@ -92,12 +97,22 @@ export default function DoctorsTable() {
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
+  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+
+  const renderLabel = (value, color, textColor) => (
+    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
+  );
+
   const handleSave = (data) => {
     setDoctors((prev) => {
       const exists = prev.find((d) => d.id === data.id);
       if (exists) {
+        setSnackBarInfo({ message: 'Updated Doctor Information Successfully', severity: 'success' });
+        setSnackbarOpen(true);
         return prev.map((d) => (d.id === data.id ? data : d));
       }
+      setSnackBarInfo({ message: 'Added Doctor Information Successfully', severity: 'success' });
+      setSnackbarOpen(true);
       return [...prev, { ...data, id: Date.now().toString() }];
     });
     setEditingDoctor(null);
@@ -123,7 +138,15 @@ export default function DoctorsTable() {
   ];
 
   const columns = [
+    { field: "id", headerName: "ID", flex: 1 },
     { field: "name", headerName: "Name", flex: 1 },
+    {
+      field: "gender", headerName: "Gender", flex: 1,
+      renderCell: (params) => {
+        const [bg, text] = getGenderColor(params.row.gender);
+        return renderLabel(params.row.gender, bg, text);
+      },
+    },
     { field: "department", headerName: "Department", flex: 1 },
     { field: "specialization", headerName: "Specialization", flex: 1 },
     { field: "degree", headerName: "Degree", flex: 1 },
@@ -307,18 +330,27 @@ export default function DoctorsTable() {
         onConfirm={confirmDeleteDoctor}
       />
 
+      {/* Snackbar for DELETE */}
       <Snackbar
         open={showSnackbar}
         autoHideDuration={3000}
         onClose={() => setShowSnackbar(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          onClose={() => setShowSnackbar(false)}
-          severity="error"
-          variant="filled"
-        >
+        <Alert onClose={() => setShowSnackbar(false)} severity="error" variant="filled">
           Delete successful!
+        </Alert>
+      </Snackbar>
+
+      {/* Snackbar for ADD / UPDATE */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarInfo.severity} variant="filled">
+          {snackbarInfo.message}
         </Alert>
       </Snackbar>
 
