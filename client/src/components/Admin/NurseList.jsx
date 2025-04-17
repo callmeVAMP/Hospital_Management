@@ -24,96 +24,75 @@
 //   ViewColumn,
 //   Search as SearchIcon,
 // } from "@mui/icons-material";
-// import DoctorForm from "./DoctorForm";
-// import DeleteDialog from "./DeleteDialog"; // adjust path if needed
+// import NurseForm from "./NurseForm";
+// import DeleteDialog from "./DeleteDialog";
 
-// const initialDoctors = [
+// const initialNurses = [
 //   {
 //     id: "1",
-//     name: "Dr. Alice",
-//     department: "Cardiology",
-//     specialization: "Heart Specialist",
-//     degree: "MD",
-//     mobile: "9876543210",
-//     email: "alice@example.com",
-//     joiningDate: "2022-01-10",
-//     experience: 10,
-//     consultationFee: 1000,
-//     rating: 4.5,
-//     availability: "Morning",
-//     clinicLocation: "Clinic A",
+//     name: "Nurse Jane Doe",
+//     address: "123 Main Street",
+//     phone: "9876543210",
+//     gender: "Female",
+//   },
+//   {
+//     id: "2",
+//     name: "Nurse John Smith",
+//     address: "456 Elm Street",
+//     phone: "9123456789",
+//     gender: "Male",
 //   },
 // ];
 
-// export default function DoctorsTable() {
-//   const [doctors, setDoctors] = useState(initialDoctors);
+// export default function NurseList() {
+//   const [nurses, setNurses] = useState(initialNurses);
 //   const [searchQuery, setSearchQuery] = useState("");
 //   const [anchorEl, setAnchorEl] = useState(null);
 //   const [openForm, setOpenForm] = useState(false);
-//   const [editingDoctor, setEditingDoctor] = useState(null);
-//   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-//   const [doctorToDelete, setDoctorToDelete] = useState(null);
+//   const [editingNurse, setEditingNurse] = useState(null);
+//   const [deleteTarget, setDeleteTarget] = useState(null);
 //   const [showSnackbar, setShowSnackbar] = useState(false);
+
 //   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
 //     name: true,
-//     department: true,
-//     specialization: true,
-//     degree: true,
-//     mobile: true,
-//     email: true,
-//     experience: true,
-//     consultationFee: true,
-//     rating: true,
-//     availability: true,
-//     clinicLocation: true,
+//     gender: true,
+//     phone: true,
+//     address: true,
 //   });
 
 //   const apiRef = useGridApiRef();
 //   const open = Boolean(anchorEl);
-
 //   const handleClick = (event) => setAnchorEl(event.currentTarget);
 //   const handleClose = () => setAnchorEl(null);
 
 //   const handleSave = (data) => {
-//     setDoctors((prev) => {
-//       const exists = prev.find((d) => d.id === data.id);
+//     setNurses((prev) => {
+//       const exists = prev.find((n) => n.id === data.id);
 //       if (exists) {
-//         return prev.map((d) => (d.id === data.id ? data : d));
+//         return prev.map((n) => (n.id === data.id ? data : n));
 //       }
 //       return [...prev, { ...data, id: Date.now().toString() }];
 //     });
-//     setEditingDoctor(null);
+//     setEditingNurse(null);
 //   };
 
-//   const filteredDoctors = doctors.filter((d) =>
-//     d.name.toLowerCase().includes(searchQuery.toLowerCase())
+//   const handleDelete = () => {
+//     if (deleteTarget) {
+//       setNurses((prev) => prev.filter((n) => n.id !== deleteTarget.id));
+//       setDeleteTarget(null);
+//       setShowSnackbar(true);
+//     }
+//   };
+
+//   const filteredNurses = nurses.filter((n) =>
+//     n.name.toLowerCase().includes(searchQuery.toLowerCase())
 //   );
-
-//   const confirmDeleteDoctor = () => {
-//     setDoctors((prev) => prev.filter((d) => d.id !== doctorToDelete?.id));
-//     setDeleteDialogOpen(false);
-//     setDoctorToDelete(null);
-//     setShowSnackbar(true);
-//   };
-
-//   const fieldsToDisplay = [
-//     { key: "name", label: "Name" },
-//     { key: "department", label: "Department" },
-//     { key: "specialization", label: "Specialization" },
-//     { key: "mobile", label: "Mobile" },
-//     { key: "email", label: "Email" },
-//   ];
 
 //   const columns = [
 //     { field: "name", headerName: "Name", flex: 1 },
-//     { field: "department", headerName: "Department", flex: 1 },
-//     { field: "specialization", headerName: "Specialization", flex: 1 },
-//     { field: "degree", headerName: "Degree", flex: 1 },
-//     { field: "mobile", headerName: "Mobile", flex: 1 },
-//     { field: "email", headerName: "Email", flex: 1 },
-//     { field: "consultationFee", headerName: "Fee", flex: 0.7 },
-//     { field: "availability", headerName: "Availability", flex: 1 },
-//     { field: "clinicLocation", headerName: "Clinic", flex: 1 },
+//     { field: "gender", headerName: "Gender", flex: 0.7 },
+//     { field: "phone", headerName: "Phone Number", flex: 1 },
+//     { field: "address", headerName: "Address", flex: 2 },
 //     {
 //       field: "actions",
 //       headerName: "Actions",
@@ -125,7 +104,7 @@
 //             <IconButton
 //               size="small"
 //               onClick={() => {
-//                 setEditingDoctor(params.row);
+//                 setEditingNurse(params.row);
 //                 setOpenForm(true);
 //               }}
 //               sx={{ color: "#0288d1" }}
@@ -136,10 +115,7 @@
 //           <Tooltip title="Delete">
 //             <IconButton
 //               size="small"
-//               onClick={() => {
-//                 setDoctorToDelete(params.row);
-//                 setDeleteDialogOpen(true);
-//               }}
+//               onClick={() => setDeleteTarget(params.row)}
 //               sx={{ color: "#e53935" }}
 //             >
 //               <Delete fontSize="small" />
@@ -154,7 +130,7 @@
 //     <Box sx={{ height: 600, width: "100%", p: 2 }}>
 //       <Box
 //         sx={{
-//           backgroundColor: "#e8f5e9",
+//           backgroundColor: "#fff3e0",
 //           p: 2,
 //           borderTopLeftRadius: 12,
 //           borderTopRightRadius: 12,
@@ -163,7 +139,7 @@
 //           justifyContent: "space-between",
 //         }}
 //       >
-//         <Typography variant="h6">Doctors</Typography>
+//         <Typography variant="h6">Nurses</Typography>
 //         <Box display="flex" alignItems="center" gap={2}>
 //           <Box
 //             sx={{
@@ -209,10 +185,10 @@
 //               </MenuItem>
 //             ))}
 //           </Menu>
-//           <Tooltip title="Add New Doctor">
+//           <Tooltip title="Add New Nurse">
 //             <IconButton
 //               onClick={() => {
-//                 setEditingDoctor(null);
+//                 setEditingNurse(null);
 //                 setOpenForm(true);
 //               }}
 //             >
@@ -234,7 +210,7 @@
 
 //       <DataGrid
 //         apiRef={apiRef}
-//         rows={filteredDoctors}
+//         rows={filteredNurses}
 //         columns={columns}
 //         pageSize={10}
 //         rowsPerPageOptions={[10, 15]}
@@ -255,26 +231,27 @@
 //         }}
 //       />
 
-//       <DoctorForm
+//       <NurseForm
 //         open={openForm}
 //         onClose={() => {
 //           setOpenForm(false);
-//           setEditingDoctor(null);
+//           setEditingNurse(null);
 //         }}
 //         onSave={handleSave}
-//         initialData={editingDoctor}
+//         initialData={editingNurse}
 //       />
 
 //       <DeleteDialog
-//         open={deleteDialogOpen}
-//         title="Are you sure you want to delete this doctor?"
-//         data={doctorToDelete}
-//         fields={fieldsToDisplay}
-//         onCancel={() => {
-//           setDeleteDialogOpen(false);
-//           setDoctorToDelete(null);
-//         }}
-//         onConfirm={confirmDeleteDoctor}
+//         open={!!deleteTarget}
+//         title="Are you sure you want to delete?"
+//         data={deleteTarget}
+//         fields={[
+//           { key: "name", label: "Name" },
+//           { key: "phone", label: "Phone Number" },
+//           { key: "address", label: "Address" },
+//         ]}
+//         onCancel={() => setDeleteTarget(null)}
+//         onConfirm={handleDelete}
 //       />
 
 //       <Snackbar
@@ -283,17 +260,14 @@
 //         onClose={() => setShowSnackbar(false)}
 //         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 //       >
-//         <Alert
-//           onClose={() => setShowSnackbar(false)}
-//           severity="error"
-//           variant="filled"
-//         >
+//         <Alert onClose={() => setShowSnackbar(false)} severity="error" variant="filled">
 //           Delete successful!
 //         </Alert>
 //       </Snackbar>
 //     </Box>
 //   );
 // }
+
 
 
 import React, { useState } from "react";
@@ -308,15 +282,6 @@ import {
   Checkbox,
   Snackbar,
   Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
 } from "@mui/material";
 import {
   DataGrid,
@@ -330,106 +295,83 @@ import {
   Add,
   ViewColumn,
   Search as SearchIcon,
-  History,
+  History as HistoryIcon,
 } from "@mui/icons-material";
-import DoctorForm from "./DoctorForm";
-import DeleteDialog from "./DeleteDialog"; // adjust path if needed
+import NurseForm from "./NurseForm";
+import DeleteDialog from "./DeleteDialog";
+import NurseHistoryDialog from "./NurseHistory";
 
-const initialDoctors = [
+const initialNurses = [
   {
     id: "1",
-    name: "Dr. Alice",
-    department: "Cardiology",
-    specialization: "Heart Specialist",
-    degree: "MD",
-    mobile: "9876543210",
-    email: "alice@example.com",
-    joiningDate: "2022-01-10",
-    experience: 10,
-    consultationFee: 1000,
-    rating: 4.5,
-    availability: "Morning",
-    clinicLocation: "Clinic A",
+    name: "Nurse Jane Doe",
+    address: "123 Main Street",
+    phone: "9876543210",
+    gender: "Female",
+  },
+  {
+    id: "2",
+    name: "Nurse John Smith",
+    address: "456 Elm Street",
+    phone: "9123456789",
+    gender: "Male",
   },
 ];
 
-export default function DoctorsTable() {
-  const [doctors, setDoctors] = useState(initialDoctors);
+export default function NurseList() {
+  const [nurses, setNurses] = useState(initialNurses);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
-  const [editingDoctor, setEditingDoctor] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const [editingNurse, setEditingNurse] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [viewingNurse, setViewingNurse] = useState(null); // 👈 For modal
   const [showSnackbar, setShowSnackbar] = useState(false);
+
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     name: true,
-    department: true,
-    specialization: true,
-    degree: true,
-    mobile: true,
-    email: true,
-    experience: true,
-    consultationFee: true,
-    rating: true,
-    availability: true,
-    clinicLocation: true,
+    gender: true,
+    phone: true,
+    address: true,
   });
-
-  const [historyModalOpen, setHistoryModalOpen] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-
-  const doctorHistory = [
-    { date: "2023-02-12", procedure: "Angioplasty", patient: "John Doe" },
-    { date: "2023-04-05", procedure: "Bypass Surgery", patient: "Mary Smith" },
-  ];
 
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
-
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
   const handleSave = (data) => {
-    setDoctors((prev) => {
-      const exists = prev.find((d) => d.id === data.id);
+    setNurses((prev) => {
+      const exists = prev.find((n) => n.id === data.id);
       if (exists) {
-        return prev.map((d) => (d.id === data.id ? data : d));
+        return prev.map((n) => (n.id === data.id ? data : n));
       }
       return [...prev, { ...data, id: Date.now().toString() }];
     });
-    setEditingDoctor(null);
+    setEditingNurse(null);
   };
 
-  const filteredDoctors = doctors.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleDelete = () => {
+    if (deleteTarget) {
+      setNurses((prev) => prev.filter((n) => n.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      setShowSnackbar(true);
+    }
+  };
+
+  const handleViewHistory = (nurse) => {
+    setViewingNurse(nurse);
+  };
+
+  const filteredNurses = nurses.filter((n) =>
+    n.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const confirmDeleteDoctor = () => {
-    setDoctors((prev) => prev.filter((d) => d.id !== doctorToDelete?.id));
-    setDeleteDialogOpen(false);
-    setDoctorToDelete(null);
-    setShowSnackbar(true);
-  };
-
-  const fieldsToDisplay = [
-    { key: "name", label: "Name" },
-    { key: "department", label: "Department" },
-    { key: "specialization", label: "Specialization" },
-    { key: "mobile", label: "Mobile" },
-    { key: "email", label: "Email" },
-  ];
 
   const columns = [
     { field: "name", headerName: "Name", flex: 1 },
-    { field: "department", headerName: "Department", flex: 1 },
-    { field: "specialization", headerName: "Specialization", flex: 1 },
-    { field: "degree", headerName: "Degree", flex: 1 },
-    { field: "mobile", headerName: "Mobile", flex: 1 },
-    { field: "email", headerName: "Email", flex: 1 },
-    { field: "consultationFee", headerName: "Fee", flex: 0.7 },
-    { field: "availability", headerName: "Availability", flex: 1 },
-    { field: "clinicLocation", headerName: "Clinic", flex: 1 },
+    { field: "gender", headerName: "Gender", flex: 0.7 },
+    { field: "phone", headerName: "Phone Number", flex: 1 },
+    { field: "address", headerName: "Address", flex: 2 },
     {
       field: "actions",
       headerName: "Actions",
@@ -441,7 +383,7 @@ export default function DoctorsTable() {
             <IconButton
               size="small"
               onClick={() => {
-                setEditingDoctor(params.row);
+                setEditingNurse(params.row);
                 setOpenForm(true);
               }}
               sx={{ color: "#0288d1" }}
@@ -452,10 +394,7 @@ export default function DoctorsTable() {
           <Tooltip title="Delete">
             <IconButton
               size="small"
-              onClick={() => {
-                setDoctorToDelete(params.row);
-                setDeleteDialogOpen(true);
-              }}
+              onClick={() => setDeleteTarget(params.row)}
               sx={{ color: "#e53935" }}
             >
               <Delete fontSize="small" />
@@ -464,13 +403,10 @@ export default function DoctorsTable() {
           <Tooltip title="View History">
             <IconButton
               size="small"
-              onClick={() => {
-                setSelectedDoctor(params.row);
-                setHistoryModalOpen(true);
-              }}
-              sx={{ color: "#6a1b9a" }}
+              onClick={() => handleViewHistory(params.row)}
+              sx={{ color: "#6d4c41" }}
             >
-              <History fontSize="small" />
+              <HistoryIcon fontSize="small" />
             </IconButton>
           </Tooltip>
         </Box>
@@ -482,7 +418,7 @@ export default function DoctorsTable() {
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
       <Box
         sx={{
-          backgroundColor: "#e8f5e9",
+          backgroundColor: "#fff3e0",
           p: 2,
           borderTopLeftRadius: 12,
           borderTopRightRadius: 12,
@@ -491,7 +427,7 @@ export default function DoctorsTable() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6">Doctors</Typography>
+        <Typography variant="h6">Nurses</Typography>
         <Box display="flex" alignItems="center" gap={2}>
           <Box
             sx={{
@@ -537,10 +473,10 @@ export default function DoctorsTable() {
               </MenuItem>
             ))}
           </Menu>
-          <Tooltip title="Add New Doctor">
+          <Tooltip title="Add New Nurse">
             <IconButton
               onClick={() => {
-                setEditingDoctor(null);
+                setEditingNurse(null);
                 setOpenForm(true);
               }}
             >
@@ -562,7 +498,7 @@ export default function DoctorsTable() {
 
       <DataGrid
         apiRef={apiRef}
-        rows={filteredDoctors}
+        rows={filteredNurses}
         columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10, 15]}
@@ -583,26 +519,33 @@ export default function DoctorsTable() {
         }}
       />
 
-      <DoctorForm
+      <NurseForm
         open={openForm}
         onClose={() => {
           setOpenForm(false);
-          setEditingDoctor(null);
+          setEditingNurse(null);
         }}
         onSave={handleSave}
-        initialData={editingDoctor}
+        initialData={editingNurse}
       />
 
       <DeleteDialog
-        open={deleteDialogOpen}
-        title="Are you sure you want to delete this doctor?"
-        data={doctorToDelete}
-        fields={fieldsToDisplay}
-        onCancel={() => {
-          setDeleteDialogOpen(false);
-          setDoctorToDelete(null);
-        }}
-        onConfirm={confirmDeleteDoctor}
+        open={!!deleteTarget}
+        title="Are you sure you want to delete?"
+        data={deleteTarget}
+        fields={[
+          { key: "name", label: "Name" },
+          { key: "phone", label: "Phone Number" },
+          { key: "address", label: "Address" },
+        ]}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
+
+      <NurseHistoryDialog
+        open={!!viewingNurse}
+        onClose={() => setViewingNurse(null)}
+        nurse={viewingNurse}
       />
 
       <Snackbar
@@ -619,33 +562,6 @@ export default function DoctorsTable() {
           Delete successful!
         </Alert>
       </Snackbar>
-
-      {/* Doctor History Modal */}
-      <Dialog open={historyModalOpen} onClose={() => setHistoryModalOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Operation History for {selectedDoctor?.name}
-        </DialogTitle>
-        <DialogContent dividers>
-          <List>
-            {doctorHistory.map((entry, index) => (
-              <React.Fragment key={index}>
-                <ListItem>
-                  <ListItemText
-                    primary={entry.procedure}
-                    secondary={`Date: ${entry.date} — Patient: ${entry.patient}`}
-                  />
-                </ListItem>
-                {index < doctorHistory.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </List>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setHistoryModalOpen(false)} color="primary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

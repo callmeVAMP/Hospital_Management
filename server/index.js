@@ -2,15 +2,15 @@ import express from 'express';
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 
-
 import patient from './routes/patient.js'
 import appointment from './routes/appointment.js'
 import occupancy from './routes/occupancy.js'
-
+import auth from './routes/authRoutes.js'
 const app = express();
 dotenv.config();
 
 let connection;
+
 
 
 const DB_PROJECT=process.env.DB_PROJECT;
@@ -58,7 +58,7 @@ app.get('/',async(req,res)=>{
 app.use('/patient',patient)
 app.use('/appointment',appointment)
 app.use('/occupancy',occupancy);
-
+app.use('/auth',auth)
 
 
   

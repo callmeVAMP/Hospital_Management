@@ -52,24 +52,25 @@ export default function AppointmentForm() {
 
   return (
     <Box
+    sx={{
+      minHeight: "90vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "start", // changed from center to start
+      mt: 0, // added margin-top
+      backgroundColor: "#f0f4ff",
+      pt: 10,
+    }}
+  >
+    <Paper
+      elevation={4}
       sx={{
-        minHeight: "100vh",
-        backgroundColor: "#f5f6fa",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        p: 3,
+        maxWidth: 800, // increased from 700
+        width: "100%",
+        p: 5, // increased padding
+        borderRadius: 3,
       }}
     >
-      <Paper
-        elevation={4}
-        sx={{
-          maxWidth: 900,
-          width: "100%",
-          p: 4,
-          borderRadius: 3,
-        }}
-      >
         <Typography variant="h4" align="center" gutterBottom>
           Book an Appointment
         </Typography>

@@ -39,23 +39,23 @@ import {
   Divider,
 } from '@mui/material';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
 import LandingPage from './pages/LandingPage';
 import AdminPage from './pages/AdminPage';
 import EmployeeList from './components/Admin/EmployeeList';
 import LabAndTestInfo from './components/Admin/LabAndTestInfo';
-import TreatmentInfo from './components/Admin/TreatmentInfo';
+import TreatmentInfo from './components/Admin/TreatmentList';
 import OperationInfo from './components/Admin/OperationInfo';
 import RoomOccupancy from './components/Admin/RoomOccupancy';
 import ReceptionistPage from './pages/ReceptionistPage';
 import LabTechnicianPage from './pages/LabTechnician';
 
 
-const router=createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
   },
-
   {
     path: "/admin",
     element: <AdminPage />,
@@ -128,11 +128,7 @@ const router=createBrowserRouter([
 
 
 function App() {
-
-
-  return (
-    <RouterProvider router={router} />
-  )
+  return <RouterProvider router={router} />;
 }
 
 export default App;
