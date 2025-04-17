@@ -9,7 +9,7 @@ import DoctorPage from './pages/DoctorPage.jsx'
 // import DoctorsTable from './components/Misc/DoctorList';
 // import AppointmentTable from './components/appointment';
 // import PatientsTable from './components/rough/r1';
-import DoctorsTable from './components/admin/DoctorList';
+//import DoctorsTable from './components/admin/DoctorList';
 import PatientsTable from './components/Admin/PatientsList';
 import PatientDashboard from './components/Doctor/PatientList';
 import AppointmentsTable from './components/Doctor/ScheduledAppointments.jsx';

@@ -261,6 +261,7 @@ import {
   Checkbox,
   Snackbar,
   Alert,
+  Chip,
 } from "@mui/material";
 import {
   DataGrid,
@@ -285,10 +286,16 @@ const initialLabTechs = [
     name: "John Doe",
     address: "123 Main Street",
     phone: "9876543210",
-    gender: "Male",
+    gender: "male",
     labId: "101",
   },
 ];
+
+const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+
+  const renderLabel = (value, color, textColor) => (
+    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
+  );
 
 export default function LabTechnicianList() {
   const [labTechs, setLabTechs] = useState(initialLabTechs);
@@ -335,10 +342,16 @@ export default function LabTechnicianList() {
   );
 
   const columns = [
+    { field: "id", headerName: "ID", flex: 0.5},
     { field: "name", headerName: "Name", flex: 1 },
     { field: "address", headerName: "Address", flex: 1 },
     { field: "phone", headerName: "Phone", flex: 1 },
-    { field: "gender", headerName: "Gender", flex: 0.5 },
+    { field: "gender", headerName: "Gender", flex: 0.5,
+      renderCell: (params) => {
+        const [bg, text] = getGenderColor(params.row.gender);
+        return renderLabel(params.row.gender, bg, text);
+      },
+    },
     { field: "labId", headerName: "Lab ID", flex: 0.5 },
     {
       field: "actions",

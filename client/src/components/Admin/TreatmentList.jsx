@@ -214,16 +214,24 @@ import DeleteDialog from "./DeleteDialog"; // Make sure this is correctly import
 const initialTreatments = [
   {
     id: "1",
+    patientName: "Mike",
     name: "Chemotherapy",
+    startDate: "2024-04-16",
+    startTime: "01:00 PM",
+    endDate: "2024-04-16",
+    endTime: "03:00 PM",
     description: "Cancer treatment using drugs",
-    duration: "6 months",
     cost: "5000",
   },
   {
     id: "2",
+    patientName: "Donna",
+    startDate: "2024-04-16",
+    startTime: "01:00 PM",
+    endDate: "2024-04-16",
+    endTime: "03:00 PM",
     name: "Physiotherapy",
     description: "Physical therapy treatment",
-    duration: "2 months",
     cost: "1200",
   },
 ];
@@ -237,9 +245,14 @@ export default function TreatmentList() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [treatmentToDelete, setTreatmentToDelete] = useState(null);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    id: true,
+    patientName: true,
     name: true,
+    startDate: true,
+    startTime: true,
+    endDate: true,
+    endTime: true,
     description: true,
-    duration: true,
     cost: true,
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -274,9 +287,14 @@ export default function TreatmentList() {
   };
 
   const columns = [
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "patientName", headerName: "Patient Name", flex: 1 },
+    { field: "startDate", headerName: "Start Date", flex: 1 },
+    { field: "startTime", headerName: "Start Time", flex: 1 },
+    { field: "endDate", headerName: "End Date", flex: 1 },
+    { field: "endTime", headerName: "End Time", flex: 1 },
     { field: "name", headerName: "Treatment Name", flex: 1 },
     { field: "description", headerName: "Description", flex: 1 },
-    { field: "duration", headerName: "Duration", flex: 1 },
     { field: "cost", headerName: "Cost ($)", flex: 1 },
     {
       field: "actions",
@@ -315,9 +333,10 @@ export default function TreatmentList() {
   ];
 
   const deleteFields = [
+    { key: "id", headerName: "ID"},
+    { key: "patientName", headerName: "Patient Name"},
     { key: "name", label: "Treatment Name" },
     { key: "description", label: "Description" },
-    { key: "duration", label: "Duration" },
     { key: "cost", label: "Cost ($)" },
   ];
 
