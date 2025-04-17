@@ -1,30 +1,3 @@
-// import { Outlet } from 'react-router-dom'
-// import React from 'react'
-
-// const LabTechnician = () => {
-//   return (
-//     <div>
-//         LabTechnician
-//         <Outlet />
-//     </div>
-//   )
-// }
-
-// export default LabTechnician
-// import { Outlet } from 'react-router-dom'
-// import React from 'react'
-
-// const DoctorPage = () => {
-//   return (
-//     <div>
-//         DoctorPage
-//         <Outlet />
-//     </div>
-//   )
-// }
-
-// export default DoctorPage
-
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import React from 'react';
 import { Box, Divider, List, ListItemButton, ListItemText, Paper, Typography } from '@mui/material';

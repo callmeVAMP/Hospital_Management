@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, MenuItem, Grid, InputAdornment,
@@ -23,6 +23,8 @@ const BookorEditRoomForm = ({ open, onClose, onSave, roomData }) => {
     roomRate: roomData? roomData?.roomRate : 0,
     specialInstructions: roomData? roomData?.specialInstructions : ''
   });
+
+  useEffect(()=>setFormData({...roomData}),[roomData]);
 
   const type=roomData? "edit":"add";
   console.log("data ",formData);

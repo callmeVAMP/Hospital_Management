@@ -27,7 +27,7 @@ import {
   Search as SearchIcon,
 } from "@mui/icons-material";
 // import DoctorForm from "../AddDoctor";
-import BookorEditRoomForm from "./BookOrEditRoom";
+import BookorEditRoomForm from "./AddOrEditRoom";
 import { DeleteRoomDialog } from "./DeleteRoomDialog";
 import AlertBar from "../Common/AlertBar";
 
@@ -97,6 +97,7 @@ export default function RoomInfoTable() {
   
   const handleEditClick=(roomData)=>{
     setSelectedRoom(roomData);
+    console.log("out ",roomData);
     setEditDilaogOpen(true);
   }
 

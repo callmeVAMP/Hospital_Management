@@ -27,8 +27,8 @@ import {
   Search as SearchIcon,
 } from "@mui/icons-material";
 import AddOrEditLabAndTestForm from "./AddOrEditLabTest";
-import { DeleteRoomDialog } from "./DeleteRoomDialog";
 import AlertBar from "../Common/AlertBar";
+import { DeleteLabDialog } from "./DeleteLabDialog";
 
 const tests = [
   {
@@ -68,6 +68,7 @@ export default function LabAndTestInfo() {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
 
     const handleEditClick=(labTestData)=>{
+        console.log("out ",labTestData);
         setSelectedLabTest(labTestData);
         setEditDilaogOpen(true);
     }
@@ -153,12 +154,12 @@ export default function LabAndTestInfo() {
       renderCell: (params) => (
         <Box display="flex" flexDirection="row" gap={0.5}>
           <Tooltip title="Edit">
-            <IconButton size="small" sx={{ color: "#4f46e5" }}>
+            <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={()=>handleEditClick(params)}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" sx={{ color: "#f43f5e" }}>
+            <IconButton size="small" sx={{ color: "#f43f5e" }} onClick={()=>handleDeleteClick(params)}>
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -170,79 +171,78 @@ export default function LabAndTestInfo() {
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
       <Box
-        sx={{
-          backgroundColor: "#dbe3f4",
-          p: 2,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Typography variant="h6">Lab Info</Typography>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Box
-            sx={{
-              backgroundColor: "white",
-              px: 2,
-              py: 0.5,
-              borderRadius: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
-            <SearchIcon fontSize="small" />
-            <TextField
-              variant="standard"
-              placeholder="Search"
-              InputProps={{ disableUnderline: true }}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              size="small"
-            />
+          sx={{
+            backgroundColor: "#dbe3f4",
+            p: 2,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography variant="h6">Room Info</Typography>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box
+              sx={{
+                backgroundColor: "white",
+                px: 2,
+                py: 0.5,
+                borderRadius: 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+              }}
+            >
+              <SearchIcon fontSize="small" />
+              <TextField
+                variant="standard"
+                placeholder="Search"
+                InputProps={{ disableUnderline: true }}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                size="small"
+              />
+            </Box>
+            <Tooltip title="Show/Hide Columns">
+              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                <ViewColumn />
+              </IconButton>
+              <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+                {Object.keys(columnVisibilityModel).map((field) => (
+                  <MenuItem key={field}>
+                    <Checkbox
+                      checked={columnVisibilityModel[field]}
+                      onChange={() =>
+                        setColumnVisibilityModel((prev) => ({
+                          ...prev,
+                          [field]: !prev[field],
+                        }))
+                      }
+                    />
+                    <Typography>{columns.find((c) => c.field === field)?.headerName}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Tooltip>
+            <Tooltip title="Add New LabTest">
+              <IconButton onClick={()=>setAddOpenTest(true)}>
+                <Add sx={{ color: "green" }} />
+              </IconButton>
+              
+            </Tooltip>
+            <Tooltip title="Refresh">
+              <IconButton onClick={()=>handleRefreshTable()}>
+                <Refresh />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Download XLSX">
+              <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
+                <Download sx={{ color: "#3b82f6" }} />
+              </IconButton>
+            </Tooltip>
           </Box>
-          <Tooltip title="Show/Hide Columns">
-            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-              <ViewColumn />
-            </IconButton>
-            <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
-              {Object.keys(columnVisibilityModel).map((field) => (
-                <MenuItem key={field}>
-                  <Checkbox
-                    checked={columnVisibilityModel[field]}
-                    onChange={() =>
-                      setColumnVisibilityModel((prev) => ({
-                        ...prev,
-                        [field]: !prev[field],
-                      }))
-                    }
-                  />
-                  <Typography>
-                    {columns.find((c) => c.field === field)?.headerName}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Tooltip>
-          <Tooltip title="Add New Lab">
-            <IconButton>
-              <Add sx={{ color: "green" }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Refresh">
-            <IconButton>
-              <Refresh />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Download XLSX">
-            <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
-              <Download sx={{ color: "#3b82f6" }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+            </Box>
       <DataGrid
         columnVisibilityModel={columnVisibilityModel}
         onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
@@ -272,12 +272,12 @@ export default function LabAndTestInfo() {
         <AddOrEditLabAndTestForm open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} labTestData={selectedLabTest?.row} />
 
         {/* Delete Dialog */}
-        {/* <DeleteRoomDialog
+        <DeleteLabDialog
             open={deleteDialogOpen}
-            room={selectedRoom}
+            labTest={selectedLabTest}
             onCancel={() => setDeleteDialogOpen(false)}
             onConfirm={handleDeleteConfirm}
-        /> */}
+        />
 
         {/* Snackbar code */}
         <AlertBar
