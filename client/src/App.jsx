@@ -4,13 +4,15 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+
+import DoctorPage from './pages/DoctorPage.jsx'
 // import DoctorsTable from './components/Misc/DoctorList';
 // import AppointmentTable from './components/appointment';
 // import PatientsTable from './components/rough/r1';
 import DoctorsTable from './components/admin/DoctorList';
 import PatientsTable from './components/Admin/PatientsList';
 import PatientDashboard from './components/Doctor/PatientList';
-import AppointmentTable from './components/Receptionist/appointmentstable';
+import AppointmentsTable from './components/Doctor/ScheduledAppointments.jsx';
 import RoomBookingForm from './components/Receptionist/RoomBedBooking';
 import PatientRegistrationForm from './components/Receptionist/PatientRegistration';
 import { DataGrid } from '@mui/x-data-grid';
@@ -118,9 +120,33 @@ const router = createBrowserRouter([
 
   
   ]
+  },
+  {
+    path:"/doctor",
+    element: <DoctorPage />,
+    children:[{
+      path: "appointments",
+      element: <AppointmentsTable />
+    },
+    {
+      path:"patient",
+      element:<PatientDashboard/>
+    }
+    ]
+  },
+  {
+    path:"/labTechnician",
+    element: <LabTechnicianPage/>,
+    children:[{
+      path: "previous",
+      element: <PreviousTestsTable />
+    },
+    {
+      path:"scheduled",
+      element:<ScheduledTestsTable/>
+    }
+  ]
   }
-
-
 
 
 
