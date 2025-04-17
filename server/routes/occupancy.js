@@ -95,8 +95,9 @@ router.get('/available-rooms',async(req,res)=>{
     try {
         const [results, fields] = await connection.query(
         `
-        SELECT RNo,BedID FROM Beds 
-        WHERE (RNo,BedID) NOT IN (SELECT RNo,BedID FROM Occupancy);
+        SELECT Beds.RNo,Beds.BedID,Rooms.RType,Rooms.RCategory FROM Beds
+        INNER JOIN Rooms ON Rooms.RNo=Beds.Rno 
+        WHERE (Beds.RNo,Beds.BedID) NOT IN (SELECT RNo,BedID FROM Occupancy);
         `
         );
         
