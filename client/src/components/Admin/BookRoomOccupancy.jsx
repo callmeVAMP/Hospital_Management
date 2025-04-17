@@ -16,7 +16,7 @@ import { Person } from "@mui/icons-material";
 
 const roomTypes = ["Single", "Double", "Triple", "Deluxe", "Suite", "Ward", "Isolation"];
 
-const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsData }) => {
+const BookRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsData }) => {
   console.log(occupancyData);
   console.log(roomsData);
   const [formData, setFormData] = useState({
@@ -120,7 +120,7 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
         </Collapse>
         <Box component="form">
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{xs:6}}>
               <TextField
                 label="Patient Name"
                 name="patientName"
@@ -130,7 +130,7 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{xs:6}}>
               <TextField
                 label="Phone Number"
                 name="phone"
@@ -140,7 +140,11 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
                 required
               />
             </Grid>
-            <Grid item xs={12}>
+          </Grid>
+
+          {/* Room Type */}
+          <Grid container mt={2} spacing={2}>  
+            <Grid size={{xs:4}}>
               <TextField
                 select
                 label="Room Type"
@@ -157,14 +161,16 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
                 ))}
               </TextField>
             </Grid>
+
+
             {formData.roomType && availableRooms.length === 0 && (
               <Grid item xs={12}>
                 <Alert severity="warning">No available rooms/beds for selected type.</Alert>
               </Grid>
             )}
-            {formData.roomType && availableRooms.length > 0 && (
+            {availableRooms.length > 0 && (
               <>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:4}}>
                   <TextField
                     select
                     label="Select Room"
@@ -173,6 +179,7 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
                     onChange={handleChange}
                     fullWidth
                     required
+                    disabled={formData.roomType ? false: true }
                   >
                     {availableRooms.map((room) => (
                       <MenuItem key={room.roomNumber} value={room.roomNumber}>
@@ -181,7 +188,7 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
                     ))}
                   </TextField>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{xs:4}}>
                   <TextField
                     select
                     label="Select Bed"
@@ -190,7 +197,7 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
                     onChange={handleChange}
                     fullWidth
                     required
-                    disabled={!formData.selectedRoom}
+                    disabled={formData.roomType ? false: true }
                   >
                     {availableBeds.map((bed) => (
                       <MenuItem key={bed.number} value={bed.number}>
@@ -226,4 +233,4 @@ const BookOrEditRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsDa
   );
 };
 
-export default BookOrEditRoomOccupancy;
+export default BookRoomOccupancy;

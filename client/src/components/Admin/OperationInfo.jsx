@@ -27,11 +27,13 @@ import {
   Delete,
 } from "@mui/icons-material";
 import AlertBar from "../Common/AlertBar";
+import AddOrEditOperation from "./AddOrEditOperation";
+import {DeleteOperationDialog} from "./DeleteOperationDialog";
 
 const operations = [
   {
     id: 1,
-    operationId: "OP1234",
+    treatmentID: "OP1234",
     startDate: "2024-04-15",
     startTime: "09:00 AM",
     endDate: "2024-04-15",
@@ -40,10 +42,11 @@ const operations = [
     patientPhone: "123-456-7890",
     professionals: ["Dr. Smith", "Dr. Allen"],
     reportUrl: "https://example.com/report1.pdf",
+    opType: 'Spenal Surgery'
   },
   {
     id: 2,
-    operationId: "OP5678",
+    treatmentID: "OP5678",
     startDate: "2024-04-16",
     startTime: "01:00 PM",
     endDate: "2024-04-16",
@@ -52,6 +55,7 @@ const operations = [
     patientPhone: "987-654-3210",
     professionals: ["Dr. Lee", "Dr. Johnson"],
     reportUrl: "https://example.com/report2.pdf",
+    opType: 'Spenal Surgery'
   },
 ];
 
@@ -130,7 +134,7 @@ export default function OperationInfo() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    operationId: true,
+    treatmentID: true,
     startDate: true,
     startTime: true,
     endDate: true,
@@ -146,17 +150,18 @@ export default function OperationInfo() {
   const apiRef = useGridApiRef();
 
   const filteredOperations = operations.filter((op) =>
-    op.operationId.toLowerCase().includes(searchQuery.toLowerCase())
+    op.treatmentID.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns = [
-    { field: "operationId", headerName: "Operation ID", flex: 1 },
+    { field: "treatmentID", headerName: "Operation ID", flex: 1 },
     { field: "startDate", headerName: "Start Date", flex: 1 },
     { field: "startTime", headerName: "Start Time", flex: 1 },
     { field: "endDate", headerName: "End Date", flex: 1 },
     { field: "endTime", headerName: "End Time", flex: 1 },
     { field: "patientName", headerName: "Patient Name", flex: 1 },
     { field: "patientPhone", headerName: "Patient Phone", flex: 1 },
+    { field: "opType", headerName: "Operation Type", flex: 1 },
     {
       field: "professionals",
       headerName: "Healthcare Professionals Involved",
@@ -273,7 +278,7 @@ export default function OperationInfo() {
             </Menu>
           </Tooltip>
           <Tooltip title="Add New Operation Data">
-            <IconButton>
+            <IconButton onClick={()=>setAddOpenOperation(true)}>
               <Add sx={{ color: "green" }} />
             </IconButton>
             
@@ -309,6 +314,21 @@ export default function OperationInfo() {
           },
         }}
       />
+
+      {/* Edit Operation */}
+      <AddOrEditOperation open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} operationData={selectedOperation} />
+      
+      {/* Add Test */}
+      <AddOrEditOperation open={openAddOperation} onClose={() => setAddOpenOperation(false)} onSave={handleSave}/>
+        
+
+      {/* Delete Dialog */}
+        <DeleteOperationDialog
+            open={deleteDialogOpen}
+            opData={selectedOperation}
+            onCancel={() => setDeleteDialogOpen(false)}
+            onConfirm={handleDeleteConfirm}
+        />
 
       {/* Snackbar code */}
       <AlertBar
