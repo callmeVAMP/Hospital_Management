@@ -35,7 +35,7 @@ const allotments = [
     id: 1,
     roomNo: "101",
     patientName: "John Doe",
-    roomType: "Delux",
+    roomType: "Deluxe",
     bedNo: 1,
     admissionDate: "02/25/2018",
     gender: "male",
@@ -48,8 +48,8 @@ const allotments = [
     id: 2,
     roomNo: "102",
     patientName: "Alice Johnson",
-    roomType: "Standard",
-    bedNo: 5,
+    roomType: "Single",
+    bedNo: 2,
     admissionDate: "03/01/2018",
     gender: "female",
     mobile: "2345678990",
@@ -59,13 +59,44 @@ const allotments = [
   },
 ];
 
-function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
-}
+const availableRoomData=[
+  {
+      "RNo": 103,
+      "BedID": 1,
+      "RType": "Triple",
+      "RCategory": "General Care"
+  },
+  {
+      "RNo": 103,
+      "BedID": 2,
+      "RType": "Triple",
+      "RCategory": "General Care"
+  },
+  {
+      "RNo": 103,
+      "BedID": 3,
+      "RType": "Triple",
+      "RCategory": "General Care"
+  },
+  {
+      "RNo": 202,
+      "BedID": 1,
+      "RType": "Suite",
+      "RCategory": "Surgical"
+  },
+  {
+      "RNo": 301,
+      "BedID": 3,
+      "RType": "Ward",
+      "RCategory": "ICU"
+  },
+  {
+      "RNo": 301,
+      "BedID": 4,
+      "RType": "Ward",
+      "RCategory": "ICU"
+  }
+]
 
 export default function RoomOccupancy() {
   const [openAddOccupancy, setAddOpenOccuoancy] = useState(false);
@@ -304,10 +335,10 @@ export default function RoomOccupancy() {
       />
 
       {/* Book Room */}
-      <BookOrEditRoomOccupancy open={openAddOccupancy} onClose={() => setAddOpenOccuoancy(false)} onSave={handleSave}/>
+      <BookOrEditRoomOccupancy open={openAddOccupancy} onClose={() => setAddOpenOccuoancy(false)} onSave={handleSave} roomsData={availableRoomData}/>
 
         {/* Edit Occupancy */}
-      <BookOrEditRoomOccupancy open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} occupancyData={selectedOccupancy?.row}/>
+      <BookOrEditRoomOccupancy open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} occupancyData={selectedOccupancy?.row} roomsData={availableRoomData}/>
 
       {/* Delete Dialog */}
       <DeleteOccupancyDialog

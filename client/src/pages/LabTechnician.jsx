@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import React from 'react'
 
-const LabTechnician = () => {
+const LabTechnicianPage = () => {
   return (
     <div>
         LabTechnician
@@ -10,4 +10,4 @@ const LabTechnician = () => {
   )
 }
 
-export default LabTechnician
+export default LabTechnicianPage

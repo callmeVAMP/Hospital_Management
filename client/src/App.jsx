@@ -47,6 +47,7 @@ import TreatmentInfo from './components/Admin/TreatmentInfo';
 import OperationInfo from './components/Admin/OperationInfo';
 import RoomOccupancy from './components/Admin/RoomOccupancy';
 import ReceptionistPage from './pages/ReceptionistPage';
+import LabTechnicianPage from './pages/LabTechnician';
 
 
 const router=createBrowserRouter([
@@ -102,6 +103,18 @@ const router=createBrowserRouter([
       path: "book-room",
       element: <RoomBookingForm />
     }
+
+  
+  ]
+  },
+  {
+    path: "/lab-technician",
+    element: <LabTechnicianPage />,
+    children:[{
+      path: "tests",
+      element: <PreviousTestsTable />
+    },
+    
 
   
   ]
