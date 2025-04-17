@@ -339,6 +339,7 @@ const initialDoctors = [
   {
     id: "1",
     name: "Dr. Alice",
+    gender: "male",
     department: "Cardiology",
     specialization: "Heart Specialist",
     degree: "MD",
@@ -363,6 +364,7 @@ export default function DoctorsTable() {
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    id:true,
     name: true,
     department: true,
     specialization: true,
@@ -389,6 +391,9 @@ export default function DoctorsTable() {
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
+
+  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+
 
   const handleSave = (data) => {
     setDoctors((prev) => {
@@ -421,7 +426,14 @@ export default function DoctorsTable() {
   ];
 
   const columns = [
+    { field: "id", headerName: "ID", flex: 1},
     { field: "name", headerName: "Name", flex: 1 },
+    { field: "gender", headerName: "Gender", flex: 1,
+      renderCell: (params) => {
+        const [bg, text] = getGenderColor(params.row.gender);
+        return renderLabel(params.row.gender, bg, text);
+      },
+    },
     { field: "department", headerName: "Department", flex: 1 },
     { field: "specialization", headerName: "Specialization", flex: 1 },
     { field: "degree", headerName: "Degree", flex: 1 },
