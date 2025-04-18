@@ -18,6 +18,7 @@ import { History } from "@mui/icons-material";
 
 export default function TreatmentForm({ open, onClose, onSave, initialData }) {
   const [treatment, setTreatment] = useState({
+    id: "",
     name: "",
     type: "",
     description: "",
@@ -40,6 +41,7 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
       setTreatment(initialData);
     } else {
       setTreatment({
+        id: "",
         name: "",
         type: "",
         description: "",
