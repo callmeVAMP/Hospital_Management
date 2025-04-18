@@ -28,7 +28,10 @@ import {
 } from "@mui/icons-material";
 import { DeleteOccupancyDialog } from "./DeleteOccupancyDialog";
 import AlertBar from "../Common/AlertBar";
-import BookOrEditRoomOccupancy from "./BookOrEditRoomOccupancy";
+import BookOrEditRoomOccupancy from "./BookRoomOccupancy";
+import EditRoomOccupancy from "./EditRoomOccupancy";
+import BookRoomOccupancy from "./BookRoomOccupancy";
+import AddPatientDialog from "./AddPatientDialog";
 
 const allotments = [
   {
@@ -37,10 +40,10 @@ const allotments = [
     patientName: "John Doe",
     roomType: "Deluxe",
     bedNo: 1,
-    admissionDate: "02/25/2018",
-    gender: "male",
+    admissionDate: "2018-04-15",
+    gender: "Male",
     mobile: "1234567890",
-    doctor: "Dr. Jane Smith",
+    doctorAssigned: "Dr. Jane Smith",
     status: "Discharged",
     amount: 15000,
   },
@@ -50,10 +53,10 @@ const allotments = [
     patientName: "Alice Johnson",
     roomType: "Single",
     bedNo: 2,
-    admissionDate: "03/01/2018",
-    gender: "female",
+    admissionDate: "2018-04-15",
+    gender: "Female",
     mobile: "2345678990",
-    doctor: "Dr. Mark Taylor",
+    doctorAssigned: "Dr. Mark Taylor",
     status: "Reserved",
     amount: 8000,
   },
@@ -100,6 +103,7 @@ const availableRoomData=[
 
 export default function RoomOccupancy() {
   const [openAddOccupancy, setAddOpenOccuoancy] = useState(false);
+  const [openAddPatient, setAddOpenPatient] = useState(false);
    
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedOccupancy, setSelectedOccupancy] = useState(null);
@@ -140,6 +144,9 @@ export default function RoomOccupancy() {
           setSnackbarOpen(true);
           setSnackBarInfo({'message':'Updated Occupancy Data Successfully','severity':'success'})
       }
+
+      // if patient not registered
+      setAddOpenPatient(true);
   };
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -154,7 +161,7 @@ export default function RoomOccupancy() {
     admissionDate: true,
     gender: true,
     mobile: true,
-    doctor: true,
+    doctorAssigned: true,
     status: true,
     amount: true,
   });
@@ -208,7 +215,7 @@ export default function RoomOccupancy() {
       },
     },
     { field: "mobile", headerName: "Mobile", flex: 1.5 },
-    { field: "doctor", headerName: "Doctor Assigned", flex: 1.5 },
+    { field: "doctorAssigned", headerName: "Doctor Assigned", flex: 1.5 },
     {
       field: "status",
       headerName: "Status",
@@ -282,6 +289,12 @@ export default function RoomOccupancy() {
               <ViewColumn />
             </IconButton>
           </Tooltip>
+           <Tooltip title="Add New Room">
+              <IconButton onClick={()=>setAddOpenOccuoancy(true)}>
+                <Add sx={{ color: "green" }} />
+              </IconButton>
+              
+            </Tooltip>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
             {Object.keys(columnVisibilityModel).map((field) => (
               <MenuItem key={field}>
@@ -335,10 +348,22 @@ export default function RoomOccupancy() {
       />
 
       {/* Book Room */}
-      <BookOrEditRoomOccupancy open={openAddOccupancy} onClose={() => setAddOpenOccuoancy(false)} onSave={handleSave} roomsData={availableRoomData}/>
+      <BookRoomOccupancy open={openAddOccupancy} onClose={() => setAddOpenOccuoancy(false)} onSave={handleSave} roomsData={availableRoomData}/>
+
+      {/* Patient Register if not present */}
+      <AddPatientDialog
+        open={openAddPatient}
+        onClose={() => setAddOpenPatient(false)}
+        onSave={(data) => {
+          console.log("New patient:", data);
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Added New Patient Successfully','severity':'success'})
+        }}
+      />
+
 
         {/* Edit Occupancy */}
-      <BookOrEditRoomOccupancy open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} occupancyData={selectedOccupancy?.row} roomsData={availableRoomData}/>
+      <EditRoomOccupancy open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} occupancyData={selectedOccupancy} />
 
       {/* Delete Dialog */}
       <DeleteOccupancyDialog

@@ -51,6 +51,8 @@ import OperationInfo from './components/Admin/OperationInfo';
 import RoomOccupancy from './components/Admin/RoomOccupancy';
 import ReceptionistPage from './pages/ReceptionistPage';
 import LabTechnicianPage from './pages/LabTechnician';
+import AppointmentTable from './components/Receptionist/appointmentstable.jsx';
+import AppointmentForm from './components/Receptionist/appointmentform.jsx';
 
 
 const router = createBrowserRouter([
@@ -146,7 +148,35 @@ const router = createBrowserRouter([
       element:<ScheduledTestsTable/>
     }
   ]
+  },
+
+  {
+    path:"/receptionist",
+    element: <ReceptionistPage/>,
+    children:[{
+      path: "PatientEnquiry",
+      element: <PatientEnquiry />
+    },
+    {
+      path:"AppointmentTable",
+      element:<AppointmentTable/>
+    },
+    {
+      path:"PatientRegistrationForm",
+      element:<PatientRegistrationForm/>
+    },
+    {
+      path:"AppointmentForm",
+      element:<AppointmentForm/>
+    },
+    {
+      path:"RoomBookingForm",
+      element:<RoomBookingForm/>
+    }
+    ]
   }
+
+
 
 
 
