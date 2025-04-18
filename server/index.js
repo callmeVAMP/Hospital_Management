@@ -12,6 +12,7 @@ import occupancy from './routes/occupancy.js'
 // import appoinment from './routes/appointment.js'
 import labtech from './routes/LabTechnician.js'
 
+import admin from './routes/admin_from_starting.js'
 
 const app = express();
 dotenv.config();
