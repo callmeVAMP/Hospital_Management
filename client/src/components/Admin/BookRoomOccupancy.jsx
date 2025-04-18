@@ -113,11 +113,11 @@ const BookRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsData }) 
         <Person /> {occupancyData ? "Edit Room Occupancy" : "Book Room"}
       </DialogTitle>
       <DialogContent dividers>
-        <Collapse in={success}>
+        {/* <Collapse in={success}>
           <Alert severity="success" sx={{ mb: 2 }}>
             Room successfully {occupancyData ? "updated" : "booked"}!
           </Alert>
-        </Collapse>
+        </Collapse> */}
         <Box component="form">
           <Grid container spacing={2}>
             <Grid size={{xs:6}}>

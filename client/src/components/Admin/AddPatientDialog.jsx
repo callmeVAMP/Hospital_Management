@@ -14,10 +14,9 @@ import {
 } from "@mui/material";
 import { PersonAdd } from "@mui/icons-material";
 
-const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
+const AddPatientDialog = ({ open, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     gender: "",
     mobile: "",
     address: "",
@@ -26,18 +25,7 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
 
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
-    if (patientData) {
-      setFormData({
-        firstName: patientData.firstName || "",
-        lastName: patientData.lastName || "",
-        gender: patientData.gender || "",
-        mobile: patientData.mobile || "",
-        address: patientData.address || "",
-        dob: patientData.dob || "",
-      });
-    }
-  }, [patientData]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,15 +36,14 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
   };
 
   const handleSubmit = () => {
-    const type = patientData ? "edit" : "add";
-    onSave(formData, type);
+    
+    onSave(formData);
     setSuccess(true);
 
     setTimeout(() => setSuccess(false), 3000);
 
     setFormData({
-      firstName: "",
-      lastName: "",
+      name: "",
       gender: "",
       mobile: "",
       address: "",
@@ -70,37 +57,28 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <PersonAdd sx={{ mr: 1 }} />
-        {patientData ? "Edit Patient Details" : "Add New Patient"}
+         Add New Patient
       </DialogTitle>
       <DialogContent dividers>
         <Collapse in={success}>
           <Alert severity="success" sx={{ mb: 2 }}>
-            Patient successfully {patientData ? "updated" : "registered"}!
+            Patient added successfully!
           </Alert>
         </Collapse>
-        <Box component="form">
+        <Box component="form" >
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid size={{xs:6}}>
               <TextField
-                label="First Name"
-                name="firstName"
-                value={formData.firstName}
+                label="Patient Name"
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 fullWidth
                 required
               />
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                label="Last Name"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={6}>
+            
+            <Grid size={{xs:6}}>
               <TextField
                 select
                 label="Gender"
@@ -115,9 +93,13 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={6}>
+
+          </Grid>
+
+          <Grid container spacing={2} mt={2}>
+            <Grid size={{xs:6}}>
               <TextField
-                label="Mobile Number"
+                label="Phone Number"
                 name="mobile"
                 value={formData.mobile}
                 onChange={handleChange}
@@ -125,19 +107,7 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
                 required
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                rows={2}
-                required
-              />
-            </Grid>
-            <Grid item xs={6}>
+            <Grid size={{xs:6}}>
               <TextField
                 label="Date of Birth"
                 name="dob"
@@ -152,6 +122,23 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
               />
             </Grid>
           </Grid>
+
+          <Grid container spacing={2} mt={2}>
+            <Grid size={{xs:12}}>
+              <TextField
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                fullWidth
+                multiline
+                rows={2}
+                required
+              />
+            </Grid>
+
+            
+          </Grid>
         </Box>
       </DialogContent>
       <DialogActions>
@@ -162,15 +149,14 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
           onClick={handleSubmit}
           variant="contained"
           disabled={
-            !formData.firstName ||
-            !formData.lastName ||
+            !formData.name ||
             !formData.gender ||
             !formData.mobile ||
             !formData.address ||
             !formData.dob
           }
         >
-          {patientData ? "Update" : "Register"}
+          Submit
         </Button>
       </DialogActions>
     </Dialog>

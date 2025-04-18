@@ -31,6 +31,7 @@ import AlertBar from "../Common/AlertBar";
 import BookOrEditRoomOccupancy from "./BookRoomOccupancy";
 import EditRoomOccupancy from "./EditRoomOccupancy";
 import BookRoomOccupancy from "./BookRoomOccupancy";
+import AddPatientDialog from "./AddPatientDialog";
 
 const allotments = [
   {
@@ -353,10 +354,11 @@ export default function RoomOccupancy() {
       <AddPatientDialog
         open={openAddPatient}
         onClose={() => setAddOpenPatient(false)}
-        onSave={(data, type) => {
-          console.log(type === "edit" ? "Edited patient:" : "New patient:", data);
+        onSave={(data) => {
+          console.log("New patient:", data);
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Added New Patient Successfully','severity':'success'})
         }}
-        patientData={null} // or existing patient object for edit
       />
 
 
