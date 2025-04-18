@@ -40,7 +40,7 @@ import {
   Paper,
   Divider,
 } from '@mui/material';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 
 import LandingPage from './pages/LandingPage';
 import AdminPage from './pages/AdminPage';
@@ -53,128 +53,165 @@ import ReceptionistPage from './pages/ReceptionistPage';
 import LabTechnicianPage from './pages/LabTechnician';
 import AppointmentTable from './components/Receptionist/appointmentstable.jsx';
 import AppointmentForm from './components/Receptionist/appointmentform.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import VerifyOTPPage from './pages/VerifyOTPPage.jsx';
+import AlertBar from './components/Common/AlertBar.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSnackBarInfo } from './Features/snackbarSlice.js';
 
+const LayoutComponent=()=>{
+  const snackBarInfo=useSelector((state)=>state.snackBarKey)
+  const dispatch=useDispatch();
+
+  return <div>
+    <Outlet />
+    <AlertBar
+        open={snackBarInfo?.open}
+        onClose={() => dispatch(setSnackBarInfo({message:'',severity:'',open:false}))}
+        message={snackBarInfo?.message}
+        severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
+        duration={3000}
+    />
+  </div>
+}
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/landing",
     element: <LandingPage />,
   },
-  {
-    path: "/admin",
-    element: <AdminPage />,
-    children:[{
-      path: "patient",
-      element: <PatientsList />
-    },
-    {
-      path:"employees",
-      element:<EmployeeList />
-    },
-    {
-      path:"rooms",
-      element: <RoomInfoTable />
-    },
-    {
-      path:"occupancy",
-      element: <RoomOccupancy />
-    },
-    {
-      path:"labTest",
-      element: <LabAndTestInfo />
-    },
-    {
-      path:"treatment",
-      element: <TreatmentInfo />
-    },
-    {
-      path:"operations",
-      element: <OperationInfo />
-    },
 
-
-  
-  ]
-  },
   {
-    path: "/receptionist",
-    element: <ReceptionistPage />,
-    children:[{
-      path: "check-occupancy",
-      element: <PatientEnquiry />
-    },
-    {
-      path: "book-room",
-      element: <RoomBookingForm />
-    }
-
-  
-  ]
-  },
-  {
-    path: "/lab-technician",
-    element: <LabTechnicianPage />,
-    children:[{
-      path: "tests",
-      element: <PreviousTestsTable />
-    },
+    path: "/",
+    element: <LayoutComponent />,
+    children:[
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/verify-otp",
+        element: <VerifyOTPPage />,
+      },  
+      
+      {
+        path: "/admin",
+        element: <AdminPage />,
+        children:[{
+          path: "patient",
+          element: <PatientsList />
+        },
+        {
+          path:"employees",
+          element:<EmployeeList />
+        },
+        {
+          path:"rooms",
+          element: <RoomInfoTable />
+        },
+        {
+          path:"occupancy",
+          element: <RoomOccupancy />
+        },
+        {
+          path:"labTest",
+          element: <LabAndTestInfo />
+        },
+        {
+          path:"treatment",
+          element: <TreatmentInfo />
+        },
+        {
+          path:"operations",
+          element: <OperationInfo />
+        },
     
-
-  
-  ]
-  },
-  {
-    path:"/doctor",
-    element: <DoctorPage />,
-    children:[{
-      path: "appointments",
-      element: <AppointmentsTable />
-    },
-    {
-      path:"patient",
-      element:<PatientDashboard/>
-    }
-    ]
-  },
-  {
-    path:"/labTechnician",
-    element: <LabTechnicianPage/>,
-    children:[{
-      path: "previous",
-      element: <PreviousTestsTable />
-    },
-    {
-      path:"scheduled",
-      element:<ScheduledTestsTable/>
-    }
-  ]
-  },
-
-  {
-    path:"/receptionist",
-    element: <ReceptionistPage/>,
-    children:[{
-      path: "PatientEnquiry",
-      element: <PatientEnquiry />
-    },
-    {
-      path:"AppointmentTable",
-      element:<AppointmentTable/>
-    },
-    {
-      path:"PatientRegistrationForm",
-      element:<PatientRegistrationForm/>
-    },
-    {
-      path:"AppointmentForm",
-      element:<AppointmentForm/>
-    },
-    {
-      path:"RoomBookingForm",
-      element:<RoomBookingForm/>
-    }
+    
+      
+      ]
+      },
+      {
+        path: "/receptionist",
+        element: <ReceptionistPage />,
+        children:[{
+          path: "check-occupancy",
+          element: <PatientEnquiry />
+        },
+        {
+          path: "book-room",
+          element: <RoomBookingForm />
+        }
+    
+      
+      ]
+      },
+      {
+        path: "/lab-technician",
+        element: <LabTechnicianPage />,
+        children:[{
+          path: "tests",
+          element: <PreviousTestsTable />
+        },
+        
+    
+      
+      ]
+      },
+      {
+        path:"/doctor",
+        element: <DoctorPage />,
+        children:[{
+          path: "appointments",
+          element: <AppointmentsTable />
+        },
+        {
+          path:"patient",
+          element:<PatientDashboard/>
+        }
+        ]
+      },
+      {
+        path:"/labTechnician",
+        element: <LabTechnicianPage/>,
+        children:[{
+          path: "previous",
+          element: <PreviousTestsTable />
+        },
+        {
+          path:"scheduled",
+          element:<ScheduledTestsTable/>
+        }
+      ]
+      },
+    
+      {
+        path:"/receptionist",
+        element: <ReceptionistPage/>,
+        children:[{
+          path: "PatientEnquiry",
+          element: <PatientEnquiry />
+        },
+        {
+          path:"AppointmentTable",
+          element:<AppointmentTable/>
+        },
+        {
+          path:"PatientRegistrationForm",
+          element:<PatientRegistrationForm/>
+        },
+        {
+          path:"AppointmentForm",
+          element:<AppointmentForm/>
+        },
+        {
+          path:"RoomBookingForm",
+          element:<RoomBookingForm/>
+        }
+        ]
+      }
     ]
   }
+
 
 
 
