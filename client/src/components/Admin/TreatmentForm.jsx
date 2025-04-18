@@ -7,34 +7,20 @@ import {
   TextField,
   Button,
   Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  DialogContentText,
 } from "@mui/material";
-import { History } from "@mui/icons-material";
 
 export default function TreatmentForm({ open, onClose, onSave, initialData }) {
   const [treatment, setTreatment] = useState({
     id: "",
     name: "",
-    type: "",
     description: "",
     cost: "",
     startDate: "",
     endDate: "",
-    doctorInCharge: "",
+    startTime: "",
+    endTime: "",
     patientName: "",
   });
-
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-
-  const treatmentHistory = [
-    { date: "2023-01-15", name: "Chemotherapy", patient: "John Doe" },
-    { date: "2023-03-10", name: "Physiotherapy", patient: "Jane Smith" },
-  ];
 
   useEffect(() => {
     if (initialData) {
@@ -43,12 +29,12 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
       setTreatment({
         id: "",
         name: "",
-        type: "",
         description: "",
         cost: "",
         startDate: "",
         endDate: "",
-        doctorInCharge: "",
+        startTime: "",
+        endTime: "",
         patientName: "",
       });
     }
@@ -60,93 +46,125 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
   };
 
   const handleSubmit = () => {
-    if (onSave) {
-      onSave(treatment);
+    if (!treatment.name || !treatment.patientName) {
+      alert("Please fill required fields: Treatment Name and Patient Name");
+      return;
     }
+    if (!treatment.id) {
+      treatment.id = Date.now().toString(); // auto-generate ID if not provided
+    }
+    onSave(treatment);
     onClose();
   };
 
   return (
-    <>
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>
-          {initialData ? "Edit Treatment" : "Add Treatment"}
-          {initialData && (
-            <IconButton
-              onClick={() => setShowHistoryModal(true)}
-              sx={{ float: "right" }}
-            >
-              <History />
-            </IconButton>
-          )}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2}>
-            {[
-              { label: "Treatment Name", name: "name" },
-              { label: "Type", name: "type" },
-              { label: "Description", name: "description" },
-              { label: "Cost", name: "cost", type: "number" },
-              { label: "Start Date", name: "startDate", type: "date" },
-              { label: "End Date", name: "endDate", type: "date" },
-              { label: "Doctor In Charge", name: "doctorInCharge" },
-              { label: "Patient Name", name: "patientName" },
-            ].map(({ label, name, type = "text" }) => (
-              <Grid item xs={12} sm={6} key={name}>
-                <TextField
-                  fullWidth
-                  label={label}
-                  name={name}
-                  type={type}
-                  value={treatment[name]}
-                  onChange={handleChange}
-                  InputLabelProps={type === "date" ? { shrink: true } : {}}
-                />
-              </Grid>
-            ))}
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{initialData ? "Edit Treatment" : "Add Treatment"}</DialogTitle>
+      <DialogContent>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Treatment ID"
+              name="id"
+              value={treatment.id}
+              onChange={handleChange}
+            />
           </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Treatment History Modal */}
-      <Dialog
-        open={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          History for {treatment.name}
-        </DialogTitle>
-        <DialogContent dividers>
-          {treatmentHistory.length > 0 ? (
-            <List>
-              {treatmentHistory.map((entry, index) => (
-                <React.Fragment key={index}>
-                  <ListItem>
-                    <ListItemText
-                      primary={entry.name}
-                      secondary={`Date: ${entry.date} — Patient: ${entry.patient}`}
-                    />
-                  </ListItem>
-                  {index < treatmentHistory.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-          ) : (
-            <DialogContentText>No history available.</DialogContentText>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowHistoryModal(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </>
+          <Grid item xs={6} sx={{ width: '262px' }}>
+            <TextField
+              fullWidth
+              label="Treatment Name *"
+              name="name"
+              value={treatment.name}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Patient Name *"
+              name="patientName"
+              value={treatment.patientName}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Start Date"
+              name="startDate"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={treatment.startDate}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Start Time"
+              name="startTime"
+              type="time"
+              InputLabelProps={{ shrink: true }}
+              value={treatment.startTime}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="End Date"
+              name="endDate"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={treatment.endDate}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="End Time"
+              name="endTime"
+              type="time"
+              InputLabelProps={{ shrink: true }}
+              value={treatment.endTime}
+              onChange={handleChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Cost"
+              name="cost"
+              type="number"
+              value={treatment.cost}
+              onChange={handleChange}
+              inputProps={{ min: 0 }}
+            />
+          </Grid>
+          <Grid item xs={12} sx={{ width: '497px' }}>
+            <TextField
+              fullWidth
+              multiline
+              label="Description"
+              name="description"
+              value={treatment.description}
+              onChange={handleChange}
+              rows={3}
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit">
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleSubmit}>
+          {initialData ? "Update" : "Add"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }

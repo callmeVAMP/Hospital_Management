@@ -91,8 +91,10 @@ export default function NurseList() {
     <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
   );
 
-  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
-
+  //const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+  //const getGenderColor = gender => gender === "male" ? ["#e0f7fa", "#0288d1"] : ["#fce4ec", "#d81b60"];
+  const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
+  
   const handleDelete = () => {
     if (deleteTarget) {
       setNurses((prev) => prev.filter((n) => n.id !== deleteTarget.id));

@@ -71,14 +71,15 @@ export default function DoctorsTable() {
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     id: true,
     name: true,
+    gender: true,
     department: true,
     specialization: true,
     degree: true,
     mobile: true,
     email: true,
     experience: true,
+    joiningDate: true,
     consultationFee: true,
-    rating: true,
     availability: true,
     clinicLocation: true,
   });
@@ -97,7 +98,8 @@ export default function DoctorsTable() {
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+  //const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+  const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
 
   const renderLabel = (value, color, textColor) => (
     <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
@@ -152,6 +154,7 @@ export default function DoctorsTable() {
     { field: "degree", headerName: "Degree", flex: 1 },
     { field: "mobile", headerName: "Mobile", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },
+    { field: "joiningDate", headerName: "Joining Date", flex: 1 },
     { field: "consultationFee", headerName: "Fee", flex: 0.7 },
     { field: "availability", headerName: "Availability", flex: 1 },
     { field: "clinicLocation", headerName: "Clinic", flex: 1 },

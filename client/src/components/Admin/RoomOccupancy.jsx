@@ -41,7 +41,7 @@ const allotments = [
     roomType: "Deluxe",
     bedNo: 1,
     admissionDate: "2018-04-15",
-    gender: "Male",
+    gender: "male",
     mobile: "1234567890",
     doctorAssigned: "Dr. Jane Smith",
     status: "Discharged",
@@ -54,7 +54,7 @@ const allotments = [
     roomType: "Single",
     bedNo: 2,
     admissionDate: "2018-04-15",
-    gender: "Female",
+    gender: "female",
     mobile: "2345678990",
     doctorAssigned: "Dr. Mark Taylor",
     status: "Reserved",
@@ -187,7 +187,7 @@ export default function RoomOccupancy() {
     }
   };
 
-  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+  const getGenderColor = (gender) => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
 
   const getRoomTypeColor = (type) => type === "Delux" ? ["#fef9c3", "#92400e"] : ["#dbeafe", "#1e3a8a"];
 

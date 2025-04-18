@@ -13,12 +13,17 @@ import {
   ListItemText,
   Divider,
   DialogContentText,
+  MenuItem,
 } from "@mui/material";
 import { History } from "@mui/icons-material";
 
+const genderOptions = ["Male", "Female", "Other"];
+
 export default function DoctorForm({ open, onClose, onSave, initialData }) {
   const [doctor, setDoctor] = useState({
+    id: "",
     name: "",
+    gender: "",
     department: "",
     specialization: "",
     degree: "",
@@ -44,7 +49,9 @@ export default function DoctorForm({ open, onClose, onSave, initialData }) {
       setDoctor(initialData);
     } else {
       setDoctor({
+        id: "",
         name: "",
+        gender: "",
         department: "",
         specialization: "",
         degree: "",
@@ -66,6 +73,10 @@ export default function DoctorForm({ open, onClose, onSave, initialData }) {
   };
 
   const handleSubmit = () => {
+    if (!doctor.id || !doctor.name || !doctor.department || !doctor.specialization) {
+      alert("Please fill required fields: Doctor's ID, Doctor Name, Department Name and Specialization");
+      return;
+    }
     if (onSave) {
       onSave(doctor);
     }
@@ -89,29 +100,46 @@ export default function DoctorForm({ open, onClose, onSave, initialData }) {
         <DialogContent dividers>
           <Grid container spacing={2}>
             {[
-              { label: "Name", name: "name" },
-              { label: "Department", name: "department" },
-              { label: "Specialization", name: "specialization" },
+              { label: "ID *", name: "id" },
+              { label: "Name *", name: "name" },
+              { label: "Gender", name: "gender", type: "select" },
+              { label: "Department *", name: "department" },
+              { label: "Specialization *", name: "specialization" },
               { label: "Degree", name: "degree" },
               { label: "Mobile", name: "mobile" },
               { label: "Email", name: "email" },
               { label: "Joining Date", name: "joiningDate", type: "date" },
-              { label: "Experience (yrs)", name: "experience" },
               { label: "Consultation Fee", name: "consultationFee" },
-              { label: "Rating", name: "rating" },
               { label: "Availability", name: "availability" },
               { label: "Clinic Location", name: "clinicLocation" },
             ].map(({ label, name, type = "text" }) => (
               <Grid item xs={12} sm={6} key={name}>
-                <TextField
-                  fullWidth
-                  label={label}
-                  name={name}
-                  type={type}
-                  value={doctor[name]}
-                  onChange={handleChange}
-                  InputLabelProps={type === "date" ? { shrink: true } : {}}
-                />
+                {name === "gender" ? (
+                  <TextField
+                    select
+                    fullWidth
+                    label={label}
+                    name={name}
+                    value={doctor[name]}
+                    onChange={handleChange}
+                  >
+                    {genderOptions.map((option) => (
+                      <MenuItem key={option} value={option.toLowerCase()}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                ) : (
+                  <TextField
+                    fullWidth
+                    label={label}
+                    name={name}
+                    type={type}
+                    value={doctor[name]}
+                    onChange={handleChange}
+                    InputLabelProps={type === "date" ? { shrink: true } : {}}
+                  />
+                )}
               </Grid>
             ))}
           </Grid>
@@ -159,4 +187,4 @@ export default function DoctorForm({ open, onClose, onSave, initialData }) {
       </Dialog>
     </>
   );
-};
+}

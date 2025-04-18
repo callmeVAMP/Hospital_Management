@@ -118,7 +118,7 @@ export default function LabAndTestInfo() {
   );
 
   const columns = [
-    { field: "labRoomNo", headerName: "Lab Room No", flex: 1 },
+    { field: "labRoomNo", headerName: "Lab Room No", flex: 0.5 },
     { field: "labName", headerName: "Lab Name", flex: 1.5 },
     {
       field: "testsPerformed",

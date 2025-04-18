@@ -25,36 +25,36 @@ import {
   ViewColumn,
   Search as SearchIcon,
 } from "@mui/icons-material";
-import PatientForm from "./PatientForm";
+import ReceptionistForm from "./ReceptionistForm";
 import DeleteDialog from "./DeleteDialog";
 
-const initialPatients = [
+const initialReceptionists = [
   {
     id: "1",
-    name: "John Doe",
-    gender: "male",
+    name: "Emily Clark",
+    gender: "female",
     phone: "9876543210",
-    email: "john@example.com",
-    address: "123 Main St",
+    email: "emily@example.com",
+    address: "123 Reception Rd",
   },
   {
     id: "2",
-    name: "Jane Smith",
-    gender: "female",
+    name: "Michael Lee",
+    gender: "male",
     phone: "1234567890",
-    email: "jane@example.com",
-    address: "456 Maple Ave",
+    email: "michael@example.com",
+    address: "456 Office St",
   },
 ];
 
-export default function PatientsList() {
-  const [patients, setPatients] = useState(initialPatients);
+export default function ReceptionistsList() {
+  const [receptionists, setReceptionists] = useState(initialReceptionists);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
+  const [editingReceptionist, setEditingReceptionist] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [patientToDelete, setPatientToDelete] = useState(null);
+  const [receptionistToDelete, setReceptionistToDelete] = useState(null);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     id: true,
     name: true,
@@ -65,6 +65,7 @@ export default function PatientsList() {
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [updateSnackbarOpen, setUpdateSnackbarOpen] = useState(false);
+  const [addSnackbarOpen, setAddSnackbarOpen] = useState(false); // <-- New
 
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
@@ -72,29 +73,31 @@ export default function PatientsList() {
   const handleClose = () => setAnchorEl(null);
 
   const handleSave = (data) => {
-    setPatients((prev) => {
-      const exists = prev.find((p) => p.id === data.id);
+    setReceptionists((prev) => {
+      const exists = prev.find((r) => r.id === data.id);
       if (exists) {
-        setUpdateSnackbarOpen(true); // <-- Trigger update snackbar
-        return prev.map((p) => (p.id === data.id ? data : p));
+        setUpdateSnackbarOpen(true);
+        return prev.map((r) => (r.id === data.id ? data : r));
       }
+      setAddSnackbarOpen(true);
       return [...prev, data];
     });
-    setEditingPatient(null);
+    setEditingReceptionist(null);
   };
 
   const renderLabel = (value, color, textColor) => (
     <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
   );
 
-  const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
+  const getGenderColor = (gender) =>
+    gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
 
-  const filteredPatients = patients.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredReceptionists = receptionists.filter((r) =>
+    r.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDelete = () => {
-    setPatients((prev) => prev.filter((p) => p.id !== patientToDelete?.id));
+    setReceptionists((prev) => prev.filter((r) => r.id !== receptionistToDelete?.id));
     setDeleteDialogOpen(false);
     setSnackbarOpen(true);
   };
@@ -125,7 +128,7 @@ export default function PatientsList() {
             <IconButton
               size="small"
               onClick={() => {
-                setEditingPatient(params.row);
+                setEditingReceptionist(params.row);
                 setOpenForm(true);
               }}
               sx={{ color: "#0288d1" }}
@@ -137,7 +140,7 @@ export default function PatientsList() {
             <IconButton
               size="small"
               onClick={() => {
-                setPatientToDelete(params.row);
+                setReceptionistToDelete(params.row);
                 setDeleteDialogOpen(true);
               }}
               sx={{ color: "#e53935" }}
@@ -153,11 +156,7 @@ export default function PatientsList() {
   const deleteFields = [
     { field: "id", headerName: "ID", flex: 1 },
     { key: "name", label: "Name", flex: 1 },
-    {
-      key: "gender",
-      label: "Gender",
-      flex: 1,
-    },
+    { key: "gender", label: "Gender", flex: 1 },
     { key: "phone", label: "Phone", flex: 1 },
     { key: "email", label: "Email", flex: 1 },
     { key: "address", label: "Address", flex: 1 },
@@ -165,6 +164,7 @@ export default function PatientsList() {
 
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
+      {/* Header Bar */}
       <Box
         sx={{
           backgroundColor: "#f0f4ff",
@@ -176,7 +176,7 @@ export default function PatientsList() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6">Patients</Typography>
+        <Typography variant="h6">Receptionists</Typography>
         <Box display="flex" alignItems="center" gap={2}>
           <Box
             sx={{
@@ -222,10 +222,10 @@ export default function PatientsList() {
               </MenuItem>
             ))}
           </Menu>
-          <Tooltip title="Add New Patient">
+          <Tooltip title="Add New Receptionist">
             <IconButton
               onClick={() => {
-                setEditingPatient(null);
+                setEditingReceptionist(null);
                 setOpenForm(true);
               }}
             >
@@ -245,9 +245,10 @@ export default function PatientsList() {
         </Box>
       </Box>
 
+      {/* Table */}
       <DataGrid
         apiRef={apiRef}
-        rows={filteredPatients}
+        rows={filteredReceptionists}
         columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10, 15]}
@@ -268,29 +269,30 @@ export default function PatientsList() {
         }}
       />
 
-      <PatientForm
+      {/* Forms and Dialogs */}
+      <ReceptionistForm
         open={openForm}
         onClose={() => {
           setOpenForm(false);
-          setEditingPatient(null);
+          setEditingReceptionist(null);
         }}
         onSave={handleSave}
-        initialData={editingPatient}
+        initialData={editingReceptionist}
       />
 
       <DeleteDialog
         open={deleteDialogOpen}
-        data={patientToDelete}
+        data={receptionistToDelete}
         fields={deleteFields}
         onCancel={() => {
           setDeleteDialogOpen(false);
-          setPatientToDelete(null);
+          setReceptionistToDelete(null);
         }}
         onConfirm={handleDelete}
-        title="Are you sure you want to delete this patient?"
+        title="Are you sure you want to delete this receptionist?"
       />
 
-      {/* Delete Snackbar */}
+      {/* Snackbars */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -307,7 +309,6 @@ export default function PatientsList() {
         </Alert>
       </Snackbar>
 
-      {/* Update Snackbar */}
       <Snackbar
         open={updateSnackbarOpen}
         autoHideDuration={3000}
@@ -321,6 +322,22 @@ export default function PatientsList() {
           sx={{ width: "100%" }}
         >
           Update successful!
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={addSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setAddSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setAddSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Added successfully!
         </Alert>
       </Snackbar>
     </Box>
