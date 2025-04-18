@@ -40,7 +40,7 @@ function LoginPage() {
     //Receptionist
     const recRes={email:"rec@gmail.com",role:"receptionist",rId:2016}
 
-    const res=recRes;
+    const res=adminRes;
 
     dispatch(setAuth({verified:false,...res}))
 

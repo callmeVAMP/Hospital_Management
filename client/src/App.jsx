@@ -50,7 +50,7 @@ import TreatmentInfo from './components/Admin/TreatmentList';
 import OperationInfo from './components/Admin/OperationInfo';
 import RoomOccupancy from './components/Admin/RoomOccupancy';
 import ReceptionistPage from './pages/ReceptionistPage';
-import LabTechnicianPage from './pages/LabTechnician';
+import LabTechnicianPage from './pages/LabTechnicianPage.jsx';
 import AppointmentTable from './components/Receptionist/appointmentstable.jsx';
 import AppointmentForm from './components/Receptionist/appointmentform.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -70,7 +70,7 @@ const LayoutComponent=()=>{
         onClose={() => dispatch(setSnackBarInfo({message:'',severity:'',open:false}))}
         message={snackBarInfo?.message}
         severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
-        duration={3000}
+        duration={2000}
     />
   </div>
 }
@@ -141,18 +141,6 @@ const router = createBrowserRouter([
           path: "book-room",
           element: <RoomBookingForm />
         }
-    
-      
-      ]
-      },
-      {
-        path: "/lab-technician",
-        element: <LabTechnicianPage />,
-        children:[{
-          path: "tests",
-          element: <PreviousTestsTable />
-        },
-        
     
       
       ]
