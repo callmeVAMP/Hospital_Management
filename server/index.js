@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import patient from './routes/patient.js'
 import admin from './routes/admin.js'
 import roomBook from './routes/roomBook.js'
+import appointment from './routes/appointment.js'
+import occupancy from './routes/occupancy.js'
 
 const app = express();
 dotenv.config();
@@ -63,6 +65,9 @@ app.get('/',async(req,res)=>{
 app.use('/patient',patient)
 app.use('/admin',admin)
 app.use('/roomBook',roomBook)
+app.use('/appointment',appointment)
+app.use('/occupancy',occupancy);
+
 
 
   
