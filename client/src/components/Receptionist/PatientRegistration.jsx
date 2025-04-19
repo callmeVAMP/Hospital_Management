@@ -14,8 +14,8 @@ import {
 
 export default function PatientRegistrationForm() {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    Name: "",
+    //lastName: "",
     gender: "",
     mobile: "",
     address: "",
@@ -39,8 +39,8 @@ export default function PatientRegistrationForm() {
 
     // Reset form
     setFormData({
-      firstName: "",
-      lastName: "",
+      Name: "",
+      // lastName: "",
       gender: "",
       mobile: "",
       address: "",
@@ -91,15 +91,15 @@ export default function PatientRegistrationForm() {
             <Grid item size={6}>
               <TextField
                 label="First Name"
-                name="firstName"
-                value={formData.firstName}
+                name="Name"
+                value={formData.Name}
                 onChange={handleChange}
                 fullWidth
                 required
               />
             </Grid>
 
-            <Grid size={6}>
+            {/* <Grid size={6}>
               <TextField
                 label="Last Name"
                 name="lastName"
@@ -108,7 +108,7 @@ export default function PatientRegistrationForm() {
                 fullWidth
                 required
               />
-            </Grid>
+            </Grid> */}
 
             <Grid item size={6}>
               <TextField

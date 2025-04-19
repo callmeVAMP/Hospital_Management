@@ -1,0 +1,102 @@
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Container,
+} from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { setSnackBarInfo } from "../Features/snackbarSlice";
+import { setAuth } from "../Features/authSlice";
+import Cookies from "js-cookie";
+//import "./VerifyOtp.css"; // Assuming you have this for styling
+
+function VerifyOtp() {
+  const dispatch=useDispatch();
+  const auth=useSelector((state)=>state.authKey);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { Email, Password,Role } = location.state || {};
+  const [otp, setOtp] = useState("");
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:8000/auth/verify-otp", {
+        Email,
+        Password,
+        Role,
+        otp,
+      });
+      console.log("responseeee");
+      console.log(response);
+      // if (response.data.message === "OTP verified. Login successful!") {
+      //   alert("Login successful!");
+      //   navigate(`${Role.toLowerCase()}`); // Redirect to the desired route
+      // }
+      if(response?.data?.verified){
+          console.log("success ",response)
+          var expiryTime = new Date(new Date().getTime() + 15 * 60 * 1000);
+          Cookies.remove("auth");
+          const authData = {...response.data};
+          Cookies.set("auth", JSON.stringify(authData), { expires: expiryTime });
+          // Cookies.set("authToken", authToken, { expires: expiryTime });
+  
+          // Also update redux
+          dispatch(setAuth(authData));
+          dispatch(setSnackBarInfo({message:`OTP Verified Successfully`,severity:'success',open:true}))
+          navigate(`/${Role.toLowerCase()}`);
+      }
+      else{
+          dispatch(setSnackBarInfo({message:`OTP not verified`,severity:'error',open:true}))
+      }
+     } 
+    catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        alert(err.response.data.message); // ← show user-friendly error
+        dispatch(setSnackBarInfo({message:`${err.response.data.message}`,severity:'error',open:true}))
+      } else {
+        alert("An unexpected error occurred.");
+        dispatch(setSnackBarInfo({message:`Unexpected Error Occured`,severity:'error',open:true}))
+        
+      }
+    }
+  };
+
+  return (
+    <Container maxWidth="sm">
+      <Box className="container">
+        <Typography variant="h4" className="heading">
+          Verify OTP
+        </Typography>
+        <form onSubmit={handleVerify}>
+          <TextField
+            label="Enter OTP"
+            variant="outlined"
+            fullWidth
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+            margin="normal"
+            required
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            Verify OTP
+          </Button>
+        </form>
+      </Box>
+    </Container>
+  );
+}
+
+export default VerifyOtp;

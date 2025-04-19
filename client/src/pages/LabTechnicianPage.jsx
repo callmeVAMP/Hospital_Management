@@ -1,10 +1,45 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Divider, List, ListItemButton, ListItemText, Paper, Typography } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSnackBarInfo } from '../Features/snackbarSlice';
+import Cookies from "js-cookie";
+import { setAuth } from '../Features/authSlice';
+
 
 const LabTechnicianPage = () => {
-  const navigate = useNavigate();  // Initialize the navigate function
-  const location = useLocation();  // Get the current location/path
+  const auth=useSelector((state)=>state.authKey);
+  const snackBarInfo=useSelector((state)=>state.snackBarKey)
+  const dispatch=useDispatch();
+  const navigate=useNavigate();
+
+
+
+  useEffect(() => {
+    let cookieAuth = Cookies.get("auth");
+
+    if (cookieAuth) {
+      cookieAuth = JSON.parse(cookieAuth);
+      dispatch(setAuth(cookieAuth));
+    }
+    console.log(cookieAuth);
+    
+    
+    if(!cookieAuth || !cookieAuth?.verified ){
+      console.log("not verified");
+      navigate("/login",{replace:true});
+    }
+    else if(cookieAuth?.role!="labTechnician"){
+      dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+      console.log("not authorised");
+      navigate(`/${cookieAuth?.role}`,{replace:true});
+    }
+    
+  }, [navigate]);
+
+
+  const location = useLocation();
+
 
   // Updated handleNavigation to include all sections
   const handleNavigation = (section) => {
