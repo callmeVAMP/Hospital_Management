@@ -83,7 +83,7 @@ import express from 'express';
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import otpRoutes from './auth/otpRouter.js'
+//import otpRoutes from './auth/otpRouter.js'
 
 import patient from './routes/patient.js';
 //import admin from './routes/admin.js'

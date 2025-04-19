@@ -180,7 +180,7 @@ import connection from "../index.js";
 
 dotenv.config();
 
-const router = express.Router();
+//const router = express.Router();
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
