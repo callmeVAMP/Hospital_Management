@@ -253,7 +253,7 @@ export const verifyOtp = async (req, res) => {
   console.log("Received data:", { Email, Password, Role, otp });
 
   if (!Email || !Password || !Role || !otp) {
-    return res.status(400).send("Email, Password, Role, and OTP are required.");
+    return res.status(400).send({message:"Email, Password, Role, and OTP are required.",verified:false});
   }
 
   try {
@@ -263,7 +263,7 @@ export const verifyOtp = async (req, res) => {
     );
 
     if (users.length === 0) {
-      return res.status(404).json({ success: false, message: "User not found. Please recheck your Email, Password, and Role." });
+      return res.status(404).json({ verified: false, message: "User not found. Please recheck your Email, Password, and Role." });
     }
 
     const [otpResults] = await connection.query(
@@ -272,7 +272,7 @@ export const verifyOtp = async (req, res) => {
     );
 
     if (otpResults.length === 0) {
-      return res.status(401).send("Invalid or expired OTP");
+      return res.status(401).send({message:"Invalid or expired OTP",verified:false});
     }
 
     console.log("OTP verified successfully for Email:", Email);
@@ -291,7 +291,7 @@ export const verifyOtp = async (req, res) => {
         [Email]
       );
       if (rows.length === 0) {
-        return res.status(404).json({ success: false, message: "Email not registered." });
+        return res.status(404).json({ verified: false, message: "Email not registered." });
       }
       
       const HID = rows[0].HID;
@@ -301,20 +301,20 @@ export const verifyOtp = async (req, res) => {
       responsePayload.role=Role;
       responsePayload.email = Email;
     }
-    else if (Role === "LabTech") {
+    else if (Role === "LabTechnician") {
       
       responsePayload.HID = HID;
       responsePayload.role=Role;
       const [col] = await connection.query(
-        "select LabID from LabTechnician where HID=?",
+        "select LabRNo from LabTechnician where HID=?",
         [HID]
       );
       if (col.length === 0) {
-        return res.status(404).json({ success: false, message: "Email not registered." });
+        return res.status(404).json({ verified: false, message: "Email not registered." });
       }
       
-      const LID = col[0].LabID;
-      responsePayload.LabID=LID;
+      const LID = col[0].LabRNo;
+      responsePayload.LabRNo=LID;
       responsePayload.email = Email;
     }
     else if (Role === "Receptionist") {
@@ -325,11 +325,11 @@ export const verifyOtp = async (req, res) => {
     }
   }
     console.log(responsePayload);
-    res.status(200).json(responsePayload);
+    res.status(200).json({...responsePayload,verified:true});
     //res.send("OTP verified. Login successful!");
   } catch (error) {
     console.error("Error in /verifyOtp:", error);
-    res.status(500).send("Server error");
+    res.status(500).json({verified:false,message:"Server error"});
   }
 };
 

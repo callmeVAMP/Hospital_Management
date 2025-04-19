@@ -8,9 +8,16 @@ import {
   Box,
   Container,
 } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { setSnackBarInfo } from "../Features/snackbarSlice";
+import { setAuth } from "../Features/authSlice";
+import Cookies from "js-cookie";
 //import "./VerifyOtp.css"; // Assuming you have this for styling
 
 function VerifyOtp() {
+  const dispatch=useDispatch();
+  const auth=useSelector((state)=>state.authKey);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -21,7 +28,7 @@ function VerifyOtp() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:3000/auth/verify-otp", {
+      const response = await axios.post("http://localhost:8000/auth/verify-otp", {
         Email,
         Password,
         Role,
@@ -29,23 +36,35 @@ function VerifyOtp() {
       });
       console.log("responseeee");
       console.log(response);
-      if (response.data.message === "OTP verified. Login successful!") {
-        alert("Login successful!");
-        navigate("/dashboard"); // Redirect to the desired route
+      // if (response.data.message === "OTP verified. Login successful!") {
+      //   alert("Login successful!");
+      //   navigate(`${Role.toLowerCase()}`); // Redirect to the desired route
+      // }
+      if(response?.data?.verified){
+          console.log("success ",response)
+          var expiryTime = new Date(new Date().getTime() + 15 * 60 * 1000);
+          Cookies.remove("auth");
+          const authData = {...response.data};
+          Cookies.set("auth", JSON.stringify(authData), { expires: expiryTime });
+          // Cookies.set("authToken", authToken, { expires: expiryTime });
+  
+          // Also update redux
+          dispatch(setAuth(authData));
+          dispatch(setSnackBarInfo({message:`OTP Verified Successfully`,severity:'success',open:true}))
+          navigate(`/${Role.toLowerCase()}`);
       }
-     } //catch (error) {
-    //   console.error("OTP verification error:", error);
-    //   if (error.response && error.response.status === 401) {
-    //     alert("Invalid or expired OTP");
-    //   } else {
-    //     alert("Server error. Please try again later.");
-    //   }
-    // }
+      else{
+          dispatch(setSnackBarInfo({message:`OTP not verified`,severity:'error',open:true}))
+      }
+     } 
     catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         alert(err.response.data.message); // ← show user-friendly error
+        dispatch(setSnackBarInfo({message:`${err.response.data.message}`,severity:'error',open:true}))
       } else {
         alert("An unexpected error occurred.");
+        dispatch(setSnackBarInfo({message:`Unexpected Error Occured`,severity:'error',open:true}))
+        
       }
     }
   };

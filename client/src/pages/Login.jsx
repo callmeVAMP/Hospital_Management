@@ -13,7 +13,7 @@ import {
   Paper,
 } from "@mui/material";
 
-const roles = ["Admin", "Doctor", "Receptionist","LabTech"];
+const roles = ["Admin", "Doctor", "Receptionist","LabTechnician"];
 const roleColors = {
   Admin: "#48CAE4",         // Blue
   Doctor: "#5ced73",        // Green
