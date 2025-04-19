@@ -85,19 +85,15 @@ router.post('/add', async (req, res) => {
 
 
 //Those patients who have taken appointments from this doctor in past
-router.get('/all/:did', async (req, res) => {
+router.get('/all/did/:val', async (req, res) => {
 
-    const HID=req.params.did;
+    const HID=req.params.val;
     console.log(HID);
-
-
     try {
         const [results, fields] = await connection.query(
-        `
-        SELECT Patient.PID,Patient.PName,Patient.PAddr,Patient.PPhNo,Patient.PGender 
+        `SELECT Patient.PID,Patient.PName,Patient.PAddr,Patient.PPhNo,Patient.PGender 
         FROM Patient INNER JOIN Appointment ON Appointment.PID=Patient.PID
-        WHERE Appointment.HID=${HID};
-        `
+        WHERE Appointment.HID=${HID};`
         );
         
         

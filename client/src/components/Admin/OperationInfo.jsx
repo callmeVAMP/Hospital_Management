@@ -155,12 +155,12 @@ export default function OperationInfo() {
 
   const columns = [
     { field: "treatmentID", headerName: "Operation ID", flex: 1 },
+    { field: "patientName", headerName: "Patient Name", flex: 1 },
+    { field: "patientPhone", headerName: "Patient Phone", flex: 1 },
     { field: "startDate", headerName: "Start Date", flex: 1 },
     { field: "startTime", headerName: "Start Time", flex: 1 },
     { field: "endDate", headerName: "End Date", flex: 1 },
     { field: "endTime", headerName: "End Time", flex: 1 },
-    { field: "patientName", headerName: "Patient Name", flex: 1 },
-    { field: "patientPhone", headerName: "Patient Phone", flex: 1 },
     { field: "opType", headerName: "Operation Type", flex: 1 },
     {
       field: "professionals",

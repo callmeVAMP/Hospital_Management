@@ -212,6 +212,20 @@
 
 
 import React, { useState } from "react";
+// import {
+//   Box,
+//   Typography,
+//   TextField,
+//   IconButton,
+//   Tooltip,
+//   Menu,
+//   MenuItem,
+//   Checkbox,
+//   Tabs,
+//   Tab,
+//   Button,
+// } from "@mui/material";
+
 import {
   Box,
   Typography,
@@ -224,7 +238,13 @@ import {
   Tabs,
   Tab,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from "@mui/material";
+
 import {
   Edit,
   Delete,
@@ -282,6 +302,10 @@ export default function PatientEnquiry() {
   const open = Boolean(anchorEl);
   const apiRef = useGridApiRef();
 
+  const [dischargeDialogOpen, setDischargeDialogOpen] = useState(false);
+  const [selectedPatientId, setSelectedPatientId] = useState(null);
+
+
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     roomNo: true,
     bedId: true,
@@ -289,10 +313,43 @@ export default function PatientEnquiry() {
     mobile: true,
     treatment: true,
   });
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  //const [selectedPatientId, setSelectedPatientId] = useState(null);
+
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
+
+  const handleDischargeClick = (id) => {
+    setSelectedPatientId(id);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmDischarge = () => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === selectedPatientId
+          ? {
+              ...p,
+              status: "Discharged",
+              endDate: new Date().toISOString().split("T")[0],
+            }
+          : p
+      )
+    );
+
+    
+    setConfirmDialogOpen(false);
+    setSelectedPatientId(null);
+  };
+
+  const handleCancelDischarge = () => {
+    setConfirmDialogOpen(false);
+    setSelectedPatientId(null);
+  };
+
+  
   const handleStatusToggle = (id) => {
     setPatients((prev) =>
       prev.map((p) =>
@@ -349,8 +406,9 @@ export default function PatientEnquiry() {
           variant="outlined"
           size="small"
           color={params.row.status === "Current" ? "error" : "success"}
-          onClick={() => handleStatusToggle(params.row.id)}
-          disabled={params.row.status === "Discharged"} // disable for discharged
+          onClick={() =>
+            params.row.status === "Current" && handleDischargeClick(params.row.id)
+          }          disabled={params.row.status === "Discharged"} // disable for discharged
         >
           {params.row.status === "Current" ? "Discharge" : "Discharged"}
         </Button>
@@ -452,6 +510,24 @@ export default function PatientEnquiry() {
           borderBottomRightRadius: 12,
         }}
       />
+       {/* Discharge Confirmation Dialog */}
+       <Dialog
+        open={confirmDialogOpen}
+        onClose={handleCancelDischarge}
+      >
+        <DialogTitle>Confirm Discharge</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to discharge this patient?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDischarge}>No</Button>
+          <Button onClick={handleConfirmDischarge} color="error" variant="contained">
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

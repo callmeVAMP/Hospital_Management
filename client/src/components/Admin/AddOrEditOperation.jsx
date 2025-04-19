@@ -98,7 +98,13 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
   };
 
   const handleSubmit = () => {
-    onSave(formData);
+    if (!formData.operationId || !formData.patientName || !formData.professionals) {
+      alert("Please fill required fields: Operation ID, Patient's Name, Health Professionals' Name");
+      return;
+    }
+    if (onSave) {
+      onSave(form);
+    }
     onClose();
   };
 

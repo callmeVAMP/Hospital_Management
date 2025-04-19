@@ -17,12 +17,18 @@ const AdminPage = () => {
 
   useEffect(() => {
     let cookieAuth = Cookies.get("auth");
+    let authToken = Cookies.get("authToken");
 
     if (cookieAuth) {
       cookieAuth = JSON.parse(cookieAuth);
       dispatch(setAuth(cookieAuth));
     }
     console.log(cookieAuth);
+
+
+    //Axios call to http://localhost:8000/auth/decode-token to get decoded AuthToken and then dispatch in authState
+    const authState={"email":"admin@gmail.com","role":"admin"}
+
     
     
     if(!cookieAuth || !cookieAuth?.verified ){
@@ -35,6 +41,17 @@ const AdminPage = () => {
       navigate(`/${cookieAuth?.role}`,{replace:true});
     }
     console.log("out")
+
+    // if(!authState || !authState?.verified ){
+    //   console.log("not verified");
+    //   navigate("/login",{replace:true});
+    // }
+    // else if(authState?.role!="admin"){
+    //   dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+    //   console.log("not authorised");
+    //   navigate(`/${authState?.role}`,{replace:true});
+    // }
+    // console.log("out")
     
   }, [navigate]);
 
@@ -71,7 +88,6 @@ const AdminPage = () => {
     }
   };
 
-  // A function to check if the section is active based on the current location
   const isActive = (path) => location.pathname.includes(path);
 
   return (
@@ -98,8 +114,10 @@ const AdminPage = () => {
               sx={{ 
                 backgroundColor: isActive('/admin/employees') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
                 '&:hover': {
-                  backgroundColor: isActive('/admin/employees') ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.04)',
-                }
+                  backgroundColor: isActive(`/admin/employees`)
+                    ? 'rgba(0, 0, 0, 0.1)'
+                    : 'rgba(0, 0, 0, 0.04)',
+                },
               }}
             >
               <ListItemText primary="Employees" />
