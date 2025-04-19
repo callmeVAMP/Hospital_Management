@@ -244,14 +244,14 @@ import PreviousTestsTable from './components/LabTechnician/PreviousTests';
 import ScheduledTestsTable from './components/LabTechnician/ScheduledTests';
 
 // const router = createBrowserRouter([
-import RoomBookingForm from './components/Receptionist/RoomBedBooking';
+//import RoomBookingForm from './components/Receptionist/RoomBedBooking';
 import LoginPage from './pages/LoginPage';
 import VerifyOtp from './pages/VerifyOtp'; // ✅ NEW IMPORT
 import AuthComponent from './pages/Login';
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from 'react-router-dom';
+// import {
+//   createBrowserRouter,
+//   RouterProvider,
+// } from 'react-router-dom';
 
 const router = createBrowserRouter([
   {
@@ -316,7 +316,7 @@ function App() {
   return <RouterProvider router={router} />;
 }
 
-// export default App;
+ export default App;
 
 
 
