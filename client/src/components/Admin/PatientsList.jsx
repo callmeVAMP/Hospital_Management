@@ -4,16 +4,16 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Stack,
   Menu,
   MenuItem,
   TextField,
   Checkbox,
+  Snackbar,
+  Alert,
+  Chip,
 } from "@mui/material";
 import {
   DataGrid,
-  GridToolbarContainer,
-  GridToolbarExport,
   useGridApiRef,
 } from "@mui/x-data-grid";
 import {
@@ -25,13 +25,14 @@ import {
   ViewColumn,
   Search as SearchIcon,
 } from "@mui/icons-material";
-import PatientForm from "../admin/PatientForm";
+import PatientForm from "./PatientForm";
+import DeleteDialog from "./DeleteDialog";
 
 const initialPatients = [
   {
     id: "1",
     name: "John Doe",
-    gender: "Male",
+    gender: "male",
     phone: "9876543210",
     email: "john@example.com",
     address: "123 Main St",
@@ -39,7 +40,7 @@ const initialPatients = [
   {
     id: "2",
     name: "Jane Smith",
-    gender: "Female",
+    gender: "female",
     phone: "1234567890",
     email: "jane@example.com",
     address: "456 Maple Ave",
@@ -52,13 +53,18 @@ export default function PatientsList() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState(null);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    id: true,
     name: true,
     gender: true,
     phone: true,
     email: true,
     address: true,
   });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [updateSnackbarOpen, setUpdateSnackbarOpen] = useState(false);
 
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
@@ -69,6 +75,7 @@ export default function PatientsList() {
     setPatients((prev) => {
       const exists = prev.find((p) => p.id === data.id);
       if (exists) {
+        setUpdateSnackbarOpen(true); // <-- Trigger update snackbar
         return prev.map((p) => (p.id === data.id ? data : p));
       }
       return [...prev, data];
@@ -76,17 +83,34 @@ export default function PatientsList() {
     setEditingPatient(null);
   };
 
+  const renderLabel = (value, color, textColor) => (
+    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
+  );
+
+  const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
+
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDelete = (id) => {
-    setPatients((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = () => {
+    setPatients((prev) => prev.filter((p) => p.id !== patientToDelete?.id));
+    setDeleteDialogOpen(false);
+    setSnackbarOpen(true);
   };
 
   const columns = [
+    { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Name", flex: 1 },
-    { field: "gender", headerName: "Gender", flex: 1 },
+    {
+      field: "gender",
+      headerName: "Gender",
+      flex: 1,
+      renderCell: (params) => {
+        const [bg, text] = getGenderColor(params.row.gender);
+        return renderLabel(params.row.gender, bg, text);
+      },
+    },
     { field: "phone", headerName: "Phone", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },
     { field: "address", headerName: "Address", flex: 1 },
@@ -112,7 +136,10 @@ export default function PatientsList() {
           <Tooltip title="Delete">
             <IconButton
               size="small"
-              onClick={() => handleDelete(params.row.id)}
+              onClick={() => {
+                setPatientToDelete(params.row);
+                setDeleteDialogOpen(true);
+              }}
               sx={{ color: "#e53935" }}
             >
               <Delete fontSize="small" />
@@ -121,6 +148,19 @@ export default function PatientsList() {
         </Box>
       ),
     },
+  ];
+
+  const deleteFields = [
+    { field: "id", headerName: "ID", flex: 1 },
+    { key: "name", label: "Name", flex: 1 },
+    {
+      key: "gender",
+      label: "Gender",
+      flex: 1,
+    },
+    { key: "phone", label: "Phone", flex: 1 },
+    { key: "email", label: "Email", flex: 1 },
+    { key: "address", label: "Address", flex: 1 },
   ];
 
   return (
@@ -237,6 +277,52 @@ export default function PatientsList() {
         onSave={handleSave}
         initialData={editingPatient}
       />
+
+      <DeleteDialog
+        open={deleteDialogOpen}
+        data={patientToDelete}
+        fields={deleteFields}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setPatientToDelete(null);
+        }}
+        onConfirm={handleDelete}
+        title="Are you sure you want to delete this patient?"
+      />
+
+      {/* Delete Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Delete successful!
+        </Alert>
+      </Snackbar>
+
+      {/* Update Snackbar */}
+      <Snackbar
+        open={updateSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setUpdateSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setUpdateSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Update successful!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

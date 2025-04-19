@@ -1,11 +1,12 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
-export const DeleteRoomDialog = ({ open, room, onCancel, onConfirm }) => {
+export const DeleteOperationDialog = ({ open, opData, onCancel, onConfirm }) => {
+  console.log("in",opData);
   return (
     <Dialog
       open={open}
       onClose={onCancel}
-      PaperProps={{
+      slotProps={{
         sx: {
           borderRadius: 3,
           padding: 2,
@@ -14,11 +15,13 @@ export const DeleteRoomDialog = ({ open, room, onCancel, onConfirm }) => {
         },
       }}
     >
-      <DialogTitle sx={{ fontSize: "2rem" }}>Are you sure?</DialogTitle>
+      <DialogTitle sx={{ fontSize: "2rem" }}>Are you sure you want to delete?</DialogTitle>
       <DialogContent>
-        <p><strong>Room ID:</strong> {room?.id}</p>
-        <p><strong>Bed Capacity:</strong> {room?.row?.bedCapacity}</p>
-        <p><strong>Room Category:</strong> {room?.row?.roomCategory}</p>
+        <p><strong>Patient Name:</strong> {opData?.patientName}</p>
+        <p><strong>Start Date Time:</strong> {opData?.startDate} {opData?.startTime}</p>
+        <p><strong>End Date Time:</strong> {opData?.endDate} {opData?.endTime}</p>
+        <p><strong>Operation Type:</strong> {opData?.opType}</p>
+        <p><strong>HealthCare Professionals Involved:</strong> {opData?.professionals.join(', ')}</p>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center", gap: 2, pb: 2 }}>
         <Button

@@ -1,0 +1,309 @@
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  IconButton,
+  Tooltip,
+  Menu,
+  MenuItem,
+  TextField,
+  Checkbox,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import {
+  DataGrid,
+  useGridApiRef,
+} from "@mui/x-data-grid";
+import {
+  Edit,
+  Delete,
+  Refresh,
+  Download,
+  Add,
+  ViewColumn,
+  Search as SearchIcon,
+} from "@mui/icons-material";
+import TreatmentForm from "./TreatmentForm";
+import DeleteDialog from "./DeleteDialog";
+
+const initialTreatments = [
+  {
+    id: "1",
+    patientName: "Mike",
+    name: "Chemotherapy",
+    startDate: "2024-04-16",
+    startTime: "01:00 PM",
+    endDate: "2024-04-16",
+    endTime: "03:00 PM",
+    description: "Cancer treatment using drugs",
+    cost: "5000",
+  },
+  {
+    id: "2",
+    patientName: "Donna",
+    startDate: "2024-04-16",
+    startTime: "01:00 PM",
+    endDate: "2024-04-16",
+    endTime: "03:00 PM",
+    name: "Physiotherapy",
+    description: "Physical therapy treatment",
+    cost: "1200",
+  },
+];
+
+export default function TreatmentList() {
+  const [treatments, setTreatments] = useState(initialTreatments);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [openForm, setOpenForm] = useState(false);
+  const [editingTreatment, setEditingTreatment] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [treatmentToDelete, setTreatmentToDelete] = useState(null);
+  const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    id: true,
+    patientName: true,
+    name: true,
+    startDate: true,
+    startTime: true,
+    endDate: true,
+    endTime: true,
+    description: true,
+    cost: true,
+  });
+
+  const apiRef = useGridApiRef();
+  const menuOpen = Boolean(anchorEl);
+
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  const handleSave = (data) => {
+    setTreatments((prev) => {
+      const exists = prev.find((t) => t.id === data.id);
+      if (exists) {
+        setSnackBarInfo({ message: 'Updated treatment successfully', severity: 'success' });
+        setSnackbarOpen(true);
+        return prev.map((t) => (t.id === data.id ? data : t));
+      }
+      setSnackBarInfo({ message: 'Added treatment successfully', severity: 'success' });
+      setSnackbarOpen(true);
+      return [...prev, { ...data, id: (prev.length + 1).toString() }];
+    });
+    setEditingTreatment(null);
+  };
+
+  const filteredTreatments = treatments.filter((t) =>
+    t.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleDelete = () => {
+    setTreatments((prev) =>
+      prev.filter((t) => t.id !== treatmentToDelete?.id)
+    );
+    setSnackBarInfo({ message: 'Deleted treatment successfully', severity: 'error' });
+    setSnackbarOpen(true);
+    setDeleteDialogOpen(false);
+  };
+
+  const columns = [
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "patientName", headerName: "Patient Name", flex: 1 },
+    { field: "startDate", headerName: "Start Date", flex: 1 },
+    { field: "startTime", headerName: "Start Time", flex: 1 },
+    { field: "endDate", headerName: "End Date", flex: 1 },
+    { field: "endTime", headerName: "End Time", flex: 1 },
+    { field: "name", headerName: "Treatment Name", flex: 1 },
+    { field: "description", headerName: "Description", flex: 1 },
+    { field: "cost", headerName: "Cost ($)", flex: 1 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      sortable: false,
+      renderCell: (params) => (
+        <Box display="flex" gap={0.5}>
+          <Tooltip title="Edit">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setEditingTreatment(params.row);
+                setOpenForm(true);
+              }}
+              sx={{ color: "#0288d1" }}
+            >
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setTreatmentToDelete(params.row);
+                setDeleteDialogOpen(true);
+              }}
+              sx={{ color: "#e53935" }}
+            >
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
+
+  const deleteFields = [
+    { key: "id", headerName: "ID" },
+    { key: "patientName", headerName: "Patient Name" },
+    { key: "name", label: "Treatment Name" },
+    { key: "description", label: "Description" },
+    { key: "cost", label: "Cost ($)" },
+  ];
+
+  return (
+    <Box sx={{ height: 600, width: "100%", p: 2 }}>
+      <Box
+        sx={{
+          backgroundColor: "#f0f4ff",
+          p: 2,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="h6">Treatments</Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box
+            sx={{
+              backgroundColor: "white",
+              px: 2,
+              py: 0.5,
+              borderRadius: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <SearchIcon fontSize="small" />
+            <TextField
+              variant="standard"
+              placeholder="Search"
+              InputProps={{ disableUnderline: true }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="small"
+            />
+          </Box>
+          <Tooltip title="Toggle Columns">
+            <IconButton onClick={handleClick}>
+              <ViewColumn />
+            </IconButton>
+          </Tooltip>
+          <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleClose}>
+            {Object.keys(columnVisibilityModel).map((field) => (
+              <MenuItem key={field}>
+                <Checkbox
+                  checked={columnVisibilityModel[field]}
+                  onChange={() =>
+                    setColumnVisibilityModel((prev) => ({
+                      ...prev,
+                      [field]: !prev[field],
+                    }))
+                  }
+                />
+                <Typography>
+                  {columns.find((col) => col.field === field)?.headerName}
+                </Typography>
+              </MenuItem>
+            ))}
+          </Menu>
+          <Tooltip title="Add New Treatment">
+            <IconButton
+              onClick={() => {
+                setEditingTreatment(null);
+                setOpenForm(true);
+              }}
+            >
+              <Add sx={{ color: "green" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Refresh">
+            <IconButton onClick={() => window.location.reload()}>
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download CSV">
+            <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
+              <Download sx={{ color: "#3b82f6" }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+
+      <DataGrid
+        apiRef={apiRef}
+        rows={filteredTreatments}
+        columns={columns}
+        pageSize={10}
+        rowsPerPageOptions={[10, 15]}
+        pagination
+        disableSelectionOnClick
+        columnVisibilityModel={columnVisibilityModel}
+        onColumnVisibilityModelChange={(newModel) =>
+          setColumnVisibilityModel(newModel)
+        }
+        sx={{
+          backgroundColor: "white",
+          borderRadius: 2,
+          mt: 1,
+          "& .MuiDataGrid-columnHeaders": {
+            backgroundColor: "#f3f6f9",
+            fontWeight: "bold",
+          },
+        }}
+      />
+
+      <TreatmentForm
+        open={openForm}
+        onClose={() => {
+          setOpenForm(false);
+          setEditingTreatment(null);
+        }}
+        onSave={handleSave}
+        initialData={editingTreatment}
+      />
+
+      <DeleteDialog
+        open={deleteDialogOpen}
+        title="Are you sure you want to delete this treatment?"
+        data={treatmentToDelete}
+        fields={deleteFields}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setTreatmentToDelete(null);
+        }}
+        onConfirm={handleDelete}
+      />
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarInfo.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarInfo.message}
+        </Alert>
+      </Snackbar>
+    </Box>
+  );
+}

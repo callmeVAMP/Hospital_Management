@@ -26,18 +26,24 @@ import {
   ViewColumn,
   Search as SearchIcon,
 } from "@mui/icons-material";
+import { DeleteOccupancyDialog } from "./DeleteOccupancyDialog";
+import AlertBar from "../Common/AlertBar";
+import BookOrEditRoomOccupancy from "./BookRoomOccupancy";
+import EditRoomOccupancy from "./EditRoomOccupancy";
+import BookRoomOccupancy from "./BookRoomOccupancy";
+import AddPatientDialog from "./AddPatientDialog";
 
 const allotments = [
   {
     id: 1,
     roomNo: "101",
     patientName: "John Doe",
-    roomType: "Delux",
+    roomType: "Deluxe",
     bedNo: 1,
-    admissionDate: "02/25/2018",
+    admissionDate: "2018-04-15",
     gender: "male",
-    mobile: "12345678...",
-    doctor: "Dr. Jane Smith",
+    mobile: "1234567890",
+    doctorAssigned: "Dr. Jane Smith",
     status: "Discharged",
     amount: 15000,
   },
@@ -45,26 +51,103 @@ const allotments = [
     id: 2,
     roomNo: "102",
     patientName: "Alice Johnson",
-    roomType: "Standard",
-    bedNo: 5,
-    admissionDate: "03/01/2018",
+    roomType: "Single",
+    bedNo: 2,
+    admissionDate: "2018-04-15",
     gender: "female",
-    mobile: "23456789...",
-    doctor: "Dr. Mark Taylor",
+    mobile: "2345678990",
+    doctorAssigned: "Dr. Mark Taylor",
     status: "Reserved",
     amount: 8000,
   },
 ];
 
-function CustomToolbar() {
-  return (
-    <GridToolbarContainer>
-      <GridToolbarExport />
-    </GridToolbarContainer>
-  );
-}
+const availableRoomData=[
+  {
+      "RNo": 103,
+      "BedID": 1,
+      "RType": "Triple",
+      "RCategory": "General Care"
+  },
+  {
+      "RNo": 103,
+      "BedID": 2,
+      "RType": "Triple",
+      "RCategory": "General Care"
+  },
+  {
+      "RNo": 103,
+      "BedID": 3,
+      "RType": "Triple",
+      "RCategory": "General Care"
+  },
+  {
+      "RNo": 202,
+      "BedID": 1,
+      "RType": "Suite",
+      "RCategory": "Surgical"
+  },
+  {
+      "RNo": 301,
+      "BedID": 3,
+      "RType": "Ward",
+      "RCategory": "ICU"
+  },
+  {
+      "RNo": 301,
+      "BedID": 4,
+      "RType": "Ward",
+      "RCategory": "ICU"
+  }
+]
 
 export default function RoomOccupancy() {
+  const [openAddOccupancy, setAddOpenOccuoancy] = useState(false);
+  const [openAddPatient, setAddOpenPatient] = useState(false);
+   
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedOccupancy, setSelectedOccupancy] = useState(null);
+  const [editDialogOpen, setEditDilaogOpen]=useState(false);
+
+  const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleEditClick=(occupancyData)=>{
+      console.log("clicked edit ",occupancyData);
+      setSelectedOccupancy(occupancyData);
+      setEditDilaogOpen(true);
+  }
+
+  const handleDeleteClick = (occupancyData) => {
+      console.log("clicked delete",occupancyData);
+      setSelectedOccupancy(occupancyData);
+      setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+      // perform delete using selectedRoom.id or something
+      console.log("Deleting Occupancy:", selectedOccupancy);
+      setDeleteDialogOpen(false);
+      setSnackbarOpen(true);
+      setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
+      
+  };
+
+      
+  const handleSave = (data, type) => {
+      console.log('Occupancy Data:', data);  
+      if(type=="add"){
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Added Occupancy Data Successfully','severity':'success'})
+      }   
+      else{
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Updated Occupancy Data Successfully','severity':'success'})
+      }
+
+      // if patient not registered
+      setAddOpenPatient(true);
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -78,7 +161,7 @@ export default function RoomOccupancy() {
     admissionDate: true,
     gender: true,
     mobile: true,
-    doctor: true,
+    doctorAssigned: true,
     status: true,
     amount: true,
   });
@@ -104,7 +187,7 @@ export default function RoomOccupancy() {
     }
   };
 
-  const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
+  const getGenderColor = (gender) => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
 
   const getRoomTypeColor = (type) => type === "Delux" ? ["#fef9c3", "#92400e"] : ["#dbeafe", "#1e3a8a"];
 
@@ -132,7 +215,7 @@ export default function RoomOccupancy() {
       },
     },
     { field: "mobile", headerName: "Mobile", flex: 1.5 },
-    { field: "doctor", headerName: "Doctor Assigned", flex: 1.5 },
+    { field: "doctorAssigned", headerName: "Doctor Assigned", flex: 1.5 },
     {
       field: "status",
       headerName: "Status",
@@ -148,15 +231,15 @@ export default function RoomOccupancy() {
       headerName: "Actions",
       flex: 0.5,
       sortable: false,
-      renderCell: () => (
+      renderCell: (params) => (
         <Box display="flex" flexDirection="row" gap={0.5}>
           <Tooltip title="Edit">
-            <IconButton size="small" sx={{ color: "#4f46e5" }}>
+            <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={()=>handleEditClick(params.row)}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" sx={{ color: "#f43f5e" }}>
+            <IconButton size="small" sx={{ color: "#f43f5e" }} onClick={()=>handleDeleteClick(params.row)}>
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -206,6 +289,12 @@ export default function RoomOccupancy() {
               <ViewColumn />
             </IconButton>
           </Tooltip>
+           <Tooltip title="Add New Room">
+              <IconButton onClick={()=>setAddOpenOccuoancy(true)}>
+                <Add sx={{ color: "green" }} />
+              </IconButton>
+              
+            </Tooltip>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
             {Object.keys(columnVisibilityModel).map((field) => (
               <MenuItem key={field}>
@@ -256,6 +345,41 @@ export default function RoomOccupancy() {
             fontWeight: "bold",
           },
         }}
+      />
+
+      {/* Book Room */}
+      <BookRoomOccupancy open={openAddOccupancy} onClose={() => setAddOpenOccuoancy(false)} onSave={handleSave} roomsData={availableRoomData}/>
+
+      {/* Patient Register if not present */}
+      <AddPatientDialog
+        open={openAddPatient}
+        onClose={() => setAddOpenPatient(false)}
+        onSave={(data) => {
+          console.log("New patient:", data);
+          setSnackbarOpen(true);
+          setSnackBarInfo({'message':'Added New Patient Successfully','severity':'success'})
+        }}
+      />
+
+
+        {/* Edit Occupancy */}
+      <EditRoomOccupancy open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} occupancyData={selectedOccupancy} />
+
+      {/* Delete Dialog */}
+      <DeleteOccupancyDialog
+          open={deleteDialogOpen}
+          occupancy={selectedOccupancy}
+          onCancel={() => setDeleteDialogOpen(false)}
+          onConfirm={handleDeleteConfirm}
+      />
+
+       {/* Snackbar code */}
+      <AlertBar
+          open={snackbarOpen}
+          onClose={() => setSnackbarOpen(false)}
+          message={snackBarInfo?.message}
+          severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
+          duration={3000}
       />
     </Box>
   );

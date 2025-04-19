@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Button, MenuItem, Grid, InputAdornment,
@@ -24,6 +24,8 @@ const BookorEditRoomForm = ({ open, onClose, onSave, roomData }) => {
     specialInstructions: roomData? roomData?.specialInstructions : ''
   });
 
+  useEffect(()=>setFormData({...roomData}),[roomData]);
+
   const type=roomData? "edit":"add";
   console.log("data ",formData);
 
@@ -33,7 +35,13 @@ const BookorEditRoomForm = ({ open, onClose, onSave, roomData }) => {
   };
 
   const handleSubmit = () => {
-    onSave(formData,type);
+    if (!formData.roomNumber || !formData.roomType || !formData.floor|| !formData.bedCapacity || !formData.roomRate || !formData.roomCategory) {
+      alert("Please fill required fields: Room's Number, Room's Type, Room's Floor, Bed's Capacity, Rate, Category");
+      return;
+    }
+    if (onSave) {
+      onSave(formData);
+    }
     onClose();
   };
 
