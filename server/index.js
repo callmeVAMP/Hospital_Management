@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import otpRoutes from './auth/otpRouter.js'
 
 import patient from './routes/patient.js'
-import admin from './routes/admin.js'
+import admin2 from './routes/admin.js'
 import roomBook from './routes/roomBook.js'
 import appointment from './routes/appointment.js'
 import occupancy from './routes/occupancy.js'
