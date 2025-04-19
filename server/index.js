@@ -82,10 +82,11 @@ import express from 'express';
 //const express = require( 'express');
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
-import cors from 'cors';import otpRoutes from './auth/otpRouter.js'
+import cors from 'cors';
+import otpRoutes from './auth/otpRouter.js'
 
 import patient from './routes/patient.js';
-import admin from './routes/admin.js'
+//import admin from './routes/admin.js'
 import roomBook from './routes/roomBook.js'
 import appointment from './routes/appointment.js';
 import occupancy from './routes/occupancy.js';

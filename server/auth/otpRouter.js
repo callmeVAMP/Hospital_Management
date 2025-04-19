@@ -775,11 +775,10 @@ export const verifyOtp = async (req, res) => {
 // });
 
 // export default router;
-=======
-});
 
-export default router;
->>>>>>> 34b6163eb90ab4cd1c72cf56ca68dde0431dc315
+//});
+
+//export default router;
 
 // import express from "express";
 // import nodemailer from "nodemailer";
