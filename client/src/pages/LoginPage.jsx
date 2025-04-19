@@ -156,13 +156,13 @@ function Login() {
         //HID,
         Email,
         Password,
-        Role: roles[selectedRole],
+        Role: roles[selectedRole].toLowerCase(),
       });
 
       if (response.data === "OTP sent successfully") {
         showSnackbar("OTP sent to your email", "success");
         navigate("/verify-otp", {
-          state: {  Email, Password, Role: roles[selectedRole] },
+          state: {  Email, Password, Role: roles[selectedRole].toLowerCase() },
         });
       }
     } catch (err) {

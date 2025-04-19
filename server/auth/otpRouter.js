@@ -177,6 +177,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import connection from "../index.js";
+import { createToken } from "../utils/auth.js";
 
 dotenv.config();
 
@@ -204,6 +205,8 @@ export const sendOtp = async (req, res) => {
       "SELECT Email FROM users WHERE Email = ? AND Password = ? AND Role = ?",
       [Email, Password, Role]
     );
+
+    console.log(users);
 
     if (users.length === 0) {
       return res.status(404).json({ success: false, message: "User does not exist. Please check your Email, Password, and Role." });
@@ -281,7 +284,7 @@ export const verifyOtp = async (req, res) => {
       message: "OTP verified. Login successful!",
     };
 
-    if (Role === "Admin") {
+    if (Role === "admin") {
       responsePayload.role=Role;
       responsePayload.email = Email;
     }
@@ -295,13 +298,13 @@ export const verifyOtp = async (req, res) => {
       }
       
       const HID = rows[0].HID;
-     if (Role === "Doctor") {
+     if (Role === "doctor") {
       
       responsePayload.HID = HID;
       responsePayload.role=Role;
       responsePayload.email = Email;
     }
-    else if (Role === "LabTechnician") {
+    else if (Role === "labtechnician") {
       
       responsePayload.HID = HID;
       responsePayload.role=Role;
@@ -317,7 +320,7 @@ export const verifyOtp = async (req, res) => {
       responsePayload.LabRNo=LID;
       responsePayload.email = Email;
     }
-    else if (Role === "Receptionist") {
+    else if (Role === "receptionist") {
       
       responsePayload.HID=HID;
       responsePayload.email = Email;
@@ -325,7 +328,8 @@ export const verifyOtp = async (req, res) => {
     }
   }
     console.log(responsePayload);
-    res.status(200).json({...responsePayload,verified:true});
+    const token=createToken({...responsePayload,verified:true})
+    res.status(200).json({verified:true,authToken:token});
     //res.send("OTP verified. Login successful!");
   } catch (error) {
     console.error("Error in /verifyOtp:", error);

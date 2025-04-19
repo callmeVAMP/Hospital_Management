@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import { setAuth } from '../Features/authSlice';
 import AlertBar from '../components/Common/AlertBar';
 import { setSnackBarInfo } from '../Features/snackbarSlice';
+import axios from 'axios'
 
 const AdminPage = () => {
   const auth=useSelector((state)=>state.authKey);
@@ -13,34 +14,62 @@ const AdminPage = () => {
   const dispatch=useDispatch();
   const navigate=useNavigate();
 
+  const fetchToken=async(authToken)=>{
+    if(!authToken) navigate('/login',{replace:true})
+    console.log("fetchtoken and decode")
+    try {
+      const res=await axios.post('http://localhost:8000/auth/decode-token',{authToken:authToken});
+      console.log("decoded token ",res);
+      const authState=res?.data;
+
+      if(!authState || !authState?.verified ){
+        console.log("not verified");
+        navigate("/login",{replace:true});
+      }
+      else if(authState?.role!="admin"){
+        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+        console.log("not authorised");
+        navigate(`/${authState?.role}`,{replace:true});
+      }
+      console.log("out")
+      dispatch(setAuth(authState));
+
+    } catch (error) {
+      console.log(error) 
+    }
+  }
+
 
 
   useEffect(() => {
     let cookieAuth = Cookies.get("auth");
     let authToken = Cookies.get("authToken");
 
-    if (cookieAuth) {
-      cookieAuth = JSON.parse(cookieAuth);
-      dispatch(setAuth(cookieAuth));
-    }
-    console.log(cookieAuth);
+    // if (cookieAuth) {
+    //   cookieAuth = JSON.parse(cookieAuth);
+    //   dispatch(setAuth(cookieAuth));
+    // }
+    // console.log(cookieAuth);
+    console.log(authToken);
 
 
     //Axios call to http://localhost:8000/auth/decode-token to get decoded AuthToken and then dispatch in authState
-    const authState={"email":"admin@gmail.com","role":"admin"}
+    fetchToken(authToken);
+
+    // const authState={"email":"admin@gmail.com","role":"admin"}
 
     
     
-    if(!cookieAuth || !cookieAuth?.verified ){
-      console.log("not verified");
-      navigate("/login",{replace:true});
-    }
-    else if(cookieAuth?.role!="admin"){
-      dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
-      console.log("not authorised");
-      navigate(`/${cookieAuth?.role}`,{replace:true});
-    }
-    console.log("out")
+    // if(!cookieAuth || !cookieAuth?.verified ){
+    //   console.log("not verified");
+    //   navigate("/login",{replace:true});
+    // }
+    // else if(cookieAuth?.role!="admin"){
+    //   dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+    //   console.log("not authorised");
+    //   navigate(`/${cookieAuth?.role}`,{replace:true});
+    // }
+    // console.log("out")
 
     // if(!authState || !authState?.verified ){
     //   console.log("not verified");
