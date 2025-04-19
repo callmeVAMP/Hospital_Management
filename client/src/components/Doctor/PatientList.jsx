@@ -1483,7 +1483,8 @@
 // }
 
 //perfect one so far
-import React, { useState } from 'react';
+
+//import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -1511,6 +1512,8 @@ import {
   InputLabel,
   Select
 } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+
 import {
   Search as SearchIcon,
   Download,
@@ -1585,13 +1588,38 @@ export default function PatientDashboard() {
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    id: true,
-    name: true,
-    gender: true,
-    number: true,
-    address: true,
+    PID: true,
+    PName: true,
+    PGender: true,
+    PPhNo: true,
+    PAddr: true,
     priority: true,
   });
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        //setLoading(true);
+        const response = await fetch('http://localhost:3000/patient/all/'); // Replace with your actual API URL
+        console.log("got the data")
+        console.log(response)
+        if (!response.ok) throw new Error('Failed to fetch patient data');
+        const data = await response.json();
+        console.log(data);
+        setPatients(data);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);}
+      // } finally {
+      //   setLoading(false);
+      // }
+    };
+  
+    fetchPatients();
+  }, []);
+
 
   const openDetails = (patient) => {
     setSelectedPatient(patient);
@@ -1606,18 +1634,28 @@ export default function PatientDashboard() {
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
-
   const handleRefreshTable = () => {
-    // Refresh functionality placeholder
-    console.log('Refreshing table');
+    // Refresh functionality 
+    const fetchPatients = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/patient/all/');
+        const data = await response.json();
+        setPatients(data);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      }
+    };
+
+    fetchPatients();
   };
 
+
   const handleDownload = () => {
-    const headers = ['Patient ID', 'Name', 'Gender', 'Number', 'Address', 'Priority'];
+    const headers = ['Patient ID', 'Name', 'Gender', 'Phone Number', 'Address', 'Priority'];
     const csvRows = [
       headers.join(','),
       ...filteredPatients.map(p =>
-        [p.id, p.name, p.gender, p.number, p.address, p.priority].join(',')
+        [p.PID, p.PName, p.PGender, p.PPhNo, p.PAddr, p.priority || 'Normal'].join(',')
       )
     ];
     const csvContent = `data:text/csv;charset=utf-8,${csvRows.join('\n')}`;
@@ -1630,22 +1668,23 @@ export default function PatientDashboard() {
     document.body.removeChild(link);
   };
 
-  const filteredPatients = patients.filter((p) =>
-    (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.number.includes(searchQuery)) &&
-    (genderFilter ? p.gender === genderFilter : true) &&
-    (priorityFilter ? p.priority === priorityFilter : true)
+  const filteredPatients = (patients || []).filter((p) =>
+    ((p?.PName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p?.PID || '').toString().includes(searchQuery) ||
+      (p?.PPhNo || '').includes(searchQuery)) &&
+    (genderFilter ? p?.PGender === genderFilter : true) &&
+    (priorityFilter ? p?.priority === priorityFilter : true)
   );
+  
 
   const paginatedPatients = filteredPatients.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
 
   const columns = [
-    { field: 'id', headerName: 'PatientID' },
-    { field: 'name', headerName: 'Patient Name' },
-    { field: 'gender', headerName: 'Gender' },
-    { field: 'number', headerName: 'Patient Number' },
-    { field: 'address', headerName: 'Patient Address' },
+    { field: 'PID', headerName: 'PatientID' },
+    { field: 'PName', headerName: 'Patient Name' },
+    { field: 'PGender', headerName: 'Gender' },
+    { field: 'PPhNo', headerName: 'Patient Number' },
+    { field: 'PAddr', headerName: 'Patient Address' },
     { field: 'priority', headerName: 'Priority' },
   ];
 

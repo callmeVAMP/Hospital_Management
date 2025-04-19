@@ -1,3 +1,179 @@
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+// import connection from "../index.js";
+// import { encryptPassword, comparePassword } from "../encryptDecrypt.js";
+
+// dotenv.config();
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// // Send OTP
+// export const sendOtp = async (req, res) => {
+//   console.log("----- Incoming Request to /sendOtp -----");
+//   const { Email, Password, Role } = req.body;
+//   console.log("Received data:", { Email, Password, Role });
+
+//   if (!Email || !Password || !Role) {
+//     return res.status(400).send("Email, Password, and Role are required.");
+//   }
+
+//   try {
+//     const [users] = await connection.query(
+//       "SELECT Email,Password FROM users WHERE Email = ?  AND Role = ?",
+//       [Email, Role]
+//     );
+
+//     if (users.length === 0) {
+//       // Send OTP
+//       return res.status(404).json({ success: false, message: "User does not exist. Please check your Email, Password, and Role." });
+//     }
+
+//     console.log("userrr");
+//     console.log(users);
+//     const isMatch = await comparePassword(Password, users[0].Password);
+//     if (!isMatch) {
+//       return res.status(401).json({ success: false, message: "Incorrect password." });
+//     }
+
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//     const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+//     // const [rows] = await connection.query(
+//     //   "select HID from HealthcareProf where Email=?",
+//     //   [Email]
+//     // );
+//     // if (rows.length === 0) {
+//     //   return res.status(404).json({ success: false, message: "Email not registered." });
+//     // }
+    
+//     // const HID = rows[0].HID;
+//     // console.log("the hid is:");
+//     // console.log(HID);
+
+//     await connection.query(
+//       "REPLACE INTO otp_store (Email, otp_code, expiry_time) VALUES (?,?, ?)",
+//       [Email, otp, expiry]
+//     );
+
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: Email,
+//       subject: "Your OTP for Hospital Login",
+//       text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
+//     };
+
+//     await transporter.sendMail(mailOptions);
+
+//     console.log("OTP sent successfully to", Email);
+//     res.send("OTP sent successfully");
+//   } catch (error) {
+//     console.error("Error in /sendOtp:", error);
+//     res.status(500).send("Server error");
+//   }
+// };
+
+// // Verify OTP
+// export const verifyOtp = async (req, res) => {
+//   console.log("----- Incoming Request to /verifyOtp -----");
+//   const { Email, Password, Role, otp } = req.body;
+//   console.log("Received data:", { Email, Password, Role, otp });
+
+//   if (!Email || !Password || !Role || !otp) {
+//     return res.status(400).send("Email, Password, Role, and OTP are required.");
+//   }
+
+//   try {
+//     const [users] = await connection.query(
+//       "SELECT Email FROM users WHERE Email = ? AND Password = ? AND Role = ?",
+//       [Email, Password, Role]
+//     );
+
+//     if (users.length === 0) {
+//       return res.status(404).json({ success: false, message: "User not found. Please recheck your Email, Password, and Role." });
+//     }
+
+//    const isMatch = await comparePassword(Password, users[0].Password);
+//     if (!isMatch) {
+//       return res.status(401).json({ success: false, message: "Incorrect password." });
+//     }
+
+//     const [otpResults] = await connection.query(
+//       "SELECT * FROM otp_store WHERE Email = ? AND otp_code = ? AND expiry_time > NOW()",
+//       [Email, otp]
+//     );
+
+//     if (otpResults.length === 0) {
+//       return res.status(401).send("Invalid or expired OTP");
+//     }
+
+//     console.log("OTP verified successfully for Email:", Email);
+    
+//     let responsePayload = {
+//       message: "OTP verified. Login successful!",
+//     };
+
+//     if (Role === "Admin") {
+//       responsePayload.role=Role;
+//       responsePayload.email = Email;
+//     }
+//     else{
+//       const [rows] = await connection.query(
+//         "select HID from HealthcareProf where Email=?",
+//         [Email]
+//       );
+//       if (rows.length === 0) {
+//         return res.status(404).json({ success: false, message: "Email not registered." });
+//       }
+      
+//       const HID = rows[0].HID;
+//      if (Role === "Doctor") {
+      
+//       responsePayload.HID = HID;
+//       responsePayload.role=Role;
+//       responsePayload.email = Email;
+//     }
+//     else if (Role === "LabTech") {
+      
+//       responsePayload.HID = HID;
+//       responsePayload.role=Role;
+//       const [col] = await connection.query(
+//         "select LabID from LabTechnician where HID=?",
+//         [HID]
+//       );
+//       if (col.length === 0) {
+//         return res.status(404).json({ success: false, message: "Email not registered." });
+//       }
+      
+//       const LID = col[0].LabID;
+//       responsePayload.LabID=LID;
+//       responsePayload.email = Email;
+//     }
+//     else if (Role === "Receptionist") {
+      
+//       responsePayload.HID=HID;
+//       responsePayload.email = Email;
+//       responsePayload.role=Role;
+//     }
+//   }
+//     console.log(responsePayload);
+//     res.status(200).json(responsePayload);
+//     //res.send("OTP verified. Login successful!");
+//   } catch (error) {
+//     console.error("Error in /verifyOtp:", error);
+//     res.status(500).send("Server error");
+//   }
+// };
+
+
+//running code
+
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import connection from "../index.js";
@@ -16,29 +192,41 @@ const transporter = nodemailer.createTransport({
 // Send OTP
 export const sendOtp = async (req, res) => {
   console.log("----- Incoming Request to /sendOtp -----");
-  const { HID, Email, Password } = req.body;
-  console.log("Received data:", { HID, Email, Password });
+  const { Email, Password, Role } = req.body;
+  console.log("Received data:", { Email, Password, Role });
 
-  if (!HID || !Email || !Password) {
-    return res.status(400).send("HID, Email, and Password are required.");
+  if (!Email || !Password || !Role) {
+    return res.status(400).send("Email, Password, and Role are required.");
   }
 
   try {
     const [users] = await connection.query(
-      "SELECT HID, Email FROM users WHERE HID = ? AND Email = ? AND Password = ?",
-      [HID, Email, Password]
+      "SELECT Email FROM users WHERE Email = ? AND Password = ? AND Role = ?",
+      [Email, Password, Role]
     );
 
     if (users.length === 0) {
-      return res.status(401).send("Invalid HID or password. Try again.");
+      return res.status(404).json({ success: false, message: "User does not exist. Please check your Email, Password, and Role." });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
+    // const [rows] = await connection.query(
+    //   "select HID from HealthcareProf where Email=?",
+    //   [Email]
+    // );
+    // if (rows.length === 0) {
+    //   return res.status(404).json({ success: false, message: "Email not registered." });
+    // }
+    
+    // const HID = rows[0].HID;
+    // console.log("the hid is:");
+    // console.log(HID);
+
     await connection.query(
-      "REPLACE INTO otp_store (HID, otp_code, expiry_time) VALUES (?, ?, ?)",
-      [HID, otp, expiry]
+      "REPLACE INTO otp_store (Email, otp_code, expiry_time) VALUES (?,?, ?)",
+      [Email, otp, expiry]
     );
 
     const mailOptions = {
@@ -61,41 +249,197 @@ export const sendOtp = async (req, res) => {
 // Verify OTP
 export const verifyOtp = async (req, res) => {
   console.log("----- Incoming Request to /verifyOtp -----");
-  const { HID, Password, otp } = req.body;
-  console.log("Received data:", { HID, Password, otp });
+  const { Email, Password, Role, otp } = req.body;
+  console.log("Received data:", { Email, Password, Role, otp });
 
-  if (!HID || !Password || !otp) {
-    return res.status(400).send("HID, Password, and OTP are required.");
+  if (!Email || !Password || !Role || !otp) {
+    return res.status(400).send("Email, Password, Role, and OTP are required.");
   }
 
   try {
     const [users] = await connection.query(
-      "SELECT HID FROM users WHERE HID = ? AND Password = ?",
-      [HID, Password]
+      "SELECT Email FROM users WHERE Email = ? AND Password = ? AND Role = ?",
+      [Email, Password, Role]
     );
 
     if (users.length === 0) {
-      return res.status(401).send("Invalid HID or password. Try again.");
+      return res.status(404).json({ success: false, message: "User not found. Please recheck your Email, Password, and Role." });
     }
 
-    const userId = users[0].HID;
-
     const [otpResults] = await connection.query(
-      "SELECT * FROM otp_store WHERE HID = ? AND otp_code = ? AND expiry_time > NOW()",
-      [userId, otp]
+      "SELECT * FROM otp_store WHERE Email = ? AND otp_code = ? AND expiry_time > NOW()",
+      [Email, otp]
     );
 
     if (otpResults.length === 0) {
       return res.status(401).send("Invalid or expired OTP");
     }
 
-    console.log("OTP verified successfully for HID:", HID);
-    res.send("OTP verified. Login successful!");
+    console.log("OTP verified successfully for Email:", Email);
+    
+    let responsePayload = {
+      message: "OTP verified. Login successful!",
+    };
+
+    if (Role === "Admin") {
+      responsePayload.role=Role;
+      responsePayload.email = Email;
+    }
+    else{
+      const [rows] = await connection.query(
+        "select HID from HealthcareProf where Email=?",
+        [Email]
+      );
+      if (rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Email not registered." });
+      }
+      
+      const HID = rows[0].HID;
+     if (Role === "Doctor") {
+      
+      responsePayload.HID = HID;
+      responsePayload.role=Role;
+      responsePayload.email = Email;
+    }
+    else if (Role === "LabTech") {
+      
+      responsePayload.HID = HID;
+      responsePayload.role=Role;
+      const [col] = await connection.query(
+        "select LabID from LabTechnician where HID=?",
+        [HID]
+      );
+      if (col.length === 0) {
+        return res.status(404).json({ success: false, message: "Email not registered." });
+      }
+      
+      const LID = col[0].LabID;
+      responsePayload.LabID=LID;
+      responsePayload.email = Email;
+    }
+    else if (Role === "Receptionist") {
+      
+      responsePayload.HID=HID;
+      responsePayload.email = Email;
+      responsePayload.role=Role;
+    }
+  }
+    console.log(responsePayload);
+    res.status(200).json(responsePayload);
+    //res.send("OTP verified. Login successful!");
   } catch (error) {
     console.error("Error in /verifyOtp:", error);
     res.status(500).send("Server error");
   }
 };
+
+//working code
+
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+// import connection from "../index.js";
+
+// dotenv.config();
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   secure: true,
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// // Send OTP
+// export const sendOtp = async (req, res) => {
+//   console.log("----- Incoming Request to /sendOtp -----");
+//   const { HID, Email, Password } = req.body;
+//   console.log("Received data:", { HID, Email, Password });
+
+//   if (!HID || !Email || !Password) {
+//     return res.status(400).send("HID, Email, and Password are required.");
+//   }
+
+//   try {
+//     const [users] = await connection.query(
+//       "SELECT HID, Email FROM users WHERE HID = ? AND Email = ? AND Password = ?",
+//       [HID, Email, Password]
+//     );
+
+//     // if (users.length === 0) {
+//     //   console.log("user not found");
+//     //   return res.status(401).send("Invalid HID or password. Try again.");
+//     // }
+//     if (users.length === 0) {
+//       return res.status(404).json({ success: false, message: "User does not exist. Please check your HID, Email, and Password." });
+//     }
+    
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//     const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+//     await connection.query(
+//       "REPLACE INTO otp_store (HID, otp_code, expiry_time) VALUES (?, ?, ?)",
+//       [HID, otp, expiry]
+//     );
+
+//     const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to: Email,
+//       subject: "Your OTP for Hospital Login",
+//       text: `Your OTP is: ${otp}. It will expire in 5 minutes.`,
+//     };
+
+//     await transporter.sendMail(mailOptions);
+
+//     console.log("OTP sent successfully to", Email);
+//     res.send("OTP sent successfully");
+//   } catch (error) {
+//     console.error("Error in /sendOtp:", error);
+//     res.status(500).send("Server error");
+//   }
+// };
+
+// // Verify OTP
+// export const verifyOtp = async (req, res) => {
+//   console.log("----- Incoming Request to /verifyOtp -----");
+//   const { HID, Password, otp } = req.body;
+//   console.log("Received data:", { HID, Password, otp });
+
+//   if (!HID || !Password || !otp) {
+//     return res.status(400).send("HID, Password, and OTP are required.");
+//   }
+
+//   try {
+//     const [users] = await connection.query(
+//       "SELECT HID FROM users WHERE HID = ? AND Password = ?",
+//       [HID, Password]
+//     );
+
+//     // if (users.length === 0) {
+//     //   return res.status(401).send("Invalid HID or password. Try again.");
+//     // }
+//     if (users.length === 0) {
+//       return res.status(404).json({ success: false, message: "User not found. Please recheck your HID and Password." });
+//     }
+    
+//     const userId = users[0].HID;
+
+//     const [otpResults] = await connection.query(
+//       "SELECT * FROM otp_store WHERE HID = ? AND otp_code = ? AND expiry_time > NOW()",
+//       [userId, otp]
+//     );
+
+//     if (otpResults.length === 0) {
+//       return res.status(401).send("Invalid or expired OTP");
+//     }
+
+//     console.log("OTP verified successfully for HID:", HID);
+//     res.send("OTP verified. Login successful!");
+//   } catch (error) {
+//     console.error("Error in /verifyOtp:", error);
+//     res.status(500).send("Server error");
+//   }
+// };
 
 
 // import nodemailer from "nodemailer";
