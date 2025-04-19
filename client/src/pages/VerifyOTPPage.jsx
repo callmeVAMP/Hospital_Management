@@ -35,6 +35,7 @@ function VerifyOtpPage() {
     const otpver={verified:true,message:"OTP Verified Successfully!!"}
 
     const otpNotVer={verified:false,message:"Invalid or Expired OTP"}
+    const authToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsInJvbGUiOiJhZG1pbiJ9.HD0fMVuYOH2YR461idWbSJ6aBUbvo1njROagrwYnEzQ"
 
     const res=otpver;
     console.log(res);
@@ -44,6 +45,7 @@ function VerifyOtpPage() {
         Cookies.remove("auth");
         const authData = {...auth, verified: true};
         Cookies.set("auth", JSON.stringify(authData), { expires: expiryTime });
+        Cookies.set("authToken", authToken, { expires: expiryTime });
 
         // Also update redux
         dispatch(setAuth(authData));
