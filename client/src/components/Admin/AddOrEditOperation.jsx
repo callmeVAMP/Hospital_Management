@@ -4,6 +4,9 @@ import {
   TextField, Button, Grid, Box, Chip, Select, InputLabel, FormControl, OutlinedInput, MenuItem, Typography, IconButton
 } from '@mui/material';
 import { UploadFile } from '@mui/icons-material';
+import { useDispatch } from 'react-redux';
+import { setSnackBarInfo } from '../../Features/snackbarSlice';
+import axios from 'axios';
 
 const operationTypes = [
   'Cardiac Surgery',
@@ -22,9 +25,11 @@ const professionalsList = [
 ];
 
 const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
-  console.log("op data ",operationData)
+  const dispatch=useDispatch()
+
+  // console.log("op data ",operationData)
   const [formData, setFormData] = useState({
-    operationId: operationData?.operationId || '',
+    operationId: operationData?.operationId || null,
     startDate: operationData?.startDate || '',
     startTime: operationData?.startTime || '',
     endDate: operationData?.endDate || '',
@@ -33,13 +38,31 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
     patientPhone: operationData?.patientPhone || '',
     opType: operationData?.opType || '',
     professionals: Array.isArray(operationData?.professionals) ? operationData.professionals : [],
-    report: null
+    reportUrl: null
   });
+
+  const [professionalsList,setProfessionalsList]=useState([]);
+
+  const fetchProfessionals=async()=>{
+    try {
+      const res=await axios.get(`http://localhost:8000/admin/all_employees`)
+      console.log("hprof",res);
+      setProfessionalsList(res?.data);
+
+    } catch (error) {
+      console.log(error)
+      dispatch(setSnackBarInfo({message:`Error loading HealthCare Professionals Data`,severity:'error',open:true}))
+      
+    }
+  }
+  
+
+  // const [report,setReport]=useState(null);
 
   useEffect(() => {
     if (operationData) {
       setFormData({
-        operationId: operationData?.operationId || '',
+        treatmentID: operationData?.treatmentID ,
         startDate: operationData?.startDate || '',
         startTime: operationData?.startTime || '',
         endDate: operationData?.endDate || '',
@@ -48,12 +71,47 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
         patientPhone: operationData?.patientPhone || '',
         opType: operationData?.opType || '',
         professionals: Array.isArray(operationData?.professionals) ? operationData.professionals : [],
-        report: null
+        professionalsHID: Array.isArray(operationData?.professionalsHID) ? operationData.professionalsHID : [],
+        reportUrl: operationData?.reportUrl,
+        reportFile: null,
+        appID:operationData?.appID
       });
     }
+    fetchProfessionals()
   }, [operationData]);
 
-  console.log("formData",formData);
+  // console.log("formData",formData);
+
+  const handleFileUpload = async(file, rowId) => {
+    // setReportFile(file)
+    console.log("rep file ",reportFile, reportFile?.name)
+    console.log("Uploading report for row ID:", rowId);
+    console.log("Selected file:", file);
+    const renamedFile = new File([file], `${rowId}-report.pdf`, { type: file.type });
+
+    const formData = new FormData();
+    formData.append("file", renamedFile);          // The key must match multer's 'upload.single("file")'
+    formData.append("TestID", rowId); 
+
+    try {
+      const res=await axios.post(`http://localhost:8000/report/upload_operation_report`,formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        })
+        console.log(res)
+        if(res?.data?.success) {
+            dispatch(setSnackBarInfo({message:`Uploaded Report Successfully! Updating Tests here`,severity:'success',open:true}))
+            fetchReportPendingTests()
+        }
+        } catch (error) {
+            dispatch(setSnackBarInfo({message:`Some Error Occured`,severity:'error',open:true}))
+        console.log(error)
+        }
+    // You can add actual upload logic here
+  };
+
 
   const type = operationData ? "edit" : "add";
 
@@ -73,8 +131,8 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
     return `${hours.padStart(2, '0')}:${minutes}`;
   }
 
-  const filteredOptions = professionalsList.filter((name) =>
-    name.toLowerCase().includes(search.toLowerCase())
+  const filteredOptions = professionalsList.filter((hprof) =>
+    hprof?.HName?.toLowerCase().includes(search.toLowerCase())
   );
   
 
@@ -84,26 +142,31 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
   };
 
   const handleProfessionalsChange = (event) => {
-    setFormData(prev => ({
+    
+    const selectedNames = event.target.value;
+
+    const selectedHIDs = professionalsList
+      .filter((prof) => selectedNames.includes(prof.HName))
+      .map((prof) => prof.HID);
+  
+    setFormData((prev) => ({
       ...prev,
-      professionals: event.target.value
+      professionals: selectedNames,
+      professionalsHID: selectedHIDs,
     }));
   };
 
   const handleFileChange = (e) => {
     setFormData(prev => ({
       ...prev,
-      report: e.target.files[0]
+      reportFile: e.target.files[0]
     }));
+    console.log(e.target.files[0])
   };
 
   const handleSubmit = () => {
-    if (!formData.operationId || !formData.patientName || !formData.professionals) {
-      alert("Please fill required fields: Operation ID, Patient's Name, Health Professionals' Name");
-      return;
-    }
     if (onSave) {
-      onSave(form);
+      onSave(formData,type);
     }
     onClose();
   };
@@ -117,15 +180,30 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
       <DialogContent dividers>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <Grid container spacing={2}>
-            <Grid size={{ xs: 4}}>
+            {type=="edit" && <Grid size={{ xs: 2}}>
               <TextField
+                type='number'
                 fullWidth
                 label="Operation ID"
-                name="operationId"
-                value={formData.operationId}
+                name="treatmentID"
+                value={formData.treatmentID}
                 disabled={type=="add"?false:true}
+                onChange={handleChange}
+              />
+            </Grid>}
+
+            <Grid size={{ xs: 2}}>
+              <TextField
+                type='number'
+                fullWidth
+                label="Appointment ID"
+                name="appID"
+                value={formData.appID}
+                disabled={type=="add"?false:true}
+                onChange={handleChange}
               />
             </Grid>
+
             <Grid size={{ xs: 4}}>
               <TextField
                 fullWidth
@@ -133,6 +211,10 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
                 name="patientName"
                 value={formData.patientName}
                 disabled={type=="add"?false:true}
+                onChange={handleChange}
+                InputLabelProps={{
+                  shrink: true,  // 👈 forces label to float correctly
+                }}
               />
             </Grid>
             <Grid size={{ xs: 4}}>
@@ -142,6 +224,7 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
                 name="patientPhone"
                 value={formData.patientPhone}
                 disabled={type=="add"?false:true}
+                onChange={handleChange}
               />
             </Grid>
         </Grid>
@@ -204,41 +287,42 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
 
             <Grid size={{ xs: 4}}>
             <FormControl fullWidth>
-                <InputLabel>Healthcare Professionals Involved</InputLabel>
-                <Select
+              <InputLabel>Healthcare Professionals Involved</InputLabel>
+              <Select
                 multiple
                 value={formData.professionals}
                 onChange={handleProfessionalsChange}
                 input={<OutlinedInput label="Healthcare Professionals Involved" />}
                 renderValue={(selected) => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {selected.map((value) => (
-                        <Chip key={value} label={value} />
+                      <Chip key={value} label={value} />
                     ))}
-                    </Box>
+                  </Box>
                 )}
                 MenuProps={{
-                    PaperProps: {
+                  PaperProps: {
                     style: { maxHeight: 300 },
-                    },
+                  },
                 }}
-                >
+              >
                 <MenuItem>
-                    <TextField
+                  <TextField
                     fullWidth
                     placeholder="Search..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     size="small"
                     variant="standard"
-                    />
+                  />
                 </MenuItem>
-                {filteredOptions.map((name) => (
-                    <MenuItem key={name} value={name}>
-                    {name}
-                    </MenuItem>
+
+                {filteredOptions.map((prof) => (
+                  <MenuItem key={prof.HID} value={prof.HName}>
+                    {prof.HName}
+                  </MenuItem>
                 ))}
-                </Select>
+              </Select>
             </FormControl>
             </Grid>
 
@@ -263,7 +347,21 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
 
       <DialogActions>
         <Button onClick={onClose} color="error">Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">Submit</Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary"
+        disabled={
+          !formData.appID ||
+          !formData.patientName ||
+          !formData.patientPhone ||
+          !formData.startDate ||
+          !formData.startTime ||
+          !formData.endDate ||
+          !formData.endTime ||
+          !formData.opType 
+          
+        }
+        
+        
+        >Submit</Button>
       </DialogActions>
     </Dialog>
   );

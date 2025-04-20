@@ -22,6 +22,7 @@ function VerifyOtp() {
   const navigate = useNavigate();
 
   const { Email, Password,Role } = location.state || {};
+  console.log(Email, Password, Role);
   const [otp, setOtp] = useState("");
 
   const handleVerify = async (e) => {
@@ -34,22 +35,19 @@ function VerifyOtp() {
         Role,
         otp,
       });
-      console.log("responseeee");
+      console.log("response");
       console.log(response);
-      // if (response.data.message === "OTP verified. Login successful!") {
-      //   alert("Login successful!");
-      //   navigate(`${Role.toLowerCase()}`); // Redirect to the desired route
-      // }
+      
       if(response?.data?.verified){
           console.log("success ",response)
-          var expiryTime = new Date(new Date().getTime() + 100000 * 60 * 1000);
-          Cookies.remove("auth");
-          const authData = {...response.data};
-          Cookies.set("auth", JSON.stringify(authData), { expires: expiryTime });
-          // Cookies.set("authToken", authToken, { expires: expiryTime });
+          var expiryTime = new Date(new Date().getTime() + 15 * 60 * 1000);
+          // Cookies.remove("auth");
+          // const authData = {...response.data};
+          // Cookies.set("auth", JSON.stringify(authData), { expires: expiryTime });
+          Cookies.set("authToken", response?.data?.authToken, { expires: expiryTime });
   
           // Also update redux
-          dispatch(setAuth(authData));
+          // dispatch(setAuth(authData));
           dispatch(setSnackBarInfo({message:`OTP Verified Successfully`,severity:'success',open:true}))
           navigate(`/${Role.toLowerCase()}`);
       }
@@ -59,10 +57,10 @@ function VerifyOtp() {
      } 
     catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
-        alert(err.response.data.message); // ← show user-friendly error
+        // alert(err.response.data.message); // ← show user-friendly error
         dispatch(setSnackBarInfo({message:`${err.response.data.message}`,severity:'error',open:true}))
       } else {
-        alert("An unexpected error occurred.");
+        // alert("An unexpected error occurred.");
         dispatch(setSnackBarInfo({message:`Unexpected Error Occured`,severity:'error',open:true}))
         
       }

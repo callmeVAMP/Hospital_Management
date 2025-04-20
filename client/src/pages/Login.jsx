@@ -51,7 +51,7 @@ function AuthComponent() {
         HID,
         Email,
         Password,
-        Role: roles[selectedRole],
+        Role: roles[selectedRole].toLowerCase(),
       });
 
       if (response.data === "OTP sent successfully") {
@@ -73,7 +73,7 @@ function AuthComponent() {
         HID,
         Password,
         otp,
-        Role: roles[selectedRole],
+        Role: roles[selectedRole].toLowerCase(),
       });
 
       if (response.data === "OTP verified. Login successful!") {

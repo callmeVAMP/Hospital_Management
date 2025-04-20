@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setSnackBarInfo } from '../Features/snackbarSlice';
 import Cookies from "js-cookie";
 import { setAuth } from '../Features/authSlice';
+import axios from 'axios';
 
 
 const LabTechnicianPage = () => {
@@ -13,27 +14,57 @@ const LabTechnicianPage = () => {
   const dispatch=useDispatch();
   const navigate=useNavigate();
 
+  const fetchToken=async(authToken)=>{
+    if(!authToken) navigate('/login',{replace:true})
+    console.log("fetchtoken and decode")
+    try {
+      const res=await axios.post('http://localhost:8000/auth/decode-token',{authToken:authToken});
+      console.log("decoded token ",res);
+      const authState=res?.data;
+
+      if(!authState || !authState?.verified ){
+        console.log("not verified");
+        navigate("/login",{replace:true});
+      }
+      else if(authState?.role!="labtechnician"){
+        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${authState?.role}`,severity:'error',open:true}))
+        console.log("not authorised");
+        navigate(`/${authState?.role}`,{replace:true});
+      }
+      console.log("out")
+      dispatch(setAuth(authState));
+
+    } catch (error) {
+      console.log(error) 
+    }
+  }
+
+
+
 
 
   useEffect(() => {
-    let cookieAuth = Cookies.get("auth");
+    // let cookieAuth = Cookies.get("auth");
+    let authToken = Cookies.get("authToken");
 
-    if (cookieAuth) {
-      cookieAuth = JSON.parse(cookieAuth);
-      dispatch(setAuth(cookieAuth));
-    }
-    console.log(cookieAuth);
+    // if (cookieAuth) {
+    //   cookieAuth = JSON.parse(cookieAuth);
+    //   dispatch(setAuth(cookieAuth));
+    // }
+    // console.log(cookieAuth);
+    console.log(authToken)
     
     
-    if(!cookieAuth || !cookieAuth?.verified ){
-      console.log("not verified");
-      navigate("/login",{replace:true});
-    }
-    else if(cookieAuth?.role!="labTechnician"){
-      dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
-      console.log("not authorised");
-      navigate(`/${cookieAuth?.role}`,{replace:true});
-    }
+    // if(!cookieAuth || !cookieAuth?.verified ){
+    //   console.log("not verified");
+    //   navigate("/login",{replace:true});
+    // }
+    // else if(cookieAuth?.role!="labtechnician"){
+    //   dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+    //   console.log("not authorised");
+    //   navigate(`/${cookieAuth?.role}`,{replace:true});
+    // }
+    fetchToken(authToken);
     
   }, [navigate]);
 
@@ -45,10 +76,13 @@ const LabTechnicianPage = () => {
   const handleNavigation = (section) => {
     switch (section) {
       case 'previous':
-        navigate('/labTechnician/previous');
+        navigate('/labtechnician/previous');
         break;
       case 'scheduled':
-        navigate('/labTechnician/scheduled');
+        navigate('/labtechnician/scheduled');
+        break;
+      case 'pending-reports':
+        navigate('/labtechnician/pending-reports');
         break;
   
       default:
@@ -74,16 +108,16 @@ const LabTechnicianPage = () => {
           }}
         >
           <Typography variant="h6" align="center" gutterBottom>
-            LabTechnician Panel
+            Labtechnician Panel
           </Typography>
           <Divider />
           <List>
             <ListItemButton 
               onClick={() => handleNavigation('previous')} 
               sx={{ 
-                backgroundColor: isActive('/labTechnician/previous') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                backgroundColor: isActive('/labtechnician/previous') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
                 '&:hover': {
-                  backgroundColor: isActive('/labTechnician/previous') ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: isActive('/labtechnician/previous') ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.04)',
                 }
               }}
             >
@@ -92,13 +126,25 @@ const LabTechnicianPage = () => {
             <ListItemButton 
               onClick={() => handleNavigation('scheduled')} 
               sx={{ 
-                backgroundColor: isActive('/labTechnician/scheduled') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                backgroundColor: isActive('/labtechnician/scheduled') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
                 '&:hover': {
-                  backgroundColor: isActive('/labTechnician/scheduled') ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: isActive('/labtechnician/scheduled') ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.04)',
                 }
               }}
             >
               <ListItemText primary="Scheduled" />
+            </ListItemButton>
+
+            <ListItemButton 
+              onClick={() => handleNavigation('pending-reports')} 
+              sx={{ 
+                backgroundColor: isActive('/labtechnician/pending-reports') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                '&:hover': {
+                  backgroundColor: isActive('/labtechnician/pending-reports') ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.04)',
+                }
+              }}
+            >
+              <ListItemText primary="Pending Reports" />
             </ListItemButton>
            
           </List>
@@ -108,7 +154,7 @@ const LabTechnicianPage = () => {
         <Box sx={{ flexGrow: 1, p: 4 }}>
           <Typography variant="h5" gutterBottom>
             {/* The content can be rendered via the respective routes */}
-            LabTechnician Panel Content
+            Labtechnician Panel Content
             <Outlet />
           </Typography>
           {/* The content will now be rendered based on routing */}
