@@ -86,6 +86,8 @@ import patient from './routes/patient.js';
 import appointment from './routes/appointment.js';
 import occupancy from './routes/occupancy.js';
 import auth from './routes/authRoutes.js';
+
+import doctor from './routes/doctor.js'
 //import otpRouter from "./auth/otpRouter.js"; 
 dotenv.config();
 
@@ -126,6 +128,7 @@ app.use('/patient', patient);
 app.use('/appointment', appointment);
 app.use('/occupancy', occupancy);
 app.use('/auth', auth);
+app.use('/doctor',doctor);
 //app.use('/login',auth)
 app.listen(PORT, () => {
   console.log(`Server Running on PORT ${PORT}`);

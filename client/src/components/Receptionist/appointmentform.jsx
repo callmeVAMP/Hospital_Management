@@ -9,30 +9,71 @@ import {
   Box,
   Divider,
 } from "@mui/material";
-
-const doctors = ["Dr. Smith", "Dr. Johnson", "Dr. Williams"];
-
+import axios from "axios";
+import { Snackbar, Alert } from "@mui/material"; // ✅ import Snackbar and Alert
 // Modified to accept props for integration with parent component
 export default function AppointmentForm({ initialData = {}, onSave, onCancel }) {
   const [formData, setFormData] = useState({
-    patientName: "",
-    phone: "",
-    gender: "",
-    doctor: "",
-    problem: "",
-    priority: "",
+    PName: "",
+    PPhNo: "",
+    PGender: "",
+    HName: "",
+    Problem: "",
+    Priority: "",
   });
+  const [shouldAutoSubmit, setShouldAutoSubmit] = useState(false);
+  const [doctors, setDoctors] = useState([]);
+  const [showSnackbar, setShowSnackbar] = useState(false); // ✅ for showing message
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // optional message
+
+
+  // Fetch doctor list from backend
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/doctor/all") // replace with your actual backend URL
+      .then((res) => {
+        setDoctors(res.data);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch doctors", err);
+      });
+  }, []);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("pendingAppointment");
+    console.log(savedData)
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      
+      setFormData(parsedData);
+      localStorage.removeItem("pendingAppointment");
+  
+      // Try to rebook appointment after slight delay
+      setShouldAutoSubmit(true); 
+  
+
+     
+
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (shouldAutoSubmit) {
+      handleSubmit({ preventDefault: () => {} });
+      setShouldAutoSubmit(false);
+    }
+  }, [formData, shouldAutoSubmit]);
 
   // Load initial data when editing
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setFormData({
-        patientName: initialData.patientName || "",
-        phone: initialData.phone || "",
-        gender: initialData.gender || "",
-        doctor: initialData.doctor || "",
-        problem: initialData.problem || "",
-        priority: initialData.priority || "",
+        PName: initialData.PName || "",
+        PPhNo: initialData.PPhNo || "",
+        PGender: initialData.PGender || "",
+        HName: initialData.HName || "",
+        Problem: initialData.Problem || "",
+        Priority: initialData.Priority || "",
       });
     }
   }, [initialData]);
@@ -41,13 +82,56 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Call parent component's onSave function
-    if (onSave) {
-      onSave(formData);
-    } else {
-      console.log(formData);
+
+    try {
+      const response = await fetch("http://localhost:3000/appointment/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      // if (!response.ok) {
+      //   throw new Error("Failed to add appointment");
+      // }
+
+      if (!response.ok) {
+        const result = await response.json(); // Move this up here
+        console.log(result.error);
+        if (response.status === 404 && result.error === "Patient not found") {
+          // Save current form data to localStorage
+          localStorage.setItem("pendingAppointment", JSON.stringify(formData));
+  
+          // Redirect to patient registration page
+          window.location.href = "/receptionist/PatientRegistrationForm"; // Update this to your actual route
+          return;
+        }
+        throw new Error(result.error || "Failed to add appointment");
+      }
+
+      const result = await response.json();
+      console.log("Appointment added:", result);
+      setSnackbarMessage("Appointment booked successfully!"); // ✅
+      setShowSnackbar(true); // ✅
+      setFormData({
+        PName: initialData.PName || "",
+        PPhNo: initialData.PPhNo || "",
+        PGender: initialData.PGender || "",
+        HName: initialData.HName || "",
+        Problem: initialData.Problem || "",
+        Priority: initialData.Priority || "",
+      });
+
+      if (onSave) {
+        onSave(result);
+      }
+
+    } catch (error) {
+      console.error("Error adding appointment:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
 
@@ -82,8 +166,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
             <Grid item size={6}>
               <TextField
                 label="Patient Name"
-                name="patientName"
-                value={formData.patientName}
+                name="PName"
+                value={formData.PName}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -93,8 +177,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
             <Grid item size={6}>
               <TextField
                 label="Phone Number"
-                name="phone"
-                value={formData.phone}
+                name="PPhNo"
+                value={formData.PPhNo}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -105,8 +189,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
               <TextField
                 select
                 label="Gender"
-                name="gender"
-                value={formData.gender}
+                name="PGender"
+                value={formData.PGender}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -122,8 +206,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
               <TextField
                 select
                 label="Priority"
-                name="priority"
-                value={formData.priority}
+                name="Priority"
+                value={formData.Priority}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -139,8 +223,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
               <TextField
                 select
                 label="Choose Doctor"
-                name="doctor"
-                value={formData.doctor}
+                name="HName"
+                value={formData.HName}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -148,8 +232,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
                 sx={{ '& .MuiInputBase-root': { height: 56 } }}
               >
                 {doctors.map((doc, index) => (
-                  <MenuItem key={index} value={doc}>
-                    {doc}
+                  <MenuItem key={index} value={doc.HName}>
+                    {doc.HName}
                   </MenuItem>
                 ))}
               </TextField>
@@ -159,8 +243,8 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
             <Grid item size={12}>
               <TextField
                 label="Describe the Problem"
-                name="problem"
-                value={formData.problem}
+                name="Problem"
+                value={formData.Problem}
                 onChange={handleChange}
                 fullWidth
                 multiline
@@ -193,13 +277,31 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
                 >
                   Submit Appointment
                 </Button>
+                              <button
+                id="hidden-auto-submit-btn"
+                style={{ display: "none" }}
+                onClick={handleSubmit}
+                >
+                Auto Submit
+                </button>
+
               </Grid>
             </Grid>
           </Grid>
         </Box>
       </Paper>
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setShowSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setShowSnackbar(false)} severity="success" sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
+
   );
 }
-
 

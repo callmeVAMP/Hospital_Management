@@ -11,46 +11,64 @@ import {
   Alert,
   Collapse,
 } from "@mui/material";
-
+import axios from "axios"; // Import axios
 export default function PatientRegistrationForm() {
   const [formData, setFormData] = useState({
-    Name: "",
+    PName: "",
     //lastName: "",
-    gender: "",
-    mobile: "",
-    address: "",
-    dob: "",
+    PGender: "",
+    PPhNo: "",
+    PAddr: "",
+    DOB: "",
   });
 
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Do something with formData (e.g. API call)
-    console.log("Patient Registered:", formData);
+    try {
+      console.log(formData);
+      // Send the form data to your backend API using Axios
+      const response = await axios.post("http://localhost:3000/patient/add", formData);
+      console.log("output dataa");
+      console.log(response.status);
+      if (response.status === 200) {
+        // Show success alert if the patient was registered successfully
+        setSuccess(true);
+        setError(false);
+        // After successful patient registration
+            const pendingData = localStorage.getItem("pendingAppointment");
 
-    // Show success alert
-    setSuccess(true);
+            if (pendingData) {
+            // Redirect back to appointment form
+            window.location.href = "/receptionist/AppointmentForm"; // Update to your actual route
+            }
 
-    // Reset form
-    setFormData({
-      Name: "",
-      // lastName: "",
-      gender: "",
-      mobile: "",
-      address: "",
-      dob: "",
-    });
+        // Reset the form after submission
+        setFormData({
+          PName: "",
+          //lastName: "",
+          PGender: "",
+          PPhNo: "",
+          PAddr: "",
+          DOB: "",
+        });
 
-    // Auto-hide success message after 3 seconds
-    setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
+        // Auto-hide success message after 3 seconds
+        setTimeout(() => {
+          setSuccess(false);
+        }, 3000);
+      }
+    } catch (error) {
+      // Show error alert if there was an issue with the API request
+      setError(true);
+      console.error("Error registering patient:", error);
+    }
   };
 
   return (
@@ -86,13 +104,19 @@ export default function PatientRegistrationForm() {
           </Alert>
         </Collapse>
 
+        <Collapse in={error}>
+          <Alert severity="error" sx={{ mb: 3 }}>
+            Error registering patient! Please try again.
+          </Alert>
+        </Collapse>
+
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid item size={6}>
               <TextField
                 label="First Name"
-                name="Name"
-                value={formData.Name}
+                name="PName"
+                value={formData.PName}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -114,8 +138,8 @@ export default function PatientRegistrationForm() {
               <TextField
                 select
                 label="Gender"
-                name="gender"
-                value={formData.gender}
+                name="PGender"
+                value={formData.PGender}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -129,8 +153,8 @@ export default function PatientRegistrationForm() {
             <Grid item size={6}>
               <TextField
                 label="Mobile Number"
-                name="mobile"
-                value={formData.mobile}
+                name="PPhNo"
+                value={formData.PPhNo}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -140,8 +164,8 @@ export default function PatientRegistrationForm() {
             <Grid item size={12}>
               <TextField
                 label="Address"
-                name="address"
-                value={formData.address}
+                name="PAddr"
+                value={formData.PAddr}
                 onChange={handleChange}
                 fullWidth
                 multiline
@@ -153,9 +177,9 @@ export default function PatientRegistrationForm() {
             <Grid item size={5}>
               <TextField
                 label="Date of Birth"
-                name="dob"
+                name="DOB"
                 type="date"
-                value={formData.dob}
+                value={formData.DOB}
                 onChange={handleChange}
                 fullWidth
                 required

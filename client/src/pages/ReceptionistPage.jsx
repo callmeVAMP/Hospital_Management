@@ -29,7 +29,7 @@ const ReceptionistPage = () => {
       console.log("not verified");
       navigate("/login",{replace:true});
     }
-    else if(cookieAuth?.role!="receptionist"){
+    else if(cookieAuth?.role!="Receptionist"){
       dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
       console.log("not authorised");
       navigate(`/${cookieAuth?.role}`,{replace:true});

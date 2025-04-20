@@ -28,7 +28,7 @@ function VerifyOtp() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8000/auth/verify-otp", {
+      const response = await axios.post("http://localhost:3000/auth/verify-otp", {
         Email,
         Password,
         Role,
@@ -42,7 +42,7 @@ function VerifyOtp() {
       // }
       if(response?.data?.verified){
           console.log("success ",response)
-          var expiryTime = new Date(new Date().getTime() + 15 * 60 * 1000);
+          var expiryTime = new Date(new Date().getTime() + 100000 * 60 * 1000);
           Cookies.remove("auth");
           const authData = {...response.data};
           Cookies.set("auth", JSON.stringify(authData), { expires: expiryTime });

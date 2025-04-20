@@ -128,7 +128,7 @@ const DoctorPage = () => {
   );
 };
 
-// export default DoctorPage;
+ export default DoctorPage;
 
 
 

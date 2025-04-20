@@ -42,7 +42,7 @@ const BookRoomOccupancy = ({ open, onClose, onSave, occupancyData, roomsData }) 
       });
     }
   }, [occupancyData]);
-
+  
   useEffect(() => {
     if (formData.roomType) {
       const roomsWithBeds = roomsData.filter(
