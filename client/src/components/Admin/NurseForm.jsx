@@ -3,10 +3,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  TextField,
   DialogActions,
   Button,
-  MenuItem,
+  TextField,
+  MenuItem
 } from "@mui/material";
 
 export default function NurseForm({ open, onClose, initialData, onSave }) {
@@ -16,11 +16,19 @@ export default function NurseForm({ open, onClose, initialData, onSave }) {
     address: "",
     phone: "",
     gender: "",
+    email: "", // Optional, if you want to support email
   });
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        id: initialData.id || "",
+        name: initialData.name || "",
+        address: initialData.address || "",
+        phone: initialData.phone || "",
+        gender: initialData.gender || "",
+        email: initialData.email || "",
+      });
     } else {
       setFormData({
         id: "",
@@ -28,6 +36,7 @@ export default function NurseForm({ open, onClose, initialData, onSave }) {
         address: "",
         phone: "",
         gender: "",
+        email: "",
       });
     }
   }, [initialData]);
@@ -59,6 +68,7 @@ export default function NurseForm({ open, onClose, initialData, onSave }) {
           fullWidth
           value={formData.id}
           onChange={handleChange}
+          disabled={!!initialData}
         />
         <TextField
           margin="dense"
@@ -95,6 +105,14 @@ export default function NurseForm({ open, onClose, initialData, onSave }) {
           name="phone"
           fullWidth
           value={formData.phone}
+          onChange={handleChange}
+        />
+        <TextField
+          margin="dense"
+          label="Email"
+          name="email"
+          fullWidth
+          value={formData.email}
           onChange={handleChange}
         />
       </DialogContent>

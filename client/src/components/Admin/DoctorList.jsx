@@ -1,64 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
-  Box,
-  Typography,
-  IconButton,
-  Tooltip,
-  TextField,
-  Menu,
-  MenuItem,
-  Checkbox,
-  Snackbar,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Chip,
+  Box, Typography, IconButton, Tooltip, TextField, Menu, MenuItem, Checkbox,
+  Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, List, ListItem, ListItemText, Divider, Chip
 } from "@mui/material";
+import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import {
-  DataGrid,
-  useGridApiRef,
-} from "@mui/x-data-grid";
-import {
-  Edit,
-  Delete,
-  Refresh,
-  Download,
-  Add,
-  ViewColumn,
-  Search as SearchIcon,
-  History,
+  Edit, Delete, Refresh, Download, Add, ViewColumn, Search as SearchIcon, History
 } from "@mui/icons-material";
 import DoctorForm from "./DoctorForm";
-import DeleteDialog from "./DeleteDialog"; // adjust path if needed
-
-const initialDoctors = [
-  {
-    id: "1",
-    name: "Dr. Alice",
-    gender: "male",
-    department: "Cardiology",
-    specialization: "Heart Specialist",
-    degree: "MD",
-    mobile: "9876543210",
-    email: "alice@example.com",
-    joiningDate: "2022-01-10",
-    experience: 10,
-    consultationFee: 1000,
-    rating: 4.5,
-    availability: "Morning",
-    clinicLocation: "Clinic A",
-  },
-];
+import DeleteDialog from "./DeleteDialog";
 
 export default function DoctorsTable() {
-  const [doctors, setDoctors] = useState(initialDoctors);
+  const [doctors, setDoctors] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
@@ -69,24 +24,13 @@ export default function DoctorsTable() {
   const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    id: true,
-    name: true,
-    gender: true,
-    department: true,
-    specialization: true,
-    degree: true,
-    mobile: true,
-    email: true,
-    experience: true,
-    joiningDate: true,
-    consultationFee: true,
-    availability: true,
-    clinicLocation: true,
+    id: true, name: true, gender: true, department: true, specialization: true,
+    degree: true, mobile: true, email: true, experience: true, joiningDate: true,
+    consultationFee: true, availability: true, clinicLocation: true,
   });
 
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-
   const doctorHistory = [
     { date: "2023-02-12", procedure: "Angioplasty", patient: "John Doe" },
     { date: "2023-04-05", procedure: "Bypass Surgery", patient: "Mary Smith" },
@@ -95,41 +39,138 @@ export default function DoctorsTable() {
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
 
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
-
-  //const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
-  const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
-
-  const renderLabel = (value, color, textColor) => (
-    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
-  );
-
-  const handleSave = (data) => {
-    setDoctors((prev) => {
-      const exists = prev.find((d) => d.id === data.id);
-      if (exists) {
-        setSnackBarInfo({ message: 'Updated Doctor Information Successfully', severity: 'success' });
-        setSnackbarOpen(true);
-        return prev.map((d) => (d.id === data.id ? data : d));
+  // Fetch doctors from API
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      console.log("fetching");
+      try {
+        const response = await axios.get("http://localhost:8000/admin/doctor_profiles");
+        setDoctors(response.data);
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
       }
-      setSnackBarInfo({ message: 'Added Doctor Information Successfully', severity: 'success' });
-      setSnackbarOpen(true);
-      return [...prev, { ...data, id: Date.now().toString() }];
-    });
+    };
+    fetchDoctors();
+  }, []);
+
+  const addDoctor = async (formData) => {
+    try {
+      // Transform frontend field names to backend expected names
+      const backendData = {
+        HID: formData.id,
+        HName: formData.name,
+        HAddr: formData.address || "-",
+        HPhNo: formData.mobile || "-",
+        HGender: formData.gender,
+        Specialisation: formData.specialization,
+        CabinNo: formData.clinicLocation || "-"
+      };
+      
+      console.log("Sending to backend:", backendData);
+      
+      const response = await axios.post("http://localhost:8000/admin/add_doctor", backendData);
+      
+      if (response.data.success) {
+        // Add to local state with frontend field names
+        const newDoctor = {
+          id: backendData.HID,
+          name: backendData.HName,
+          gender: backendData.HGender,
+          department: formData.department || "-",
+          specialization: backendData.Specialisation,
+          degree: formData.degree || "-",
+          mobile: backendData.HPhNo,
+          email: formData.email || "-",
+          joiningDate: formData.joiningDate || "-",
+          experience: "-",
+          address: backendData.HAddr,
+          consultationFee: formData.consultationFee || "-",
+          availability: formData.availability || "-",
+          clinicLocation: backendData.CabinNo
+        };
+        
+        setDoctors(prev => [...prev, newDoctor]);
+        setSnackBarInfo({ message: 'Doctor added successfully!', severity: 'success' });
+      } else {
+        throw new Error("Backend reported failure");
+      }
+    } catch (error) {
+      console.error("Add doctor error:", error);
+      setSnackBarInfo({ message: `Failed: ${error.response?.data || error.message}`, severity: 'error' });
+    }
+    setSnackbarOpen(true);
+  };
+  
+  const updateDoctor = async (doctorData) => {
+    try {
+      // Transform to match backend field expectations
+      const backendData = {
+        HName: doctorData.name,
+        HAddr: doctorData.address || "-",
+        HPhNo: doctorData.mobile || "-",
+        HGender: doctorData.gender,
+        Specialisation: doctorData.specialization,
+        CabinNo: doctorData.clinicLocation || "-"
+      };
+      
+      const response = await axios.put(`http://localhost:8000/admin/update_doctor/${doctorData.id}`, backendData);
+      
+      if (response.data.success) {
+        setDoctors(prev => prev.map(doc => doc.id === doctorData.id ? doctorData : doc));
+        setSnackBarInfo({ message: 'Doctor updated successfully!', severity: 'success' });
+      } else {
+        throw new Error("Update failed");
+      }
+    } catch (error) {
+      console.error("Update doctor error:", error.response?.data || error.message);
+      setSnackBarInfo({ message: 'Failed to update doctor', severity: 'error' });
+    }
+    setSnackbarOpen(true);
+  };
+  
+  const deleteDoctor = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:8000/admin/delete_doctor/${id}`);
+      
+      if (response.data.success) {
+        setDoctors(prev => prev.filter(d => d.id !== id));
+        setSnackBarInfo({ message: 'Doctor deleted successfully!', severity: 'success' });
+      } else {
+        throw new Error("Delete failed");
+      }
+    } catch (error) {
+      console.error("Delete doctor error:", error.response?.data || error.message);
+      setSnackBarInfo({ message: 'Failed to delete doctor', severity: 'error' });
+    }
+    setSnackbarOpen(true);
+  };
+
+  const handleSave = async (data) => {
+    console.log("Form data received:", data);
+    
+    if (data.id && editingDoctor) {
+      await updateDoctor(data);
+    } else {
+      await addDoctor(data);
+    }
     setEditingDoctor(null);
+    setOpenForm(false);
+  };
+
+  const confirmDeleteDoctor = async () => {
+    await deleteDoctor(doctorToDelete?.id);
+    setDeleteDialogOpen(false);
+    setDoctorToDelete(null);
   };
 
   const filteredDoctors = doctors.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+    d.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const confirmDeleteDoctor = () => {
-    setDoctors((prev) => prev.filter((d) => d.id !== doctorToDelete?.id));
-    setDeleteDialogOpen(false);
-    setDoctorToDelete(null);
-    setShowSnackbar(true);
-  };
+  const getGenderColor = gender => gender === "Male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
+  const renderLabel = (value, color, textColor) => (
+    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
+  );
 
   const fieldsToDisplay = [
     { key: "name", label: "Name" },
@@ -243,11 +284,11 @@ export default function DoctorsTable() {
             />
           </Box>
           <Tooltip title="Toggle Columns">
-            <IconButton onClick={handleClick}>
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
               <ViewColumn />
             </IconButton>
           </Tooltip>
-          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+          <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
             {Object.keys(columnVisibilityModel).map((field) => (
               <MenuItem key={field}>
                 <Checkbox
@@ -276,7 +317,7 @@ export default function DoctorsTable() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Refresh">
-            <IconButton onClick={() => console.log("Refreshed")}>
+            <IconButton onClick={() => window.location.reload()}>
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -333,19 +374,7 @@ export default function DoctorsTable() {
         onConfirm={confirmDeleteDoctor}
       />
 
-      {/* Snackbar for DELETE */}
-      <Snackbar
-        open={showSnackbar}
-        autoHideDuration={3000}
-        onClose={() => setShowSnackbar(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert onClose={() => setShowSnackbar(false)} severity="error" variant="filled">
-          Delete successful!
-        </Alert>
-      </Snackbar>
-
-      {/* Snackbar for ADD / UPDATE */}
+      {/* Snackbar for ADD / UPDATE / DELETE */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

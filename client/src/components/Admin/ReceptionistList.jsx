@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -27,34 +27,17 @@ import {
 } from "@mui/icons-material";
 import ReceptionistForm from "./ReceptionistForm";
 import DeleteDialog from "./DeleteDialog";
-
-const initialReceptionists = [
-  {
-    id: "1",
-    name: "Emily Clark",
-    gender: "female",
-    phone: "9876543210",
-    email: "emily@example.com",
-    address: "123 Reception Rd",
-  },
-  {
-    id: "2",
-    name: "Michael Lee",
-    gender: "male",
-    phone: "1234567890",
-    email: "michael@example.com",
-    address: "456 Office St",
-  },
-];
+import axios from "axios";
 
 export default function ReceptionistsList() {
-  const [receptionists, setReceptionists] = useState(initialReceptionists);
+  const [receptionists, setReceptionists] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [editingReceptionist, setEditingReceptionist] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [receptionistToDelete, setReceptionistToDelete] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarInfo, setSnackbarInfo] = useState({ message: "", severity: "success" });
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     id: true,
     name: true,
@@ -63,32 +46,92 @@ export default function ReceptionistsList() {
     email: true,
     address: true,
   });
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [updateSnackbarOpen, setUpdateSnackbarOpen] = useState(false);
-  const [addSnackbarOpen, setAddSnackbarOpen] = useState(false); // <-- New
 
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const handleSave = (data) => {
-    setReceptionists((prev) => {
-      const exists = prev.find((r) => r.id === data.id);
-      if (exists) {
-        setUpdateSnackbarOpen(true);
-        return prev.map((r) => (r.id === data.id ? data : r));
+  // --- Fetch receptionists from backend ---
+  useEffect(() => {
+    axios.get("http://localhost:8000/admin/all_receptionists")
+      .then(res => {
+        setReceptionists(res.data.map(r => ({
+          id: r.ReceptionistID,
+          name: r.Name,
+          address: r.Address,
+          phone: r.PhoneNo,
+          gender: r.Gender,
+          email: r.Email || "",
+        })));
+      })
+      .catch(() => {
+        setSnackbarInfo({ message: "Failed to fetch receptionists", severity: "error" });
+        setSnackbarOpen(true);
+      });
+  }, []);
+
+  // --- Add or Update Receptionist ---
+  const handleSave = async (data) => {
+    const backendData = {
+      HID: data.id,
+      HName: data.name,
+      HAddr: data.address || "-",
+      HPhNo: data.phone || "-",
+      HGender: data.gender,
+      Email: data.email || "-",
+    };
+
+    try {
+      if (editingReceptionist) {
+        // Update existing receptionist
+        await axios.put(`http://localhost:8000/admin/update_receptionist/${data.id}`, backendData);
+        setReceptionists(prev => prev.map(r => r.id === data.id ? { ...data } : r));
+        setSnackbarInfo({ message: "Receptionist updated successfully", severity: "success" });
+      } else {
+        // Add new receptionist
+        const response = await axios.post("http://localhost:8000/admin/add_receptionist", backendData);
+        if (response.data.success) {
+          const newRecep = {
+            id: backendData.HID,
+            name: backendData.HName,
+            gender: backendData.HGender,
+            phone: backendData.HPhNo,
+            email: backendData.Email,
+            address: backendData.HAddr,
+          };
+          setReceptionists(prev => [...prev, newRecep]);
+          setSnackbarInfo({ message: "Receptionist added successfully", severity: "success" });
+        } else {
+          throw new Error("Backend reported failure");
+        }
       }
-      setAddSnackbarOpen(true);
-      return [...prev, data];
-    });
+    } catch (error) {
+      setSnackbarInfo({ message: `Failed: ${error.response?.data || error.message}`, severity: "error" });
+    }
+    setSnackbarOpen(true);
     setEditingReceptionist(null);
+    setOpenForm(false);
+  };
+
+  // --- Delete Receptionist ---
+  const handleDelete = async () => {
+    if (deleteTarget) {
+      try {
+        await axios.delete(`http://localhost:8000/admin/delete_receptionist/${deleteTarget.id}`);
+        setReceptionists(prev => prev.filter(r => r.id !== deleteTarget.id));
+        setSnackbarInfo({ message: "Receptionist deleted successfully", severity: "success" });
+      } catch (err) {
+        setSnackbarInfo({ message: "Failed to delete receptionist", severity: "error" });
+      }
+      setSnackbarOpen(true);
+      setDeleteTarget(null);
+    }
   };
 
   const renderLabel = (value, color, textColor) => (
     <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
   );
-
   const getGenderColor = (gender) =>
     gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
 
@@ -96,14 +139,8 @@ export default function ReceptionistsList() {
     r.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDelete = () => {
-    setReceptionists((prev) => prev.filter((r) => r.id !== receptionistToDelete?.id));
-    setDeleteDialogOpen(false);
-    setSnackbarOpen(true);
-  };
-
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "id", headerName: "ID", flex: 1 },
     { field: "name", headerName: "Name", flex: 1 },
     {
       field: "gender",
@@ -120,7 +157,7 @@ export default function ReceptionistsList() {
     {
       field: "actions",
       headerName: "Actions",
-      flex: 0.5,
+      flex: 1,
       sortable: false,
       renderCell: (params) => (
         <Box display="flex" gap={0.5}>
@@ -139,10 +176,7 @@ export default function ReceptionistsList() {
           <Tooltip title="Delete">
             <IconButton
               size="small"
-              onClick={() => {
-                setReceptionistToDelete(params.row);
-                setDeleteDialogOpen(true);
-              }}
+              onClick={() => setDeleteTarget(params.row)}
               sx={{ color: "#e53935" }}
             >
               <Delete fontSize="small" />
@@ -154,12 +188,10 @@ export default function ReceptionistsList() {
   ];
 
   const deleteFields = [
-    { field: "id", headerName: "ID", flex: 1 },
-    { key: "name", label: "Name", flex: 1 },
-    { key: "gender", label: "Gender", flex: 1 },
-    { key: "phone", label: "Phone", flex: 1 },
-    { key: "email", label: "Email", flex: 1 },
-    { key: "address", label: "Address", flex: 1 },
+    { key: "name", label: "Name" },
+    { key: "phone", label: "Phone" },
+    { key: "email", label: "Email" },
+    { key: "address", label: "Address" },
   ];
 
   return (
@@ -233,7 +265,7 @@ export default function ReceptionistsList() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Refresh">
-            <IconButton onClick={() => console.log("Refreshed")}>
+            <IconButton onClick={() => window.location.reload()}>
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -276,23 +308,20 @@ export default function ReceptionistsList() {
           setOpenForm(false);
           setEditingReceptionist(null);
         }}
-        onSave={handleSave}
+        onSuccess={handleSave}
         initialData={editingReceptionist}
       />
 
       <DeleteDialog
-        open={deleteDialogOpen}
-        data={receptionistToDelete}
+        open={!!deleteTarget}
+        title="Are you sure you want to delete?"
+        data={deleteTarget}
         fields={deleteFields}
-        onCancel={() => {
-          setDeleteDialogOpen(false);
-          setReceptionistToDelete(null);
-        }}
+        onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
-        title="Are you sure you want to delete this receptionist?"
       />
 
-      {/* Snackbars */}
+      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -301,45 +330,13 @@ export default function ReceptionistsList() {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity="error"
+          severity={snackbarInfo.severity}
           variant="filled"
-          sx={{ width: "100%" }}
         >
-          Delete successful!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={updateSnackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setUpdateSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setUpdateSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Update successful!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={addSnackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setAddSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setAddSnackbarOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Added successfully!
+          {snackbarInfo.message}
         </Alert>
       </Snackbar>
     </Box>
   );
 }
+

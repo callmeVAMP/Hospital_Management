@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -29,32 +29,16 @@ import {
 import NurseForm from "./NurseForm";
 import DeleteDialog from "./DeleteDialog";
 import NurseHistoryDialog from "./NurseHistory";
-
-const initialNurses = [
-  {
-    id: "1",
-    name: "Nurse Jane Doe",
-    address: "123 Main Street",
-    phone: "9876543210",
-    gender: "female",
-  },
-  {
-    id: "2",
-    name: "Nurse John Smith",
-    address: "456 Elm Street",
-    phone: "9123456789",
-    gender: "male",
-  },
-];
+import axios from "axios";
 
 export default function NurseList() {
-  const [nurses, setNurses] = useState(initialNurses);
+  const [nurses, setNurses] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [editingNurse, setEditingNurse] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [viewingNurse, setViewingNurse] = useState(null); // 👈 For modal
+  const [viewingNurse, setViewingNurse] = useState(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
@@ -65,6 +49,7 @@ export default function NurseList() {
     gender: true,
     phone: true,
     address: true,
+    email: true
   });
 
   const apiRef = useGridApiRef();
@@ -72,47 +57,99 @@ export default function NurseList() {
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const handleSave = (data) => {
-    setNurses((prev) => {
-      const exists = prev.find((n) => n.id === data.id);
-      if (exists) {
-        setSnackBarInfo({ message: 'Updated Nurse Information Successfully', severity: 'success' });
+  // --- Fetch nurses from backend ---
+  useEffect(() => {
+    axios.get("http://localhost:8000/admin/all_nurses")
+      .then(res => {
+        setNurses(res.data.map(n => ({
+          id: n.NurseID,
+          name: n.NurseName,
+          address: n.Address,
+          phone: n.PhoneNo,
+          gender: n.Gender,
+          email: n.Email || "",
+        })));
+      })
+      .catch(err => {
+        setSnackBarInfo({ message: 'Failed to fetch nurses', severity: 'error' });
         setSnackbarOpen(true);
-        return prev.map((n) => (n.id === data.id ? data : n));
+      });
+  }, []);
+
+  // --- Add or Update Nurse ---
+  const handleSave = async (data) => {
+    const backendData = {
+      HID: data.id,
+      HName: data.name,
+      HAddr: data.address || "-",
+      HPhNo: data.phone || "-",
+      HGender: data.gender,
+      Email: data.email || "-",
+    };
+
+    try {
+      if (editingNurse) {
+        // Update existing nurse
+        await axios.put(`http://localhost:8000/admin/update_nurse/${data.id}`, backendData);
+        setNurses(prev => prev.map(n => n.id === data.id ? { ...data } : n));
+        setSnackBarInfo({ message: 'Updated Nurse Information Successfully', severity: 'success' });
+      } else {
+        // Add new nurse
+        const response = await axios.post("http://localhost:8000/admin/add_nurse", backendData);
+        if (response.data.success) {
+          const newNurse = {
+            id: backendData.HID,
+            name: backendData.HName,
+            gender: backendData.HGender,
+            phone: backendData.HPhNo,
+            email: backendData.Email,
+            address: backendData.HAddr,
+          };
+          setNurses(prev => [...prev, newNurse]);
+          setSnackBarInfo({ message: 'Added Nurse Information Successfully', severity: 'success' });
+        } else {
+          throw new Error("Backend reported failure");
+        }
       }
-      setSnackBarInfo({ message: 'Added Nurse Information Successfully', severity: 'success' });
-      setSnackbarOpen(true);
-      return [...prev, { ...data, id: Date.now().toString() }];
-    });
+    } catch (error) {
+      console.error("Error:", error);
+      setSnackBarInfo({ message: `Failed: ${error.response?.data || error.message}`, severity: 'error' });
+    }
+    setSnackbarOpen(true);
     setEditingNurse(null);
+    setOpenForm(false);
   };
 
-  const renderLabel = (value, color, textColor) => (
-    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
-  );
-
-  //const getGenderColor = (gender) => gender === "male" ? ["#d1fae5", "#065f46"] : ["#ede9fe", "#5b21b6"];
-  //const getGenderColor = gender => gender === "male" ? ["#e0f7fa", "#0288d1"] : ["#fce4ec", "#d81b60"];
-  const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
-  
-  const handleDelete = () => {
+  // --- Delete Nurse ---
+  const handleDelete = async () => {
     if (deleteTarget) {
-      setNurses((prev) => prev.filter((n) => n.id !== deleteTarget.id));
+      try {
+        await axios.delete(`http://localhost:8000/admin/delete_nurse/${deleteTarget.id}`);
+        setNurses(prev => prev.filter(n => n.id !== deleteTarget.id));
+        setSnackBarInfo({ message: 'Deleted Nurse Successfully', severity: 'success' });
+        setShowSnackbar(true);
+      } catch (err) {
+        setSnackBarInfo({ message: 'Failed to delete nurse', severity: 'error' });
+        setSnackbarOpen(true);
+      }
       setDeleteTarget(null);
-      setShowSnackbar(true);
     }
   };
 
-  const handleViewHistory = (nurse) => {
-    setViewingNurse(nurse);
-  };
+  const handleViewHistory = (nurse) => setViewingNurse(nurse);
 
   const filteredNurses = nurses.filter((n) =>
     n.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const renderLabel = (value, color, textColor) => (
+    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
+  );
+
+  const getGenderColor = (gender) => gender === "Male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
+
   const columns = [
-    { field: "id", headerName: "ID", flex: 1},
+    { field: "id", headerName: "ID", flex: 1 },
     { field: "name", headerName: "Name", flex: 1 },
     { field: "gender", headerName: "Gender", flex: 1, 
       renderCell: (params) => {
@@ -121,6 +158,7 @@ export default function NurseList() {
       },
     },
     { field: "phone", headerName: "Phone Number", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
     { field: "address", headerName: "Address", flex: 2 },
     {
       field: "actions",
@@ -234,7 +272,7 @@ export default function NurseList() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Refresh">
-            <IconButton onClick={() => console.log("Refreshed")}>
+            <IconButton onClick={() => window.location.reload()}>
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -280,7 +318,7 @@ export default function NurseList() {
       />
 
       <DeleteDialog
-        open={deleteTarget}
+        open={!!deleteTarget}
         title="Are you sure you want to delete?"
         data={deleteTarget}
         fields={[
@@ -288,8 +326,8 @@ export default function NurseList() {
           { key: "phone", label: "Phone Number" },
           { key: "address", label: "Address" },
         ]}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+        onDelete={handleDelete}
       />
 
       <NurseHistoryDialog
@@ -299,28 +337,16 @@ export default function NurseList() {
       />
 
       <Snackbar
-        open={showSnackbar}
-        autoHideDuration={3000}
-        onClose={() => setShowSnackbar(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setShowSnackbar(false)}
-          severity="error"
-          variant="filled"
-        >
-          Delete successful!
-        </Alert>
-      </Snackbar>
-
-      {/* Snackbar for ADD / UPDATE */}
-      <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarInfo.severity} variant="filled">
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarInfo.severity}
+          variant="filled"
+        >
           {snackbarInfo.message}
         </Alert>
       </Snackbar>

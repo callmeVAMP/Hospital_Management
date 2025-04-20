@@ -1,183 +1,209 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  IconButton,
-  Tooltip,
-  Menu,
-  MenuItem,
-  TextField,
-  Checkbox,
-  Snackbar,
-  Alert,
-  Chip,
-} from "@mui/material";
-import {
-  DataGrid,
-  useGridApiRef,
-} from "@mui/x-data-grid";
-import {
-  Edit,
-  Delete,
-  Refresh,
-  Download,
-  Add,
-  ViewColumn,
-  Search as SearchIcon,
-} from "@mui/icons-material";
 
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Box, Typography, IconButton, Tooltip, TextField, Menu, MenuItem, Checkbox,
+  Snackbar, Alert
+} from "@mui/material";
+import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
+import { Edit, Delete, Refresh, Download, Add, ViewColumn, Search as SearchIcon } from "@mui/icons-material";
 import LabTechnicianForm from "./LabTechnicianForm";
 import DeleteDialog from "./DeleteDialog";
 
-const initialLabTechs = [
-  {
-    id: "1",
-    name: "John Doe",
-    address: "123 Main Street",
-    phone: "9876543210",
-    gender: "male",
-    labId: "101",
-  },
-];
-
-const getGenderColor = gender => gender === "male" ? ["#d0ebff", "#1971c2"] : ["#ffe0f0", "#c2255c"];
-
-  const renderLabel = (value, color, textColor) => (
-    <Chip label={value} size="small" sx={{ backgroundColor: color, color: textColor }} />
-  );
-
-export default function LabTechnicianList() {
-  const [labTechs, setLabTechs] = useState(initialLabTechs);
+export default function LabTechniciansTable() {
+  const [labTechs, setLabTechs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    name: true,
-    address: true,
-    phone: true,
-    gender: true,
-    labId: true,
-  });
-
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openForm, setOpenForm] = useState(false);
   const [editingTech, setEditingTech] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    id: true, name: true, gender: true, email: true, mobile: true, department: true
+  });
 
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
 
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
+  // Fetch Lab Technicians
+  useEffect(() => {
+    const fetchLabTechs = async () => {
+      try {
+        const res = await axios.get("http://localhost:8000/admin/all_lab_technicians");
+        const mapped = res.data.map(item => ({
+          id: item.id,
+          name: item.name,
+          address: item.address,
+          mobile: item.mobile,
+          gender: item.gender,
+          email: item.email,
+          department: item.department
+        }));
+        setLabTechs(mapped);
+      } catch (error) {
+        console.error("Error fetching lab technicians:", error);
+      }
+    };
+    fetchLabTechs();
+  }, []);
 
-  const handleSave = (tech) => {
-    setLabTechs((prev) => {
-      const exists = prev.find((t) => t.id === tech.id);
-      return exists
-        ? prev.map((t) => (t.id === tech.id ? tech : t))
-        : [...prev, { ...tech, id: Date.now().toString() }];
-    });
+  const addLabTech = async (formData) => {
+    try {
+      const backendData = {
+        HID: formData.id,
+        HName: formData.name,
+        HAddr: formData.address || "-",
+        HPhNo: formData.phone || "-",
+        HGender: formData.gender,
+        Email: formData.email || "-",
+        LabRno: formData.department
+      };
+  
+      const response = await axios.post(
+        "http://localhost:8000/admin/add_lab_technician", 
+        backendData
+      );
+  
+      if (response.data.success) {
+        setLabTechs(prev => [...prev, {
+          id: backendData.HID,
+          name: backendData.HName,
+          gender: backendData.HGender,
+          email: backendData.Email,
+          mobile: backendData.HPhNo,
+          address: backendData.HAddr,
+          department: backendData.LabRno
+        }]);
+        setSnackBarInfo({ message: "Lab Technician added!", severity: "success" });
+      }
+    } catch (error) {
+      setSnackBarInfo({ message: "Error adding lab technician", severity: "error" });
+    }
+    setSnackbarOpen(true);
   };
 
-  const handleDelete = () => {
-    if (deleteTarget) {
-      setLabTechs((prev) => prev.filter((t) => t.id !== deleteTarget.id));
-      setDeleteTarget(null);
-      setShowDeleteAlert(true);
+  // Update Lab Technician
+  const updateLabTech = async (data) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/admin/update_lab_technician/${data.id}`,
+        {
+          HName: data.name,
+          HAddr: data.address,
+          HPhNo: data.mobile,
+          HGender: data.gender,
+          Email: data.email,
+          LabRno: data.department
+        }
+      );
+      if (response.data.success) {
+        setLabTechs(prev => prev.map(lt => lt.id === data.id ? {...data} : lt));
+        setSnackBarInfo({ message: "Lab Technician updated!", severity: "success" });
+      }
+    } catch (error) {
+      setSnackBarInfo({ message: "Error updating lab technician", severity: "error" });
     }
+    setSnackbarOpen(true);
+  };
+
+  // Fixed delete function
+  const deleteLabTech = async () => {
+    if (!deleteTarget) return;
+    
+    try {
+      const response = await axios.delete(
+        `http://localhost:8000/admin/delete_lab_technician/${deleteTarget.id}`
+      );
+      
+      if (response.data.success) {
+        setLabTechs(prev => prev.filter(lt => lt.id !== deleteTarget.id));
+        setSnackBarInfo({ message: "Deleted successfully!", severity: "success" });
+      }
+    } catch (error) {
+      setSnackBarInfo({ message: "Error deleting lab technician", severity: "error" });
+    }
+    setSnackbarOpen(true);
+    setDeleteTarget(null);
+  };
+
+  const handleSave = async (data) => {
+    if (editingTech) {
+      await updateLabTech(data);
+    } else {
+      await addLabTech(data);
+    }
+    setEditingTech(null);
+    setOpenForm(false);
   };
 
   const filteredTechs = labTechs.filter((t) =>
-    t.name.toLowerCase().includes(searchQuery.toLowerCase())
+    t.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5},
+    { field: "id", headerName: "ID", flex: 1 },
     { field: "name", headerName: "Name", flex: 1 },
+    { field: "gender", headerName: "Gender", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "mobile", headerName: "Mobile", flex: 1 },
     { field: "address", headerName: "Address", flex: 1 },
-    { field: "phone", headerName: "Phone", flex: 1 },
-    { field: "gender", headerName: "Gender", flex: 0.5,
-      renderCell: (params) => {
-        const [bg, text] = getGenderColor(params.row.gender);
-        return renderLabel(params.row.gender, bg, text);
-      },
-    },
-    { field: "labId", headerName: "Lab ID", flex: 0.5 },
+    { field: "department", headerName: "Department", flex: 1 },
     {
-      field: "actions",
-      headerName: "Actions",
-      flex: 0.6,
-      sortable: false,
+      field: "actions", headerName: "Actions", flex: 1, sortable: false,
       renderCell: (params) => (
-        <Box display="flex" gap={0.5}>
+        <Box display="flex" gap={1}>
           <Tooltip title="Edit">
-            <IconButton
-              size="small"
-              sx={{ color: "#0288d1" }}
-              onClick={() => {
-                setEditingTech(params.row);
-                setDialogOpen(true);
-              }}
-            >
+            <IconButton onClick={() => {
+              setEditingTech(params.row);
+              setOpenForm(true);
+            }} sx={{ color: "#0288d1" }}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton
-              size="small"
-              sx={{ color: "#e53935" }}
-              onClick={() => setDeleteTarget(params.row)}
-            >
+            <IconButton onClick={() => setDeleteTarget(params.row)} sx={{ color: "#e53935" }}>
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
         </Box>
-      ),
-    },
+      )
+    }
+  ];
+
+  const deleteFields = [
+    { key: "name", label: "Name" },
+    { key: "mobile", label: "Mobile" },
+    { key: "email", label: "Email" },
+    { key: "department", label: "Department" },
   ];
 
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
-      {/* Top bar */}
-      <Box
-        sx={{
-          backgroundColor: "#e3f2fd",
-          p: 2,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
+      <Box sx={{
+        backgroundColor: "#fff3e0", p: 2,
+        borderTopLeftRadius: 12, borderTopRightRadius: 12,
+        display: "flex", justifyContent: "space-between", alignItems: "center"
+      }}>
         <Typography variant="h6">Lab Technicians</Typography>
         <Box display="flex" alignItems="center" gap={2}>
-          <Box
-            sx={{
-              backgroundColor: "white",
-              px: 2,
-              py: 0.5,
-              borderRadius: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-            }}
-          >
+          <Box sx={{ backgroundColor: "white", px: 2, py: 0.5, borderRadius: 1, display: "flex", gap: 1 }}>
             <SearchIcon fontSize="small" />
             <TextField
-              variant="standard"
-              placeholder="Search"
+              variant="standard" placeholder="Search"
               InputProps={{ disableUnderline: true }}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               size="small"
             />
           </Box>
+          
           <Tooltip title="Toggle Columns">
-            <IconButton onClick={handleClick}>
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
               <ViewColumn />
             </IconButton>
           </Tooltip>
-          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+          <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
             {Object.keys(columnVisibilityModel).map((field) => (
               <MenuItem key={field}>
                 <Checkbox
@@ -195,18 +221,16 @@ export default function LabTechnicianList() {
               </MenuItem>
             ))}
           </Menu>
-          <Tooltip title="Add New">
-            <IconButton
-              onClick={() => {
-                setEditingTech(null);
-                setDialogOpen(true);
-              }}
-            >
+          <Tooltip title="Add Lab Technician">
+            <IconButton onClick={() => {
+              setEditingTech(null);
+              setOpenForm(true);
+            }}>
               <Add sx={{ color: "green" }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Refresh">
-            <IconButton onClick={() => console.log("Refreshed")}>
+            <IconButton onClick={() => window.location.reload()}>
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -218,13 +242,12 @@ export default function LabTechnicianList() {
         </Box>
       </Box>
 
-      {/* DataGrid */}
       <DataGrid
         apiRef={apiRef}
         rows={filteredTechs}
         columns={columns}
         pageSize={10}
-        rowsPerPageOptions={[10, 15]}
+        rowsPerPageOptions={[10]}
         pagination
         disableSelectionOnClick
         columnVisibilityModel={columnVisibilityModel}
@@ -242,42 +265,33 @@ export default function LabTechnicianList() {
         }}
       />
 
-      {/* Add/Edit Dialog */}
       <LabTechnicianForm
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        open={openForm}
+        onClose={() => {
+          setOpenForm(false);
+          setEditingTech(null);
+        }}
         onSave={handleSave}
         initialData={editingTech}
       />
-
-      {/* Delete Confirmation Dialog */}
+      
       <DeleteDialog
         open={!!deleteTarget}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-        title="Are you sure you want to delete?"
+        title="Delete Lab Technician"
         data={deleteTarget}
-        fields={[
-          { key: "name", label: "Name" },
-          { key: "phone", label: "Phone" },
-          { key: "labId", label: "Lab ID" },
-        ]}
+        fields={deleteFields}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={deleteLabTech}
       />
 
-      {/* Snackbar for delete success */}
       <Snackbar
-        open={showDeleteAlert}
+        open={snackbarOpen}
         autoHideDuration={3000}
-        onClose={() => setShowDeleteAlert(false)}
+        onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          severity="error"
-          variant="filled"
-          onClose={() => setShowDeleteAlert(false)}
-          sx={{ width: "100%" }}
-        >
-          Delete successful!
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarInfo.severity} variant="filled">
+          {snackbarInfo.message}
         </Alert>
       </Snackbar>
     </Box>
