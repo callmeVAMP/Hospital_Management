@@ -23,27 +23,56 @@ const DoctorPage = () => {
   const dispatch=useDispatch();
   const navigate=useNavigate();
 
+  const fetchToken=async(authToken)=>{
+    if(!authToken) navigate('/login',{replace:true})
+    console.log("fetchtoken and decode")
+    try {
+      const res=await axios.post('http://localhost:8000/auth/decode-token',{authToken:authToken});
+      console.log("decoded token ",res);
+      const authState=res?.data;
+
+      if(!authState || !authState?.verified ){
+        console.log("not verified");
+        navigate("/login",{replace:true});
+      }
+      else if(authState?.role!="doctor"){
+        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+        console.log("not authorised");
+        navigate(`/${authState?.role}`,{replace:true});
+      }
+      console.log("out")
+      dispatch(setAuth(authState));
+
+    } catch (error) {
+      console.log(error) 
+    }
+  }
+
 
 
   useEffect(() => {
-    let cookieAuth = Cookies.get("auth");
+    // let cookieAuth = Cookies.get("auth");
+    let authToken = Cookies.get("authToken");
 
-    if (cookieAuth) {
-      cookieAuth = JSON.parse(cookieAuth);
-      dispatch(setAuth(cookieAuth));
-    }
-    console.log(cookieAuth);
+    // if (cookieAuth) {
+    //   cookieAuth = JSON.parse(cookieAuth);
+    //   dispatch(setAuth(cookieAuth));
+    // }
+    // console.log(cookieAuth);
+    console.log(authToken)
     
     
-    if(!cookieAuth || !cookieAuth?.verified ){
-      console.log("not verified");
-      navigate("/login",{replace:true});
-    }
-    else if(cookieAuth?.role!="doctor"){
-      dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
-      console.log("not authorised");
-      navigate(`/${cookieAuth?.role}`,{replace:true});
-    }
+    // if(!cookieAuth || !cookieAuth?.verified ){
+    //   console.log("not verified");
+    //   navigate("/login",{replace:true});
+    // }
+    // else if(cookieAuth?.role!="doctor"){
+    //   dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+    //   console.log("not authorised");
+    //   navigate(`/${cookieAuth?.role}`,{replace:true});
+    // }
+
+    fetchToken(authToken);
     
   }, [navigate]);
 
@@ -128,7 +157,7 @@ const DoctorPage = () => {
   );
 };
 
-export default DoctorPage;
+ export default DoctorPage;
 
 
 

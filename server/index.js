@@ -7,13 +7,19 @@ import appointment from './routes/appointment.js';
 import occupancy from './routes/occupancy.js';
 import auth from './routes/authRoutes.js';
 import admin from './routes/admin_from_starting.js';
-//import otpRouter from "./auth/otpRouter.js"; 
+
+import doctor from './routes/doctor.js'
+import labtech from './routes/LabTechnician.js'
+import tests from './routes/tests.js'
+import report from './routes/report.js'
+import operation from './routes/operations.js'
+//import admin from './routes/admin_from_starting.js'
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 const DB_PROJECT = process.env.DB_PROJECT;
 const PORT = process.env.PORT || 3000;
@@ -43,11 +49,17 @@ try {
 app.get('/', (req, res) => {
   res.send("hello");
 });
+app.use('/admin',admin)
 app.use('/patient', patient);
 app.use('/appointment', appointment);
 app.use('/occupancy', occupancy);
 app.use('/auth', auth);
 app.use('/admin',admin)
+app.use('/labtechnician',labtech);
+app.use('/tests',tests);
+app.use('/report',report);
+app.use('/operation',operation);
+app.use('/doctor',doctor);
 //app.use('/login',auth)
 app.listen(PORT, () => {
   console.log(`Server Running on PORT ${PORT}`);

@@ -4,6 +4,8 @@ const router=Router();
 
 // ALL Healthcare Professionals
 router.get('/all_employees', async (req, res) => {
+// ALL Healthcare Professionals
+router.get('/all_employees', async (req, res) => {
 
 try {
     const [results, fields] = await connection.query(
@@ -657,7 +659,62 @@ router.delete('/delete_treatment/:trid', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Error deleting treatment");
+        console.error(err);
+        res.status(500).send("Error fetching treatment by appointment");
     }
+});
+
+// Add new treatment
+router.post('/add_treatment', async (req, res) => {
+    const { TrID, AppID, TrName, TrType, StDateTime, EndDateTime } = req.body;
+
+    try {
+        await connection.query(
+            `INSERT INTO Treatment (TrID, AppID, TrName, TrType, StDateTime, EndDateTime)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [TrID, AppID, TrName, TrType, StDateTime, EndDateTime]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error adding treatment");
+    }
+});
+
+// Update a treatment
+router.put('/update_treatment/:trid', async (req, res) => {
+    const { trid } = req.params;
+    const { TrName, TrType, StDateTime, EndDateTime } = req.body;
+
+    try {
+        const [result] = await connection.query(
+            `UPDATE Treatment 
+             SET TrName = ?, TrType = ?, StDateTime = ?, EndDateTime = ?
+             WHERE TrID = ?`,
+            [TrName, TrType, StDateTime, EndDateTime, trid]
+        );
+        res.json({ success: true, affectedRows: result.affectedRows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error updating treatment");
+    }
+});
+
+// Delete a treatment
+router.delete('/delete_treatment/:trid', async (req, res) => {
+    const { trid } = req.params;
+
+    try {
+        const [result] = await connection.query(
+            `DELETE FROM Treatment WHERE TrID = ?`,
+            [trid]
+        );
+        res.json({ success: true, affectedRows: result.affectedRows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting treatment");
+    }
+});
 });
 
 export default router;

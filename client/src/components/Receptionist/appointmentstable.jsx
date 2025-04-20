@@ -1,124 +1,157 @@
-
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Box,
   Typography,
   TextField,
   IconButton,
   Tooltip,
+  Menu,
+  MenuItem,
+  Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
-  Menu,
-  MenuItem,
-  Checkbox
+  DialogActions,
+  Button,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
-  Add,
   Edit,
   Delete,
   Phone,
-  Search as SearchIcon,
-  ViewColumn
+  ViewColumn,
+  Add,
 } from "@mui/icons-material";
-import AppointmentForm from "./appointmentform"; // your updated form
-
-const initialPatients = [
-  {
-    id: 1,
-    patientName: "John Doe",
-    phone: "9876543210",
-    gender: "Male",
-    doctor: "Dr. Smith",
-    problem: "Fever and body pain",
-    priority: "Normal",
-  },
-  {
-    id: 2,
-    patientName: "Aarav Sharma",
-    phone: "9123456789",
-    gender: "Male",
-    doctor: "Dr. Johnson",
-    problem: "Cough and cold",
-    priority: "Emergency",
-  },
-];
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function AppointmentTable() {
-  const [patients, setPatients] = useState(initialPatients);
+  const [appointments, setAppointments] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [openFormDialog, setOpenFormDialog] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [openFormDialog, setOpenFormDialog] = useState(false);
+
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    patientName: true,
-    phone: true,
-    gender: true,
-    doctor: true,
-    problem: true,
-    priority: true,
-    actions: true
+    PName: true,
+    PPhNo: true,
+    PGender: true,
+    HName: true,
+    Problem: true,
+    actions: true,
   });
 
+  
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/appointment/all_appointment")
+      .then((response) => {
+        const dataWithIds = response.data.map((item, index) => ({
+          id: index + 1,
+          ...item,
+        }));
+        setAppointments(dataWithIds);
+      })
+      .catch((error) => {
+        console.error("Error fetching appointments:", error);
+      });
+  }, []);
+
+  const filteredAppointments = appointments.filter((p) =>
+    p.PName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const [patientForm, setPatientForm] = useState({
+    PName: "",
+    PPhNo: "",
+    PGender: "",
+    HName: "",
+    Problem: "",
+  });
+  
   const handleAddClick = () => {
     setSelectedPatient(null);
+    setPatientForm({
+      PName: "",
+      PPhNo: "",
+      PGender: "",
+      HName: "",
+      Problem: "",
+    });
     setOpenFormDialog(true);
   };
-
+  
   const handleEditClick = (patient) => {
     setSelectedPatient(patient);
+    setPatientForm({
+      PName: patient.PName,
+      PPhNo: patient.PPhNo,
+      PGender: patient.PGender,
+      HName: patient.HName,
+      Problem: patient.Problem,
+    });
     setOpenFormDialog(true);
   };
+  
 
-  const handleDeleteClick = (patientId) => {
-    setPatients(patients.filter(p => p.id !== patientId));
-  };
-
-  const handleSave = (patientData) => {
-    if (selectedPatient) {
-      // Edit existing patient
-      setPatients(prevPatients => 
-        prevPatients.map(p => p.id === selectedPatient.id ? { ...p, ...patientData } : p)
-      );
-    } else {
-      // Add new patient
-      const newId = patients.length > 0 ? Math.max(...patients.map(p => p.id)) + 1 : 1;
-      setPatients(prevPatients => [...prevPatients, { id: newId, ...patientData }]);
+  
+  const handleSave = async (patientData) => {
+    try {
+      if (selectedPatient) {
+        // Edit existing appointment
+        const response = await axios.put(`http://localhost:3000/appointment/update_appointment/${selectedPatient.AppID}`, patientData);
+        setAppointments(prev =>
+          prev.map((p) =>
+            p.AppID === selectedPatient.AppID ? { ...p, ...patientData } : p
+          )
+        );
+      } else {
+        // Add new appointment
+        const response = await axios.post("http://localhost:3000/appointments", patientData);
+        setAppointments(prev => [...prev, response.data]);
+      }
+  
+      setOpenFormDialog(false);
+      setSelectedPatient(null);
+    } catch (error) {
+      console.error("Error saving appointment:", error);
     }
-    
-    setOpenFormDialog(false);
   };
-
+  
+  const handleDeleteClick = async (id) => {
+    console.log(id);
+    try {
+      await axios.delete(`http://localhost:3000/appointment/delete_appointment/${id}`);
+      setAppointments(prev => prev.filter((p) => p.AppID !== id));
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+    }
+  };
+  
+  
   const handleCancel = () => {
     setOpenFormDialog(false);
     setSelectedPatient(null);
   };
 
-  const filteredPatients = patients.filter((p) =>
-    p.patientName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const columns = [
-    { field: "patientName", headerName: "Patient Name", flex: 1.5 },
+    { field: "PName", headerName: "Patient Name", flex: 1.5 },
     {
-      field: "phone",
+      field: "PPhNo",
       headerName: "Contact",
       flex: 1.2,
       renderCell: (params) => (
         <Box display="flex" alignItems="center" gap={1}>
           <Phone fontSize="small" color="success" />
-          <Typography noWrap>{params.row.phone}</Typography>
+          <Typography noWrap>{params.row.PPhNo}</Typography>
         </Box>
       ),
     },
-    { field: "gender", headerName: "Gender", flex: 0.8 },
-    { field: "doctor", headerName: "Assigned Doctor", flex: 1.2 },
-    { field: "problem", headerName: "Problem Description", flex: 2 },
-    { field: "priority", headerName: "Priority", flex: 1 },
+    { field: "PGender", headerName: "Gender", flex: 1 },
+    { field: "HName", headerName: "Assigned Doctor", flex: 1.5 },
+    { field: "Problem", headerName: "Problem Description", flex: 2 },
     {
       field: "actions",
       headerName: "Actions",
@@ -128,7 +161,7 @@ export default function AppointmentTable() {
           <IconButton onClick={() => handleEditClick(params.row)}>
             <Edit />
           </IconButton>
-          <IconButton onClick={() => handleDeleteClick(params.row.id)}>
+          <IconButton onClick={() => handleDeleteClick(params.row.AppID)}>
             <Delete />
           </IconButton>
         </Box>
@@ -138,6 +171,7 @@ export default function AppointmentTable() {
 
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
+      {/* Header */}
       <Box
         sx={{
           backgroundColor: "#dbe3f4",
@@ -149,10 +183,9 @@ export default function AppointmentTable() {
           justifyContent: "space-between",
         }}
       >
-        <Typography variant="h6">Patients</Typography>
+        <Typography variant="h6">Appointments</Typography>
 
         <Box display="flex" alignItems="center" gap={2}>
-          
           <TextField
             variant="standard"
             placeholder="Search"
@@ -162,23 +195,17 @@ export default function AppointmentTable() {
             sx={{ backgroundColor: "white", px: 1, borderRadius: 1 }}
             InputProps={{ startAdornment: <SearchIcon fontSize="small" /> }}
           />
-          
-
-          <Tooltip title="Add New Patient">
+          <Tooltip title="Add New">
             <IconButton onClick={handleAddClick}>
-              <Add sx={{ color: "green" }} />
+              <Add />
             </IconButton>
           </Tooltip>
-          
-          
           <Tooltip title="Show/Hide Columns">
-          <Tooltip>
-            <IconButton onClick={handleClick}>
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
               <ViewColumn />
             </IconButton>
           </Tooltip>
-          
-          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+          <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
             {Object.keys(columnVisibilityModel).map((field) => (
               <MenuItem key={field}>
                 <Checkbox
@@ -190,24 +217,27 @@ export default function AppointmentTable() {
                     }))
                   }
                 />
-                <Typography>{columns.find((c) => c.field === field)?.headerName}</Typography>
+                <Typography>
+                  {columns.find((col) => col.field === field)?.headerName}
+                </Typography>
               </MenuItem>
             ))}
           </Menu>
-          </Tooltip>
         </Box>
       </Box>
 
+      {/* DataGrid */}
       <DataGrid
         columnVisibilityModel={columnVisibilityModel}
         onColumnVisibilityModelChange={(newModel) =>
           setColumnVisibilityModel(newModel)
         }
-        rows={filteredPatients}
+        rows={filteredAppointments}
         columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10]}
         disableSelectionOnClick
+        getRowId={(row) => row.id}
         sx={{
           backgroundColor: "white",
           borderRadius: 2,
@@ -218,26 +248,64 @@ export default function AppointmentTable() {
         }}
       />
 
-      {/* Dialog for Adding/Editing Patient */}
-      <Dialog 
-        open={openFormDialog} 
-        onClose={handleCancel} 
-        maxWidth="md" 
-        fullWidth
-      >
-        <DialogTitle>
-          {selectedPatient ? "Edit Patient" : "Add New Patient"}
-        </DialogTitle>
-        <DialogContent dividers>
-          {openFormDialog && (
-            <AppointmentForm
-              initialData={selectedPatient || {}}
-              onSave={handleSave}
-              onCancel={handleCancel}
-            />
-          )}
+      {/* Dialog for Add/Edit */}
+      <Dialog open={openFormDialog} onClose={handleCancel} fullWidth>
+        <DialogTitle>{selectedPatient ? "Edit" : "Add"} Appointment</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Patient Name"
+            fullWidth
+            value={selectedPatient?.PName || ""}
+            onChange={(e) =>
+              setSelectedPatient((prev) => ({ ...prev, PName: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Phone Number"
+            fullWidth
+            value={selectedPatient?.PPhNo || ""}
+            onChange={(e) =>
+              setSelectedPatient((prev) => ({ ...prev, PPhNo: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Gender"
+            fullWidth
+            value={selectedPatient?.PGender || ""}
+            onChange={(e) =>
+              setSelectedPatient((prev) => ({ ...prev, PGender: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Assigned Doctor"
+            fullWidth
+            value={selectedPatient?.HName || ""}
+            onChange={(e) =>
+              setSelectedPatient((prev) => ({ ...prev, HName: e.target.value }))
+            }
+          />
+          <TextField
+            margin="dense"
+            label="Problem"
+            fullWidth
+            value={selectedPatient?.Problem || ""}
+            onChange={(e) =>
+              setSelectedPatient((prev) => ({ ...prev, Problem: e.target.value }))
+            }
+          />
         </DialogContent>
+        <DialogActions>
+  <Button onClick={handleCancel}>Cancel</Button>
+  <Button onClick={() => handleSave(patientForm)}>Save</Button>
+</DialogActions>
+
       </Dialog>
     </Box>
   );
 }
+
+

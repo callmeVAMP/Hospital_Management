@@ -6,7 +6,7 @@ export const createToken = (authInfo) => {
 };
 
 export const validateToken = (token) => {
-    console.log(token);
+    // console.log(token);
     const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
     return payload;
 };

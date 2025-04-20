@@ -179,23 +179,23 @@ router.post('/beds/edit', async (req, res) => {
     }
     });   
 
-router.get('/LabTechnician/view', async (req, res) => {
+// router.get('/LabTechnician/view', async (req, res) => {
 
-    try {
-        const [results, fields] = await connection.query(
-        `SELECT l.HID, h.HName, h.HGender, h.HPhNo, h.HAddr, l.LabID, lb.LabName from LabTechnician l JOIN HealthcareProf h on l.HID=h.HID JOIN Lab lb on l.LabID=lb.LabID`
-        // 'Select* from Occupancy'
-        );
+//     try {
+//         const [results, fields] = await connection.query(
+//         `SELECT l.HID, h.HName, h.HGender, h.HPhNo, h.HAddr, l.LabID, lb.LabName from LabTechnician l JOIN HealthcareProf h on l.HID=h.HID JOIN Lab lb on l.LabID=lb.LabID`
+//         // 'Select* from Occupancy'
+//         );
         
         
-        console.log(results); // results contains rows returned by server
-        console.log(fields); // fields contains extra meta data about results, if available
-        res.json(results);
-    } catch (err) {
-        console.log(err);
-        res.status(500).send('error');
-    }
-    });  
+//         console.log(results); // results contains rows returned by server
+//         console.log(fields); // fields contains extra meta data about results, if available
+//         res.json(results);
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send('error');
+//     }
+//     });  
                             
 
                              

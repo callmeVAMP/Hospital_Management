@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import {
   Box,
   Typography,
@@ -29,35 +30,40 @@ import {
 import AlertBar from "../Common/AlertBar";
 import AddOrEditOperation from "./AddOrEditOperation";
 import {DeleteOperationDialog} from "./DeleteOperationDialog";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setSnackBarInfo } from "../../Features/snackbarSlice";
+import AddPatientDialog from "./AddPatientDialog";
 
-const operations = [
-  {
-    id: 1,
-    treatmentID: "OP1234",
-    startDate: "2024-04-15",
-    startTime: "09:00 AM",
-    endDate: "2024-04-15",
-    endTime: "11:00 AM",
-    patientName: "John Doe",
-    patientPhone: "123-456-7890",
-    professionals: ["Dr. Smith", "Dr. Allen"],
-    reportUrl: "https://example.com/report1.pdf",
-    opType: 'Spenal Surgery'
-  },
-  {
-    id: 2,
-    treatmentID: "OP5678",
-    startDate: "2024-04-16",
-    startTime: "01:00 PM",
-    endDate: "2024-04-16",
-    endTime: "03:00 PM",
-    patientName: "Jane Smith",
-    patientPhone: "987-654-3210",
-    professionals: ["Dr. Lee", "Dr. Johnson"],
-    reportUrl: "https://example.com/report2.pdf",
-    opType: 'Spenal Surgery'
-  },
-];
+// const operations = [
+//   {
+//     id: 1,
+//     treatmentID: "OP1234",
+//     startDate: "2024-04-15",
+//     startTime: "09:00 AM",
+//     endDate: "2024-04-15",
+//     endTime: "11:00 AM",
+//     patientName: "John Doe",
+//     patientPhone: "123-456-7890",
+//     professionals: ["Dr. Smith", "Dr. Allen"],
+//     reportUrl: "https://example.com/report1.pdf",
+//     opType: 'Spenal Surgery'
+//   },
+//   {
+//     id: 2,
+//     treatmentID: "OP5678",
+//     startDate: "2024-04-16",
+//     startTime: "01:00 PM",
+//     endDate: "2024-04-16",
+//     endTime: "03:00 PM",
+//     patientName: "Jane Smith",
+//     patientPhone: "987-654-3210",
+//     professionals: ["Dr. Lee", "Dr. Johnson"],
+//     reportUrl: "https://example.com/report2.pdf",
+//     opType: 'Spenal Surgery'
+//   },
+// ];
 
 
 function getRandomColor(name) {
@@ -90,13 +96,77 @@ function darkenColor(hex, amount = 0.6) {
 }
 
 export default function OperationInfo() {
+  const dispatch=useDispatch()
+  const navigate=useNavigate()
+  const [openAddPatient, setAddOpenPatient] = useState(false);
+
   const [openAddOperation, setAddOpenOperation] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedOperation, setSelectedOperation] = useState(null);
   const [editDialogOpen, setEditDilaogOpen]=useState(false);
+  const [operations,setOperations]=useState([]);
+  const [activeOp,setActiveOp]=useState({});
 
-  const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  // const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
+  // const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+
+  const fetchAllOperations=async()=>{
+    
+    
+
+    try {
+      const res=await axios.get(`http://localhost:8000/operation/all`);
+      console.log(res?.data);
+
+      const formattedOps = res?.data.map((op,index) => ({
+        id:index+1,
+        treatmentID: op.TrID,
+        patientName: op.PName,
+        patientPhone: op.PPhNo,
+        startDate: dayjs(op.StDateTime).format("YYYY-MM-DD"),
+        startTime: dayjs(op.StDateTime).format("hh:mm A"),
+        endDate: dayjs(op.EndDateTime).format("YYYY-MM-DD"),
+        endTime: dayjs(op.EndDateTime).format("hh:mm A"),
+        professionals: [op.HName],
+        professionalsHID: [op.HID],
+        reportUrl: op.FilePath,
+        opType: op.TrName,
+        appID:op.AppID
+      }));
+      console.log("formatted")
+      console.log(formattedOps)
+
+      const mergedMap = new Map();
+
+      formattedOps.forEach(item => {
+          const key = String(item.treatmentID); // ensure uniform key type
+          if (!mergedMap.has(key)) {
+              mergedMap.set(key, {
+                  ...item,
+              });
+          } else {
+              const existing = mergedMap.get(key);
+              if (!existing.professionals.includes(item.professionals[0])) {
+                  existing.professionals.push(item.professionals[0]);
+                  existing.professionalsHID.push(item.professionalsHID[0]);
+              }
+          }
+      });
+
+      const mergedList = Array.from(mergedMap.values());
+      console.log(mergedList);
+
+      setOperations(mergedList)
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
+  const handleRefreshTable = () => {
+    fetchAllOperations();
+  };
   
   const handleEditClick=(opData)=>{
     setSelectedOperation(opData);
@@ -114,23 +184,200 @@ export default function OperationInfo() {
     // perform delete using selectedRoom.id or something
     console.log("Deleting Room:", selectedOperation);
     setDeleteDialogOpen(false);
-    setSnackbarOpen(true);
-    setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
+    // setSnackbarOpen(true);
+    // setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
     
   };
 
+
+  const formatDateTime = (date, time) => {
+    const [timePart, modifier] = time.split(" ");
+    let [hours, minutes] = timePart.split(":").map(Number);
+  
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+  
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+  
+    return `${date} ${hh}:${mm}:00`;
+  };
+  
+
     
-  const handleSave = (data, type) => {
-    console.log('Operation Data:', data);  
+  const handleSave = async (data, type) => {
+    setActiveOp(data);
+    console.log('Operation Data:', data,type);  
     if(type=="add"){
-        setSnackbarOpen(true);
-        setSnackBarInfo({'message':'Added Operation Information Successfully','severity':'success'})
+
+      let res;
+      let res2;
+      let res3;
+
+      try {
+          res=await axios.post(`http://localhost:8000/operation/insert_operation/`,{
+          
+            StDateTime:`${formatDateTime(data?.startDate,data?.startTime)}`,
+            EndDateTime:`${formatDateTime(data?.endDate,data?.endTime)}`,
+            TrName:data?.opType,
+            AppID:data?.appID,
+            PName:data?.patientName,
+            PPhNo:data?.patientPhone
+          
+        }) 
+        console.log(res);
+        if(res?.data?.success){
+          data.treatmentID=res?.data?.TrID;
+          console.log(data.treatmentID)
+        }
+
+        else if(res?.data?.status==400){
+          // open dialog of insert patient
+
+
+
+
+        }
+        else if(res?.data?.success){
+          data.treatmentID=res?.data?.TrID;
+          console.log(data.treatmentID)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+
+      try {
+          res2=await axios.post(`http://localhost:8000/operation/update_healthcare_prof/${data.treatmentID}`,{
+          
+            hid_list:data?.professionalsHID,
+            
+          
+        }) 
+        console.log(res2);
+      } catch (error) {
+        console.log(error)
+      }
+
+      //for report
+      if(data?.reportFile){
+        console.log("upload",data?.reportFile)
+        const renamedFile = new File([data?.reportFile], `${data?.treatmentID}-report.pdf`, { type: data?.reportFile.type });
+
+        const formData = new FormData();
+        formData.append("file", renamedFile);          // The key must match multer's 'upload.single("file")'
+        formData.append("TrID", data?.treatmentID); 
+
+        console.log(formData)
+
+        try {
+            res3=await axios.post(`http://localhost:8000/report/upload_operation_report`,formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data"
+              }
+            })
+            console.log(res)
+            if(res3?.data?.success) {
+                dispatch(setSnackBarInfo({message:`Uploaded Report Successfully! Updating Operations here`,severity:'success',open:true}))
+                fetchAllOperations()
+            }
+        } catch (error) {
+          dispatch(setSnackBarInfo({message:`Some Error Occured in Uploading`,severity:'error',open:true}))
+          console.log(error)
+        }
+      }
+      
+
+      if(res?.data?.success && res2?.data?.success){
+        fetchAllOperations();
+        dispatch(setSnackBarInfo({message:`Uploaded Operation Successfully! Updating Operations here`,severity:'success',open:true}))
+      }
+
+
+        // setSnackbarOpen(true);
+        // setSnackBarInfo({'message':'Added Operation Information Successfully','severity':'success'})
     }   
     else{
-        setSnackbarOpen(true);
-        setSnackBarInfo({'message':'Updated Operation Information Successfully','severity':'success'})
+      let res;
+      let res2;
+      let res3;
+
+        try {
+           res=await axios.post(`http://localhost:8000/operation/update_operation/${data.treatmentID}`,{
+            
+              StDateTime:`${formatDateTime(data?.startDate,data?.startTime)}`,
+              EndDateTime:`${formatDateTime(data?.endDate,data?.endTime)}`,
+              TrName:data?.opType
+            
+          }) 
+          console.log(res);
+        } catch (error) {
+          console.log(error)
+        }
+
+        try {
+           res2=await axios.post(`http://localhost:8000/operation/update_healthcare_prof/${data.treatmentID}`,{
+            
+              hid_list:data?.professionalsHID,
+              
+            
+          }) 
+          console.log(res2);
+        } catch (error) {
+          console.log(error)
+        }
+
+        //for report
+        if(data?.reportFile){
+          console.log("upload",data?.reportFile)
+          const renamedFile = new File([data?.reportFile], `${data?.treatmentID}-report.pdf`, { type: data?.reportFile.type });
+
+          const formData = new FormData();
+          formData.append("file", renamedFile);          // The key must match multer's 'upload.single("file")'
+          formData.append("TrID", data?.treatmentID); 
+
+          console.log(formData)
+
+          try {
+             res3=await axios.post(`http://localhost:8000/report/upload_operation_report`,formData,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data"
+                }
+              })
+              console.log(res)
+              if(res3?.data?.success) {
+                  dispatch(setSnackBarInfo({message:`Uploaded Report Successfully! Updating Operations here`,severity:'success',open:true}))
+                  fetchAllOperations()
+              }
+          } catch (error) {
+            dispatch(setSnackBarInfo({message:`Some Error Occured in Uploading`,severity:'error',open:true}))
+            console.log(error)
+          }
+        }
+        
+
+        if(res?.data?.success && res2?.data?.success){
+          fetchAllOperations();
+          dispatch(setSnackBarInfo({message:`Uploaded Operation Successfully! Updating Operations here`,severity:'success',open:true}))
+        }
+
+        
+
+        // setSnackbarOpen(true);
+        // setSnackBarInfo({'message':'Updated Operation Information Successfully','severity':'success'})
     }
   };
+
+  const handleSavePatient=async(data)=>{
+    console.log(data);
+
+    
+  }
+
+  useEffect(()=>{
+    fetchAllOperations()
+  },[navigate])
   
   const [searchQuery, setSearchQuery] = useState("");
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
@@ -150,7 +397,7 @@ export default function OperationInfo() {
   const apiRef = useGridApiRef();
 
   const filteredOperations = operations.filter((op) =>
-    op.treatmentID.toLowerCase().includes(searchQuery.toLowerCase())
+    op.patientName.includes(searchQuery.toLowerCase())
   );
 
   const columns = [
@@ -167,15 +414,17 @@ export default function OperationInfo() {
       headerName: "Healthcare Professionals Involved",
       flex: 2,
       renderCell: (params) => (
+        params.row?.professionals.length>0 && params.row?.professionals[0] &&
         <Box display="flex" flexWrap="wrap" gap={0.5}>
-          {params.row.professionals.map((name, index) => {
-            const bg = getRandomColor(name);
-            const text = darkenColor(bg);
+          {params.row?.professionals.map((name, index) => {
+            // const bg = getRandomColor(name);
+            // const text = darkenColor(bg);
             return (
               <Chip
                 key={index}
                 label={name}
-                sx={{ backgroundColor: bg, color: text, fontWeight: 600 }}
+                // sx={{ backgroundColor: bg, color: text, fontWeight: 600 }}
+                sx={{ fontWeight: 600 }}
               />
             );
           })}
@@ -187,11 +436,11 @@ export default function OperationInfo() {
       headerName: "View Report",
       flex: 1,
       sortable: false,
-      renderCell: (params) => (
+      renderCell: (params) => ( params?.row?.reportUrl &&
         <Button
           variant="outlined"
           size="small"
-          onClick={() => window.open(params.row.reportUrl, "_blank")}
+          onClick={() =>window.open(`http://localhost:5173/${params.row.reportUrl}`, "_blank")}
         >
           View Report
         </Button>
@@ -296,12 +545,13 @@ export default function OperationInfo() {
         </Box>
       </Box>
       <DataGrid
+        // getRowHeight={() => 'auto'}
         columnVisibilityModel={columnVisibilityModel}
         onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
         apiRef={apiRef}
         rows={filteredOperations}
         columns={columns}
-        pageSize={10}
+        pageSize={20}
         rowsPerPageOptions={[10, 15]}
         pagination
         disableSelectionOnClick
@@ -318,7 +568,7 @@ export default function OperationInfo() {
       {/* Edit Operation */}
       <AddOrEditOperation open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} operationData={selectedOperation} />
       
-      {/* Add Test */}
+      {/* Add op */}
       <AddOrEditOperation open={openAddOperation} onClose={() => setAddOpenOperation(false)} onSave={handleSave}/>
         
 
@@ -330,14 +580,22 @@ export default function OperationInfo() {
             onConfirm={handleDeleteConfirm}
         />
 
+        {/* add patient */}
+        <AddPatientDialog
+        open={openAddPatient}
+        onClose={() => setAddOpenPatient(false)}
+        onSave={handleSavePatient}
+        patientData={activeOp}
+      />
+
       {/* Snackbar code */}
-      <AlertBar
+      {/* <AlertBar
             open={snackbarOpen}
             onClose={() => setSnackbarOpen(false)}
             message={snackBarInfo?.message}
             severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
             duration={3000}
-        />
+        /> */}
 
     </Box>
   );
