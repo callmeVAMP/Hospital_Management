@@ -14,11 +14,11 @@ import {
 } from "@mui/material";
 import { PersonAdd } from "@mui/icons-material";
 
-const AddPatientDialog = ({ open, onClose, onSave }) => {
+const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    name: patientData.patientName || "",
     gender: "",
-    mobile: "",
+    mobile: patientData.patientPhone || "",
     address: "",
     dob: "",
   });

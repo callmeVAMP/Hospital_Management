@@ -90,6 +90,27 @@ router.patch('/discharge', async (req, res) => {
     }
 });
 
+//get available rooms and corresponding beds for each room type
+router.get('/available-rooms',async(req,res)=>{
+    try {
+        const [results, fields] = await connection.query(
+        `
+        SELECT Beds.RNo,Beds.BedID,Rooms.RType,Rooms.RCategory FROM Beds
+        INNER JOIN Rooms ON Rooms.RNo=Beds.Rno 
+        WHERE (Beds.RNo,Beds.BedID) NOT IN (SELECT RNo,BedID FROM Occupancy);
+        `
+        );
+        
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.status(200).json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({error:"Server Error"});
+    }
+})
+
 
 
 

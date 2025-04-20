@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import {
   Box,
   Typography,
@@ -23,7 +24,13 @@ import {
   Search as SearchIcon,
   AccessTime,
   Visibility as VisibilityIcon,
+  Edit,
+  EditOffOutlined,
 } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { setSnackBarInfo } from "../../Features/snackbarSlice";
 
 const testSchedule = [
   {
@@ -53,6 +60,12 @@ function CustomToolbar() {
 }
 
 export default function PreviousTestsTable() {
+  const auth=useSelector((state)=>state.authKey);
+  const navigate=useNavigate();
+  const dispatch=useDispatch();
+
+  const [testSchedule,setTestSchedule]=useState([]);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -67,20 +80,89 @@ export default function PreviousTestsTable() {
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
+
+  const fetchPreviousTests=async()=>{
+    const labRNo=auth?.LabRNo;
+    console.log("labRno",labRNo)
+
+    try {
+      const res=await axios.get(`http://localhost:8000/tests/previous_tests/${labRNo}`);
+      console.log(res?.data);
+
+      const formattedTests = res?.data.map((test,index) => ({
+        sno:index+1,
+        id: test.TestID,
+        patientName: test.PName,
+        testName: test.TestName,
+        date: dayjs(test.ScheduledDTime).format("YYYY-MM-DD"),
+        time: dayjs(test.ScheduledDTime).format("hh:mm A"),
+        reportUrl: `http://localhost:5173/${test?.FilePath}`,
+        cdate: dayjs(test.CompletedDTime).format("YYYY-MM-DD"),
+        ctime: dayjs(test.CompletedDTime).format("hh:mm A"),
+
+      }));
+      console.log("formatted")
+      console.log(formattedTests)
+      setTestSchedule(formattedTests);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
+
+  useEffect(()=>{
+    auth?.LabRNo && fetchPreviousTests();
+  },[auth,navigate])
+
+
+
   const handleRefreshTable = () => {
-    // Add refresh logic here
+    fetchPreviousTests();
   };
+
+  const handleFileUpload = async(file, rowId) => {
+    // setReportFile(file)
+    // console.log("rep file ",reportFile, reportFile?.name)
+    console.log("Uploading report for row ID:", rowId);
+    console.log("Selected file:", file);
+    const renamedFile = new File([file], `${rowId}-report.pdf`, { type: file.type });
+
+    const formData = new FormData();
+    formData.append("file", renamedFile);          // The key must match multer's 'upload.single("file")'
+    formData.append("TestID", rowId); 
+
+    try {
+      const res=await axios.post(`http://localhost:8000/report/upload_test_report`,formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        })
+        console.log(res)
+        if(res?.data?.success) {
+            dispatch(setSnackBarInfo({message:`Uploaded Report Successfully! Updating Tests here`,severity:'success',open:true}))
+            fetchPreviousTests()
+        }
+        } catch (error) {
+            dispatch(setSnackBarInfo({message:`Some Error Occured`,severity:'error',open:true}))
+        console.log(error)
+        }
+    // You can add actual upload logic here
+  };
+
 
   const filteredTests = testSchedule.filter((test) =>
     test.patientName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns = [
-    { field: "id", headerName: "S.No", width: 80 },
+    { field: "sno", headerName: "S.No", width: 80 },
     { field: "patientName", headerName: "Patient Name", flex: 1.5 },
     { field: "testName", headerName: "Test Name", flex: 1.5 },
     { field: "date", headerName: "Scheduled Date", flex: 1 },
     {field: "time",headerName: "Scheduled Time",flex: 1},
+    { field: "cdate", headerName: "Completed Date", flex: 1 },
+    { field: "ctime", headerName: "Completed Time", flex: 1 },
     {
       field: "viewReport",
       headerName: "View Report",
@@ -101,6 +183,32 @@ export default function PreviousTestsTable() {
             Not Available
           </Typography>
         ),
+    },
+    {
+      field: "actions",
+      headerName: "Update Report",
+      flex: 0.5,
+      sortable: false,
+      renderCell: (params) => (
+        
+        <Button
+            variant="outlined"
+            component="label"
+            startIcon={<Edit />}
+            size="small"
+          >
+            Upload
+            <input
+              type="file"
+              hidden
+              onChange={(e) =>
+                handleFileUpload(e.target.files[0], params.row.id)
+              }
+              // value={reportFile}
+            />
+          </Button>
+        
+      ),
     },
   ];
 

@@ -1,3 +1,4 @@
+
 // import nodemailer from "nodemailer";
 // import dotenv from "dotenv";
 // import connection from "../index.js";
@@ -179,11 +180,12 @@ import dotenv from "dotenv";
 import connection from "../index.js";
 import { createToken } from "../utils/auth.js";
 
+
 dotenv.config();
+// const router = express.Router();
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
-  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,

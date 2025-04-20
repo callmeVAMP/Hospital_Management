@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
 export const DeleteOperationDialog = ({ open, opData, onCancel, onConfirm }) => {
-  console.log("in",opData);
+  // console.log("in",opData);
   return (
     <Dialog
       open={open}

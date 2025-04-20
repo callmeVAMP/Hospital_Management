@@ -70,6 +70,7 @@ import ScheduledTestsTable from './components/LabTechnician/ScheduledTests';
 import LoginPage from './pages/LoginPage';
 import VerifyOtp from './pages/VerifyOtp'; 
 import AuthComponent from './pages/Login';
+import PendingReportsTestTable from './components/LabTechnician/PendingReports.jsx';
 
 
 const router = createBrowserRouter([
@@ -157,7 +158,7 @@ const router = createBrowserRouter([
         ]
       },
       {
-        path:"/labTechnician",
+        path:"/labtechnician",
         element: <LabTechnicianPage/>,
         children:[{
           path: "previous",
@@ -166,7 +167,12 @@ const router = createBrowserRouter([
         {
           path:"scheduled",
           element:<ScheduledTestsTable/>
+        },
+        {
+          path:"pending-reports",
+          element:<PendingReportsTestTable/>
         }
+
       ]
       },
     

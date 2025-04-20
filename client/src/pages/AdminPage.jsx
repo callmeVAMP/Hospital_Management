@@ -42,7 +42,7 @@ const AdminPage = () => {
 
 
   useEffect(() => {
-    let cookieAuth = Cookies.get("auth");
+    // let cookieAuth = Cookies.get("auth");
     let authToken = Cookies.get("authToken");
 
     // if (cookieAuth) {

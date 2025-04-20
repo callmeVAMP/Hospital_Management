@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import dayjs from "dayjs";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -23,9 +24,14 @@ import {
   Refresh,
   Download,
   Search as SearchIcon,
+  CheckCircle,
 } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { setSnackBarInfo } from "../../Features/snackbarSlice";
 
-const testSchedule = [
+const initialTests = [
   {
     id: 1,
     patientName: "John Doe",
@@ -52,6 +58,11 @@ function CustomToolbar() {
 }
 
 export default function ScheduledTestsTable() {
+  const auth=useSelector((state)=>state.authKey);
+  const dispatch=useDispatch();
+  const navigate=useNavigate();
+
+  const [testSchedule,setTestSchedule]=useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -63,50 +74,116 @@ export default function ScheduledTestsTable() {
     time: true,
     upload: true,
   });
+  const [reportFile,setReportFile]=useState('');
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
+
+  const fetchScheduledTests=async()=>{
+    const labRNo=auth?.LabRNo;
+    console.log("labRno",labRNo)
+
+    try {
+      const res=await axios.get(`http://localhost:8000/tests/scheduled_tests/${labRNo}`);
+      console.log(res?.data);
+
+      const formattedTests = res?.data.map((test,index) => ({
+        sno:index+1,
+        id: test.TestID,
+        patientName: test.PName,
+        testName: test.TestName,
+        date: dayjs(test.ScheduledDTime).format("YYYY-MM-DD"),
+        time: dayjs(test.ScheduledDTime).format("hh:mm A"),
+      }));
+      console.log("formatted")
+      console.log(formattedTests)
+      setTestSchedule(formattedTests);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  
   const handleRefreshTable = () => {
-    // Refresh logic here
+    fetchScheduledTests();
   };
 
-  const handleFileUpload = (file, rowId) => {
-    console.log("Uploading report for row ID:", rowId);
-    console.log("Selected file:", file);
-    // You can add actual upload logic here
-  };
+  useEffect(()=>{
+    auth?.LabRNo && fetchScheduledTests();
+  },[auth,navigate])
+
+
+  // /// need to be uploaded
+
+  // const handleFileUpload = async(file, rowId) => {
+  //   setReportFile(file)
+  //   console.log("rep file ",reportFile, reportFile?.name)
+  //   console.log("Uploading report for row ID:", rowId);
+  //   console.log("Selected file:", file);
+  //   const renamedFile = new File([file], `${rowId}-report.pdf`, { type: file.type });
+
+  //   const formData = new FormData();
+  //   formData.append("file", renamedFile);          // The key must match multer's 'upload.single("file")'
+  //   formData.append("TestID", rowId); 
+
+  //   try {
+  //     const res=await axios.post(`http://localhost:8000/report/upload_test_report`,formData,
+  //       {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data"
+  //         }
+  //       })
+  //     console.log(res)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+    
+    
+  // };
+  const handleUpdateStatus=async(params)=>{
+    console.log(params)
+    const test=params?.row;
+    try {
+      const res=await axios.post(`http://localhost:8000/tests/mark-test-complete`,{TestID:test?.id});
+      console.log(res);
+      if(res?.data?.success) {
+        dispatch(setSnackBarInfo({message:`Test Marked as Complete! Updating Tests here`,severity:'success',open:true}))
+        fetchScheduledTests()
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    
+  }
 
   const filteredTests = testSchedule.filter((test) =>
     test.patientName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns = [
-    { field: "id", headerName: "S.No", width: 80 },
+    { field: "sno", headerName: "S.No", width: 80 },
     { field: "patientName", headerName: "Patient Name", flex: 1.5 },
     { field: "testName", headerName: "Test Name", flex: 1.5 },
     { field: "date", headerName: "Scheduled Date", flex: 1 },
     { field: "time", headerName: "Scheduled Time", flex: 1 },
     {
-      field: "upload",
-      headerName: "Upload Report",
+      field: "updateStatus",
+      headerName: "Update Status",
       flex: 1.5,
       sortable: false,
       renderCell: (params) => (
+      
         <Button
+          onClick={()=>handleUpdateStatus(params)}
           variant="outlined"
           component="label"
-          startIcon={<UploadFileIcon />}
+          startIcon={<CheckCircle />}
           size="small"
         >
-          Upload
-          <input
-            type="file"
-            hidden
-            onChange={(e) =>
-              handleFileUpload(e.target.files[0], params.row.id)
-            }
-          />
+          Mark as Complete
+          
         </Button>
+        
+        
       ),
     },
   ];
