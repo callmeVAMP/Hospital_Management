@@ -1,7 +1,7 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
 export const DeleteOperationDialog = ({ open, opData, onCancel, onConfirm }) => {
-  // console.log("in",opData);
+  console.log("in",opData);
   return (
     <Dialog
       open={open}
@@ -25,7 +25,7 @@ export const DeleteOperationDialog = ({ open, opData, onCancel, onConfirm }) => 
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center", gap: 2, pb: 2 }}>
         <Button
-          onClick={onConfirm}
+          onClick={()=>onConfirm(opData?.treatmentID)}
           variant="contained"
           color="error"
           sx={{ borderRadius: "999px", px: 3 }}

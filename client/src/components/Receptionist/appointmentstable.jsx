@@ -46,7 +46,7 @@ export default function AppointmentTable() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/appointment/all_appointment")
+      .get("http://localhost:8000/appointment/all_appointment")
       .then((response) => {
         const dataWithIds = response.data.map((item, index) => ({
           id: index + 1,
@@ -101,7 +101,7 @@ export default function AppointmentTable() {
     try {
       if (selectedPatient) {
         // Edit existing appointment
-        const response = await axios.put(`http://localhost:3000/appointment/update_appointment/${selectedPatient.AppID}`, patientData);
+        const response = await axios.put(`http://localhost:8000/appointment/update_appointment/${selectedPatient.AppID}`, patientData);
         setAppointments(prev =>
           prev.map((p) =>
             p.AppID === selectedPatient.AppID ? { ...p, ...patientData } : p
@@ -109,7 +109,7 @@ export default function AppointmentTable() {
         );
       } else {
         // Add new appointment
-        const response = await axios.post("http://localhost:3000/appointments", patientData);
+        const response = await axios.post("http://localhost:8000/appointments", patientData);
         setAppointments(prev => [...prev, response.data]);
       }
   
@@ -123,7 +123,7 @@ export default function AppointmentTable() {
   const handleDeleteClick = async (id) => {
     console.log(id);
     try {
-      await axios.delete(`http://localhost:3000/appointment/delete_appointment/${id}`);
+      await axios.delete(`http://localhost:8000/appointment/delete_appointment/${id}`);
       setAppointments(prev => prev.filter((p) => p.AppID !== id));
     } catch (error) {
       console.error("Error deleting appointment:", error);

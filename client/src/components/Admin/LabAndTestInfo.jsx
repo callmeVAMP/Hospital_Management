@@ -1,11 +1,304 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
+// import {
+//   Box,
+//   Typography,
+//   TextField,
+//   IconButton,
+//   Tooltip,
+//   Stack,
+//   Menu,
+//   MenuItem,
+//   Checkbox,
+//   Chip,
+// } from "@mui/material";
+// import {
+//   DataGrid,
+//   GridToolbarContainer,
+//   GridToolbarExport,
+//   useGridApiRef,
+// } from "@mui/x-data-grid";
+// import {
+//   Edit,
+//   Delete,
+//   Refresh,
+//   Download,
+//   Add,
+//   ViewColumn,
+//   Search as SearchIcon,
+// } from "@mui/icons-material";
+// import AddOrEditLabAndTestForm from "./AddOrEditLabTest";
+// import AlertBar from "../Common/AlertBar";
+// import { DeleteLabDialog } from "./DeleteLabDialog";
+
+// const tests = [
+//   {
+//     id: 1,
+//     labRoomNo: "201",
+//     labName: "Biochemistry Lab",
+//     testsPerformed: ["Blood Test", "Liver Function Test"],
+//     floor: 2,
+//   },
+//   {
+//     id: 2,
+//     labRoomNo: "202",
+//     labName: "Microbiology Lab",
+//     testsPerformed: ["Culture Test", "Sensitivity Test"],
+//     floor: 2,
+//   },
+// ];
+
+// const getColor = (text) => {
+//   const colorMap = {
+//     "Blood Test": { bg: "#e3f2fd", text: "#1565c0" },
+//     "Liver Function Test": { bg: "#fff3e0", text: "#ef6c00" },
+//     "Culture Test": { bg: "#ede7f6", text: "#4527a0" },
+//     "Sensitivity Test": { bg: "#f3e5f5", text: "#6a1b9a" },
+//   };
+//   return colorMap[text] || { bg: "#eceff1", text: "#263238" };
+// };
+
+// export default function LabAndTestInfo() {
+//     const [openAddTest, setAddOpenTest] = useState(false);
+ 
+//     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+//     const [selectedLabTest, setSelectedLabTest] = useState(null);
+//     const [editDialogOpen, setEditDilaogOpen]=useState(false);
+
+//     const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
+//     const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+//     const handleEditClick=(labTestData)=>{
+//         console.log("out ",labTestData);
+//         setSelectedLabTest(labTestData);
+//         setEditDilaogOpen(true);
+//     }
+
+//     const handleDeleteClick = (labTestData) => {
+//         console.log(labTestData);
+//         setSelectedLabTest(labTestData);
+//         setDeleteDialogOpen(true);
+//     };
+
+//     const handleDeleteConfirm = () => {
+//         // perform delete using selectedRoom.id or something
+//         console.log("Deleting Lab Test:", selectedLabTest);
+//         setDeleteDialogOpen(false);
+//         setSnackbarOpen(true);
+//         setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
+        
+//     };
+
+        
+//     const handleSave = (data, type) => {
+//         console.log('Lab Test Data:', data);  
+//         if(type=="add"){
+//             setSnackbarOpen(true);
+//             setSnackBarInfo({'message':'Added Lab and Tests Successfully','severity':'success'})
+//         }   
+//         else{
+//             setSnackbarOpen(true);
+//             setSnackBarInfo({'message':'Updated Lab Information Successfully','severity':'success'})
+//         }
+//     };
+    
+
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+//     labRoomNo: true,
+//     labName: true,
+//     testsPerformed: true,
+//     floor: true,
+//   });
+//   const [anchorEl, setAnchorEl] = useState(null);
+//   const open = Boolean(anchorEl);
+//   const apiRef = useGridApiRef();
+
+//   const filteredTests = tests.filter((lab) =>
+//     lab.labRoomNo.toLowerCase().includes(searchQuery.toLowerCase())
+//   );
+
+//   const columns = [
+//     { field: "labRoomNo", headerName: "Lab Room No", flex: 0.5 },
+//     { field: "labName", headerName: "Lab Name", flex: 1.5 },
+//     {
+//       field: "testsPerformed",
+//       headerName: "Tests Performed",
+//       flex: 2,
+//       renderCell: (params) => (
+//         <Box display="flex" flexWrap="wrap" gap={0.5} sx={{ justifyContent: 'flex-start', alignItems: 'flex-start' }}>
+//           {params.row.testsPerformed.map((test, index) => {
+//             const { bg, text } = getColor(test);
+//             return (
+//               <Chip
+//                 key={index}
+//                 label={test}
+//                 sx={{
+//                   backgroundColor: bg,
+//                   color: text,
+//                   fontWeight: "bold",
+//                   borderRadius: 1.5,
+//                   height: 28,
+//                 }}
+//               />
+//             );
+//           })}
+//         </Box>
+//       ),
+//     },
+//     { field: "floor", headerName: "Floor", flex: 0.5 },
+//     {
+//       field: "actions",
+//       headerName: "Actions",
+//       flex: 0.5,
+//       sortable: false,
+//       renderCell: (params) => (
+//         <Box display="flex" flexDirection="row" gap={0.5}>
+//           <Tooltip title="Edit">
+//             <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={()=>handleEditClick(params)}>
+//               <Edit fontSize="small" />
+//             </IconButton>
+//           </Tooltip>
+//           <Tooltip title="Delete">
+//             <IconButton size="small" sx={{ color: "#f43f5e" }} onClick={()=>handleDeleteClick(params)}>
+//               <Delete fontSize="small" />
+//             </IconButton>
+//           </Tooltip>
+//         </Box>
+//       ),
+//     },
+//   ];
+
+//   return (
+//     <Box sx={{ height: 600, width: "100%", p: 2 }}>
+//       <Box
+//           sx={{
+//             backgroundColor: "#dbe3f4",
+//             p: 2,
+//             borderTopLeftRadius: 12,
+//             borderTopRightRadius: 12,
+//             display: "flex",
+//             alignItems: "center",
+//             justifyContent: "space-between",
+//           }}
+//         >
+//           <Typography variant="h6">Room Info</Typography>
+//           <Box display="flex" alignItems="center" gap={2}>
+//             <Box
+//               sx={{
+//                 backgroundColor: "white",
+//                 px: 2,
+//                 py: 0.5,
+//                 borderRadius: 1,
+//                 display: "flex",
+//                 alignItems: "center",
+//                 gap: 1,
+//               }}
+//             >
+//               <SearchIcon fontSize="small" />
+//               <TextField
+//                 variant="standard"
+//                 placeholder="Search"
+//                 InputProps={{ disableUnderline: true }}
+//                 value={searchQuery}
+//                 onChange={(e) => setSearchQuery(e.target.value)}
+//                 size="small"
+//               />
+//             </Box>
+//             <Tooltip title="Show/Hide Columns">
+//               <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+//                 <ViewColumn />
+//               </IconButton>
+//               <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+//                 {Object.keys(columnVisibilityModel).map((field) => (
+//                   <MenuItem key={field}>
+//                     <Checkbox
+//                       checked={columnVisibilityModel[field]}
+//                       onChange={() =>
+//                         setColumnVisibilityModel((prev) => ({
+//                           ...prev,
+//                           [field]: !prev[field],
+//                         }))
+//                       }
+//                     />
+//                     <Typography>{columns.find((c) => c.field === field)?.headerName}</Typography>
+//                   </MenuItem>
+//                 ))}
+//               </Menu>
+//             </Tooltip>
+//             <Tooltip title="Add New LabTest">
+//               <IconButton onClick={()=>setAddOpenTest(true)}>
+//                 <Add sx={{ color: "green" }} />
+//               </IconButton>
+              
+//             </Tooltip>
+//             <Tooltip title="Refresh">
+//               <IconButton onClick={()=>handleRefreshTable()}>
+//                 <Refresh />
+//               </IconButton>
+//             </Tooltip>
+//             <Tooltip title="Download XLSX">
+//               <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
+//                 <Download sx={{ color: "#3b82f6" }} />
+//               </IconButton>
+//             </Tooltip>
+//           </Box>
+//             </Box>
+//       <DataGrid
+//         columnVisibilityModel={columnVisibilityModel}
+//         onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
+//         apiRef={apiRef}
+//         rows={filteredTests}
+//         columns={columns.map((col) =>
+//           col.field === "floor" ? { ...col, headerName: "Floor" } : col
+//         )}
+//         pageSize={10}
+//         rowsPerPageOptions={[10, 15]}
+//         pagination
+//         disableSelectionOnClick
+//         sx={{
+//           backgroundColor: "white",
+//           borderRadius: 2,
+//           "& .MuiDataGrid-columnHeaders": {
+//             backgroundColor: "#f3f6f9",
+//             fontWeight: "bold",
+//           },
+//         }}
+//       />
+
+//         {/* Add Test */}
+//         <AddOrEditLabAndTestForm open={openAddTest} onClose={() => setAddOpenTest(false)} onSave={handleSave}/>
+        
+//         {/* Edit Test */}
+//         <AddOrEditLabAndTestForm open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} labTestData={selectedLabTest?.row} />
+
+//         {/* Delete Dialog */}
+//         <DeleteLabDialog
+//             open={deleteDialogOpen}
+//             labTest={selectedLabTest}
+//             onCancel={() => setDeleteDialogOpen(false)}
+//             onConfirm={handleDeleteConfirm}
+//         />
+
+//         {/* Snackbar code */}
+//         <AlertBar
+//             open={snackbarOpen}
+//             onClose={() => setSnackbarOpen(false)}
+//             message={snackBarInfo?.message}
+//             severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
+//             duration={3000}
+//         />
+
+//     </Box>
+//   );
+// }
+
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
   TextField,
   IconButton,
   Tooltip,
-  Stack,
   Menu,
   MenuItem,
   Checkbox,
@@ -13,8 +306,6 @@ import {
 } from "@mui/material";
 import {
   DataGrid,
-  GridToolbarContainer,
-  GridToolbarExport,
   useGridApiRef,
 } from "@mui/x-data-grid";
 import {
@@ -29,24 +320,9 @@ import {
 import AddOrEditLabAndTestForm from "./AddOrEditLabTest";
 import AlertBar from "../Common/AlertBar";
 import { DeleteLabDialog } from "./DeleteLabDialog";
+import axios from "axios";
 
-const tests = [
-  {
-    id: 1,
-    labRoomNo: "201",
-    labName: "Biochemistry Lab",
-    testsPerformed: ["Blood Test", "Liver Function Test"],
-    floor: 2,
-  },
-  {
-    id: 2,
-    labRoomNo: "202",
-    labName: "Microbiology Lab",
-    testsPerformed: ["Culture Test", "Sensitivity Test"],
-    floor: 2,
-  },
-];
-
+// Utility for color coding
 const getColor = (text) => {
   const colorMap = {
     "Blood Test": { bg: "#e3f2fd", text: "#1565c0" },
@@ -58,63 +334,137 @@ const getColor = (text) => {
 };
 
 export default function LabAndTestInfo() {
-    const [openAddTest, setAddOpenTest] = useState(false);
- 
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedLabTest, setSelectedLabTest] = useState(null);
-    const [editDialogOpen, setEditDilaogOpen]=useState(false);
+  const [labTests, setLabTests] = useState([]);
+  const [openAddTest, setAddOpenTest] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedLabTest, setSelectedLabTest] = useState(null);
+  const [editDialogOpen, setEditDilaogOpen] = useState(false);
 
-    const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
-
-    const handleEditClick=(labTestData)=>{
-        console.log("out ",labTestData);
-        setSelectedLabTest(labTestData);
-        setEditDilaogOpen(true);
-    }
-
-    const handleDeleteClick = (labTestData) => {
-        console.log(labTestData);
-        setSelectedLabTest(labTestData);
-        setDeleteDialogOpen(true);
-    };
-
-    const handleDeleteConfirm = () => {
-        // perform delete using selectedRoom.id or something
-        console.log("Deleting Lab Test:", selectedLabTest);
-        setDeleteDialogOpen(false);
-        setSnackbarOpen(true);
-        setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
-        
-    };
-
-        
-    const handleSave = (data, type) => {
-        console.log('Lab Test Data:', data);  
-        if(type=="add"){
-            setSnackbarOpen(true);
-            setSnackBarInfo({'message':'Added Lab and Tests Successfully','severity':'success'})
-        }   
-        else{
-            setSnackbarOpen(true);
-            setSnackBarInfo({'message':'Updated Lab Information Successfully','severity':'success'})
-        }
-    };
-    
+  const [snackBarInfo, setSnackBarInfo] = useState({ message: '', severity: '' });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     labRoomNo: true,
     labName: true,
     testsPerformed: true,
-    floor: true,
+    // floor: true,
+    location:true,
   });
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const apiRef = useGridApiRef();
 
-  const filteredTests = tests.filter((lab) =>
-    lab.labRoomNo.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch lab data from backend API on mount
+  useEffect(() => {
+    fetchLabTests();
+  }, []);
+
+  // GET: Fetch all lab tests from backend
+  const fetchLabTests = async () => {
+    try {
+      // TODO: Replace with your actual GET API endpoint for labs
+      const response = await axios.get("http://localhost:8000/admin/labs/view");
+      // Map and group results so each lab appears once with all its tests
+      const grouped = {};
+      response.data.forEach((item) => {
+        // const key = item.LabRNo + "|" + item.LabName;
+        const key = item.LabRNo + "|" + item.LabName;
+        if (!grouped[key]) {
+          grouped[key] = {
+            id: key,
+            labRoomNo: item.LabRNo,
+            labName: item.LabName,
+            testsPerformed: [],
+            location: item.Loc || "", // Add floor if available
+          };
+        }
+        if (item.TestName) grouped[key].testsPerformed.push(item.TestName);
+      });
+      setLabTests(Object.values(grouped));
+    } catch (error) {
+      setSnackBarInfo({ message: "Failed to fetch labs", severity: "error" });
+      setSnackbarOpen(true);
+    }
+  };
+
+
+  const handleSave = async (data, type) => {
+    try {
+      if (type === "add") {
+        const response = await axios.post(
+          "http://localhost:8000/admin/labs/insert",
+          {
+            LabRNo: data.labRoomNo,
+            LabName: data.labName,
+            TestName: data.testsPerformed,
+            Loc: data.location
+          }
+        );
+        
+        setSnackBarInfo({ 
+          message: response.data.message || "Added successfully", 
+          severity: "success" 
+        });
+      } else if (type === "edit") {
+        // EDIT logic (new)
+        // You must have LabRNo as the unique identifier in your data
+        await axios.put(
+          `http://localhost:8000/admin/labs/edit/${data.labRoomNo}`,
+          {
+            LabName: data.labName,
+            TestName: data.testPerformed,
+            Loc: data.location
+          }
+        );
+        setSnackBarInfo({ message: "Updated Lab Information Successfully", severity: "success" });
+      }
+      fetchLabTests(); // Refresh data after add/edit
+    }
+      
+    catch (error) {
+      setSnackBarInfo({
+        message: error.response?.data?.message || "Operation failed",
+        severity: "error"
+      });
+    }
+    setSnackbarOpen(true);
+  };
+
+  
+
+  // DELETE: Delete a lab/test from backend
+  const handleDeleteConfirm = async () => {
+    try {
+      // TODO: Replace with your actual DELETE API endpoint for deleting a lab/test
+      await axios.delete(`http://localhost:8000/admin/labs/delete/${selectedLabTest.labRoomNo}`);
+      setSnackBarInfo({ message: "Deleted Successfully", severity: "success" });
+      fetchLabTests(); // Refresh data after deletion
+    } catch (error) {
+      setSnackBarInfo({ message: "Deletion failed", severity: "error" });
+    }
+    setSnackbarOpen(true);
+    setDeleteDialogOpen(false);
+  };
+
+  const handleEditClick = (params) => {
+    setSelectedLabTest(params.row);
+    setEditDilaogOpen(true);
+  };
+
+  const handleDeleteClick = (params) => {
+    setSelectedLabTest(params.row);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleRefreshTable = () => {
+    fetchLabTests();
+    setSnackBarInfo({ message: "Table refreshed", severity: "info" });
+    setSnackbarOpen(true);
+  };
+
+  const filteredLabTests = labTests.filter((lab) =>
+    (lab.labRoomNo || "").toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns = [
@@ -145,7 +495,7 @@ export default function LabAndTestInfo() {
         </Box>
       ),
     },
-    { field: "floor", headerName: "Floor", flex: 0.5 },
+    { field: "location", headerName: "Location", flex: 0.5 },
     {
       field: "actions",
       headerName: "Actions",
@@ -154,12 +504,12 @@ export default function LabAndTestInfo() {
       renderCell: (params) => (
         <Box display="flex" flexDirection="row" gap={0.5}>
           <Tooltip title="Edit">
-            <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={()=>handleEditClick(params)}>
+            <IconButton size="small" sx={{ color: "#4f46e5" }} onClick={() => handleEditClick(params)}>
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" sx={{ color: "#f43f5e" }} onClick={()=>handleDeleteClick(params)}>
+            <IconButton size="small" sx={{ color: "#f43f5e" }} onClick={() => handleDeleteClick(params)}>
               <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -171,86 +521,83 @@ export default function LabAndTestInfo() {
   return (
     <Box sx={{ height: 600, width: "100%", p: 2 }}>
       <Box
-          sx={{
-            backgroundColor: "#dbe3f4",
-            p: 2,
-            borderTopLeftRadius: 12,
-            borderTopRightRadius: 12,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Typography variant="h6">Room Info</Typography>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Box
-              sx={{
-                backgroundColor: "white",
-                px: 2,
-                py: 0.5,
-                borderRadius: 1,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <SearchIcon fontSize="small" />
-              <TextField
-                variant="standard"
-                placeholder="Search"
-                InputProps={{ disableUnderline: true }}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                size="small"
-              />
-            </Box>
-            <Tooltip title="Show/Hide Columns">
-              <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-                <ViewColumn />
-              </IconButton>
-              <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
-                {Object.keys(columnVisibilityModel).map((field) => (
-                  <MenuItem key={field}>
-                    <Checkbox
-                      checked={columnVisibilityModel[field]}
-                      onChange={() =>
-                        setColumnVisibilityModel((prev) => ({
-                          ...prev,
-                          [field]: !prev[field],
-                        }))
-                      }
-                    />
-                    <Typography>{columns.find((c) => c.field === field)?.headerName}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Tooltip>
-            <Tooltip title="Add New LabTest">
-              <IconButton onClick={()=>setAddOpenTest(true)}>
-                <Add sx={{ color: "green" }} />
-              </IconButton>
-              
-            </Tooltip>
-            <Tooltip title="Refresh">
-              <IconButton onClick={()=>handleRefreshTable()}>
-                <Refresh />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Download XLSX">
-              <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
-                <Download sx={{ color: "#3b82f6" }} />
-              </IconButton>
-            </Tooltip>
+        sx={{
+          backgroundColor: "#dbe3f4",
+          p: 2,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="h6">Lab & Test Info</Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box
+            sx={{
+              backgroundColor: "white",
+              px: 2,
+              py: 0.5,
+              borderRadius: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <SearchIcon fontSize="small" />
+            <TextField
+              variant="standard"
+              placeholder="Search"
+              InputProps={{ disableUnderline: true }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              size="small"
+            />
           </Box>
-            </Box>
+          <Tooltip title="Show/Hide Columns">
+            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+              <ViewColumn />
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+              {Object.keys(columnVisibilityModel).map((field) => (
+                <MenuItem key={field}>
+                  <Checkbox
+                    checked={columnVisibilityModel[field]}
+                    onChange={() =>
+                      setColumnVisibilityModel((prev) => ({
+                        ...prev,
+                        [field]: !prev[field],
+                      }))
+                    }
+                  />
+                  <Typography>{columns.find((c) => c.field === field)?.headerName}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Tooltip>
+          <Tooltip title="Add New LabTest">
+            <IconButton onClick={() => setAddOpenTest(true)}>
+              <Add sx={{ color: "green" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Refresh">
+            <IconButton onClick={handleRefreshTable}>
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download XLSX">
+            <IconButton onClick={() => apiRef.current.exportDataAsCsv()}>
+              <Download sx={{ color: "#3b82f6" }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
       <DataGrid
         columnVisibilityModel={columnVisibilityModel}
         onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
         apiRef={apiRef}
-        rows={filteredTests}
-        columns={columns.map((col) =>
-          col.field === "floor" ? { ...col, headerName: "Floor" } : col
-        )}
+        rows={filteredLabTests}
+        columns={columns}
         pageSize={10}
         rowsPerPageOptions={[10, 15]}
         pagination
@@ -265,29 +612,37 @@ export default function LabAndTestInfo() {
         }}
       />
 
-        {/* Add Test */}
-        <AddOrEditLabAndTestForm open={openAddTest} onClose={() => setAddOpenTest(false)} onSave={handleSave}/>
-        
-        {/* Edit Test */}
-        <AddOrEditLabAndTestForm open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} labTestData={selectedLabTest?.row} />
+      {/* Add Lab/Test Dialog: calls handleSave with type "add" */}
+      <AddOrEditLabAndTestForm
+        open={openAddTest}
+        onClose={() => setAddOpenTest(false)}
+        onSave={(data) => handleSave(data, "add")}
+      />
 
-        {/* Delete Dialog */}
-        <DeleteLabDialog
-            open={deleteDialogOpen}
-            labTest={selectedLabTest}
-            onCancel={() => setDeleteDialogOpen(false)}
-            onConfirm={handleDeleteConfirm}
-        />
+      {/* Edit Lab/Test Dialog: calls handleSave with type "edit" */}
+      <AddOrEditLabAndTestForm
+        open={editDialogOpen}
+        onClose={() => setEditDilaogOpen(false)}
+        onSave={(data) => handleSave(data, "edit")}
+        labTestData={selectedLabTest}
+      />
 
-        {/* Snackbar code */}
-        <AlertBar
-            open={snackbarOpen}
-            onClose={() => setSnackbarOpen(false)}
-            message={snackBarInfo?.message}
-            severity={snackBarInfo?.severity} // Can be 'success', 'error', 'warning', 'info'
-            duration={3000}
-        />
+      {/* Delete Confirmation Dialog */}
+      <DeleteLabDialog
+        open={deleteDialogOpen}
+        labTest={selectedLabTest}
+        onCancel={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+      />
 
+      {/* Snackbar for notifications */}
+      <AlertBar
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackBarInfo?.message}
+        severity={snackBarInfo?.severity}
+        duration={3000}
+      />
     </Box>
   );
 }

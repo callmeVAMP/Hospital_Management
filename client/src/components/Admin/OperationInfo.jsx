@@ -180,10 +180,26 @@ export default function OperationInfo() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async(trID) => {
     // perform delete using selectedRoom.id or something
     console.log("Deleting Room:", selectedOperation);
+
+    try {
+      const res=await axios.delete(`http://localhost:8000/operation/delete/${trID}`);
+      console.log(res);
+      if(res?.data?.success){
+        dispatch(setSnackBarInfo({message:`Deleted Operation Successfully! Updating Operations here`,severity:'success',open:true}))
+        fetchAllOperations()
+      }
+    } catch (error) {
+      console.log(error)
+      dispatch(setSnackBarInfo({message:`Failed to Delete Operation!`,severity:'error',open:true}))
+    }
+    
+
+
     setDeleteDialogOpen(false);
+
     // setSnackbarOpen(true);
     // setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
     

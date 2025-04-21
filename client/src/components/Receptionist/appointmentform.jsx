@@ -30,7 +30,7 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
   // Fetch doctor list from backend
   useEffect(() => {
     axios
-      .get("http://localhost:3000/doctor/all") // replace with your actual backend URL
+      .get("http://localhost:8000/doctor/all") // replace with your actual backend URL
       .then((res) => {
         setDoctors(res.data);
       })
@@ -86,7 +86,7 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/appointment/book", {
+      const response = await fetch("http://localhost:8000/appointment/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -292,7 +292,7 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
       </Paper>
       <Snackbar
         open={showSnackbar}
-        autoHideDuration={3000}
+        autoHideDuration={8000}
         onClose={() => setShowSnackbar(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >

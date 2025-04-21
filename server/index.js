@@ -13,6 +13,7 @@ import labtech from './routes/LabTechnician.js'
 import tests from './routes/tests.js'
 import report from './routes/report.js'
 import operation from './routes/operations.js'
+import treatment from './routes/treatment.js'
 //import admin from './routes/admin_from_starting.js'
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use('/tests',tests);
 app.use('/report',report);
 app.use('/operation',operation);
 app.use('/doctor',doctor);
+app.use('/treatment',treatment)
 //app.use('/login',auth)
 app.listen(PORT, () => {
   console.log(`Server Running on PORT ${PORT}`);

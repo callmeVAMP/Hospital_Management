@@ -27,7 +27,7 @@ const ReceptionistPage = () => {
         navigate("/login",{replace:true});
       }
       else if(authState?.role!="receptionist"){
-        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${authState?.role}`,severity:'error',open:true}))
         console.log("not authorised");
         navigate(`/${authState?.role}`,{replace:true});
       }

@@ -125,6 +125,7 @@ router.delete('/delete_patient/:pid', async (req, res) => {
 
 // Get all doctor profiles
 router.get('/doctor_profiles', async (req, res) => {
+    console.log("called")
     try {
         const [results] = await connection.query(`
             SELECT 
@@ -717,5 +718,349 @@ router.delete('/delete_treatment/:trid', async (req, res) => {
 });
 });
 
+
+
+router.get('/occupancy/view', async (req, res) => {
+    try {
+      const [results] = await connection.query(`
+        SELECT 
+          O.RNo AS roomNo,
+          O.BedID AS bedNo,
+          DATE(O.StDateTime) AS admissionDate,
+          P.PName AS patientName,
+          P.PPhNo AS mobile,
+          P.PGender AS gender,
+          H.HName AS doctorAssigned,
+          CASE 
+            WHEN O.EndDateTime IS NULL THEN 'Admit' 
+            ELSE 'Discharged' 
+          END AS status,
+          0 AS amount,  -- Hardcoded temporary value
+          O.StDateTime,  -- Needed for edit/delete operations
+          O.PID          -- Needed for patient reference
+        FROM Occupancy O
+        LEFT JOIN Patient P ON O.PID = P.PID
+        LEFT JOIN HealthcareProf H ON O.DoctorAssigned = H.HID
+      `);
+  
+      console.log('Fetched occupancy data:', results);
+      res.json(results);
+    } catch (err) {
+      console.error('Error fetching occupancy data:', err);
+      res.status(500).json({ 
+        error: 'Failed to fetch occupancy data',
+        details: err.message 
+      });
+    }
+  });
+  
+
+router.post('/occupancy/insert', async (req, res) => {
+var RNo=req?.body?.RNo;
+var BedID=req?.body?.BedID;
+var DoctorAssigned=req?.body?.DoctorAssigned;
+var StDateTime=req?.body?.StDateTime;
+var EndDateTime=req?.body?.EndDateTime;
+var PID=req?.body?.PID;
+var TreatmentDesc=req?.body?.TreatmentDesc;
+console.log(PID);
+    try {
+        const [results, fields] = await connection.query(
+        `INSERT INTO Occupancy (RNo, BedID, DoctorAssigned, StDateTime, EndDateTime, PID, TreatmentDesc) VALUES (${RNo}, ${BedID}, '${DoctorAssigned}', '${StDateTime}', '${EndDateTime}', ${PID}, '${TreatmentDesc}')`
+       
+        );
+        
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
+    }
+    });
+
+router.post('/occupancy/delete', async (req, res) => {
+    var RNo=req?.body?.RNo;
+    var BedID=req?.body?.BedID;
+    var StDateTime=req?.body?.StDateTime;
+    try {
+        const [results, fields] = await connection.query(
+        `DELETE FROM Occupancy WHERE RNo = ${RNo} AND BedID = ${BedID} AND StDateTime = '${StDateTime}'`
+        // 'Select* from Occupancy'
+        );
+        
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
+    }
+    });
+
+
+
+router.post('/occupancy/edit', async (req, res) => {
+    const { RNo, BedID, StDateTime, PName, PPhNo, PGender, DoctorAssigned, status, HPhNo } = req.body;
+
+    try {
+        // Step 1: Check if patient is registered
+        const [patientResult] = await connection.query(
+            `SELECT PID FROM Patient WHERE PName = ? AND PPhNo = ? AND PGender = ?`,
+            [PName, PPhNo, PGender]
+        );
+
+        if (patientResult.length === 0) {
+            return res.status(404).json({ message: "Patient not registered" });
+        }
+
+        // Step 2: Get HID from HealthCareProf using HName and HPhNo
+        const [doctorResult] = await connection.query(
+            `SELECT HID FROM HealthcareProf WHERE HName = ? AND HPhNo = ?`,
+            [DoctorAssigned, HPhNo]
+        );
+
+        if (doctorResult.length === 0) {
+            return res.status(404).json({ message: "Healthcare professional not found" });
+        }
+
+        const HID = doctorResult[0].HID;
+
+        // Step 3: Get current EndDateTime (if any)
+        const [occupancyResult] = await connection.query(
+            `SELECT EndDateTime FROM Occupancy WHERE RNo = ? AND BedID = ? AND StDateTime = ?`,
+            [RNo, BedID, StDateTime]
+        );
+
+        if (occupancyResult.length === 0) {
+            return res.status(404).json({ message: "Occupancy record not found" });
+        }
+
+        let updatedEndDateTime = occupancyResult[0].EndDateTime;
+
+        // Step 4: If discharged and EndDateTime is NULL, set it to now
+        if (status === 'discharged' && !updatedEndDateTime) {
+            updatedEndDateTime = new Date(); // or use MySQL NOW() in the query instead
+        }
+
+        // Step 5: Update Occupancy with new DoctorAssigned (HID) and EndDateTime
+        const [updateResult] = await connection.query(
+            `UPDATE Occupancy 
+             SET DoctorAssigned = ?, EndDateTime = ? 
+             WHERE RNo = ? AND BedID = ? AND StDateTime = ?`,
+            [HID, updatedEndDateTime, RNo, BedID, StDateTime]
+        );
+
+        res.json({ message: "Occupancy updated successfully", updated: updateResult });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("An error occurred while updating occupancy");
+    }
+});
+
+
+router.get('/beds/view', async (req, res) => {
+
+    try {
+        const [results, fields] = await connection.query(
+        // `SELECT r.RNo, r.RType, r.Capacity, r.Capacity - COALESCE((SELECT COUNT(BedID) FROM Occupancy WHERE RNo = r.RNo AND NOW() BETWEEN StDateTime AND EndDateTime), 0) AS AvailableCapacity,r.RoomRate,r.RCategory FROM Rooms r`
+        `SELECT r.RNo, r.RType, r.Capacity, r.Capacity - COUNT(o.BedID) AS AvailableCapacity, r.RoomRate, r.RCategory FROM Rooms r LEFT JOIN Occupancy o ON r.RNo = o.RNo AND o.EndDateTime IS NULL GROUP BY r.RNo;  
+`
+
+        );
+        
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
+    }
+    });    
+        
+           
+
+router.post('/beds/insert', async (req, res) => {
+   
+
+    const {RNo,Capacity,RType,RCategory,RoomRate}=req.body;
+    try{
+        const [results,fields]=await connection.query(
+            `INSERT INTO Rooms Values (${RNo},'${Capacity}','${RType}','${RCategory}',${RoomRate})`
+        )
+
+        console.log(results);
+        console.log(fields);
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
+    }
+});
+
+
+   
+
+router.delete('/beds/delete', async (req, res) => {
+    
+    const { RNo } = req.body;
+   
+  
+    try {
+      const [result] = await connection.query(
+    
+        `DELETE From Rooms where RNo=${RNo}`
+      );
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No matching occupancy record found"
+        });
+      }
+  
+      res.json({
+        success: true,
+        message: "Bed occupancy deleted successfully"
+      });
+  
+    } catch (err) {
+      console.error("Delete error:", err);
+      res.status(500).json({
+        success: false,
+        message: "Database error occurred"
+      });
+    }
+  });
+  
+   
+
+router.put('/beds/edit/:RNo', async (req, res) => {
+    const RNo = req.params.RNo;
+    const { Capacity, RType, RCategory, RoomRate } = req.body;
+  
+    try {
+      const [results] = await connection.query(
+        `UPDATE Rooms 
+         SET Capacity = ?, RCategory = ?, RoomRate = ?, RType = ?
+         WHERE RNo = ?`,
+        [Capacity, RCategory, RoomRate, RType, RNo] // Order matches placeholders
+      );
+  
+      res.json({ success: true, message: "Room updated successfully" });
+    } catch (err) {
+      console.error("Update error:", err);
+      res.status(500).json({ success: false, message: "Update failed" });
+    }
+  });
+
+
+router.get('/Labs/view', async (req, res) => {
+
+try {
+    const [results, fields] = await connection.query(
+    
+    `SELECT lb.LabRNo, lb.LabName, lb.TestName,lb.Loc from Lab lb`
+    // 'Select* from Occupancy'
+    );
+    
+    
+    console.log(results); // results contains rows returned by server
+    console.log(fields); // fields contains extra meta data about results, if available
+    res.json(results);
+} catch (err) {
+    console.log(err);
+    res.status(500).send('error');
+}
+});            
+                                            
+router.post('/Labs/insert', async (req, res) => {
+
+
+const { LabRNo, LabName, TestName, Loc } = req.body;
+
+    try {
+        const [results, fields] = await connection.query(
+        `INSERT INTO Lab (LabRNo, TestName, LabName, Loc) VALUES (${LabRNo}, '${TestName}', '${LabName}', '${Loc}')`
+        
+        );
+        
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
+    }
+    });                    
+
+//ca---------
+router.put('/Labs/edit/:labID', async (req, res) => {
+    
+    const labID=req.params.labID;
+    // const {LabName,TestName,Loc}=req.body;
+    const LabName=req?.body?.LabName;
+    const TestName=req?.body?.TestName;
+    const Loc=req?.body?.Loc;
+
+    
+
+    try {
+        const [results, fields] = await connection.query(
+        `UPDATE Lab SET LabName = '${LabName}', TestName = '${TestName}', Loc = '${Loc}' WHERE LabRNo = ${labID}`
+        
+        );
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
+    }
+    }); 
+
+
+    
+
+
+
+// DELETE /admin/labs/:labId (RESTful endpoint)
+router.delete('/labs/delete/:labId', async (req, res) => {
+    const labId = req.params.labId;
+    
+    try {
+        const [result] = await connection.query(
+        `DELETE FROM Lab WHERE LabRNo = ?`,
+        [labId]
+        );
+    
+        if (result.affectedRows === 0) {
+        return res.status(404).json({ 
+            success: false,
+            message: "Lab not found" 
+        });
+        }
+    
+        res.json({
+        success: true,
+        message: "Lab deleted successfully"
+        });
+    
+    } catch (err) {
+        console.error("Delete error:", err);
+        res.status(500).json({
+        success: false,
+        message: "Failed to delete lab"
+        });
+    }
+    });
+
 export default router;
+
+
   

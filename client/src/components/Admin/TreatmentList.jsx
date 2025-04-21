@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import {
   Box,
   Typography,
@@ -26,6 +27,11 @@ import {
 } from "@mui/icons-material";
 import TreatmentForm from "./TreatmentForm";
 import DeleteDialog from "./DeleteDialog";
+import { setSnackBarInfo } from "../../Features/snackbarSlice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { DeleteTreatmentDialog } from "./DeleteTreatmentDialog";
 
 const initialTreatments = [
   {
@@ -53,17 +59,22 @@ const initialTreatments = [
 ];
 
 export default function TreatmentList() {
-  const [treatments, setTreatments] = useState(initialTreatments);
+  const dispatch=useDispatch()
+  const navigate=useNavigate()
+
+  const [treatments, setTreatments] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [treatmentToDelete, setTreatmentToDelete] = useState(null);
-  const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [selectedTreatment, setSelectedTreatment] = useState(null);
+  const [editDialogOpen, setEditDilaogOpen]=useState(false);
+  // const [snackbarInfo, setSnackBarInfo] = useState({ message: '', severity: 'success' });
+  // const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [columnVisibilityModel, setColumnVisibilityModel] = useState({
     id: true,
+    treatmentID: true,
     patientName: true,
     name: true,
     startDate: true,
@@ -71,7 +82,8 @@ export default function TreatmentList() {
     endDate: true,
     endTime: true,
     description: true,
-    cost: true,
+    appDocName:true,
+    appDocHID:true
   });
 
   const apiRef = useGridApiRef();
@@ -80,44 +92,175 @@ export default function TreatmentList() {
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const handleSave = (data) => {
-    setTreatments((prev) => {
-      const exists = prev.find((t) => t.id === data.id);
-      if (exists) {
-        setSnackBarInfo({ message: 'Updated treatment successfully', severity: 'success' });
-        setSnackbarOpen(true);
-        return prev.map((t) => (t.id === data.id ? data : t));
+  // const handleSave = (data) => {
+  //   // setTreatments((prev) => {
+  //   //   const exists = prev.find((t) => t.id === data.id);
+  //   //   if (exists) {
+  //   //     // setSnackBarInfo({ message: 'Updated treatment successfully', severity: 'success' });
+  //   //     // setSnackbarOpen(true);
+  //   //     return prev.map((t) => (t.id === data.id ? data : t));
+  //   //   }
+  //   //   // setSnackBarInfo({ message: 'Added treatment successfully', severity: 'success' });
+  //   //   // setSnackbarOpen(true);
+  //   //   return [...prev, { ...data, id: (prev.length + 1).toString() }];
+  //   // });
+  //   // setEditingTreatment(null);
+
+
+  // };
+
+  const handleSave = async (data, type) => {
+    setActiveOp(data);
+    console.log('Operation Data:', data,type);  
+    if(type=="add"){
+
+    }   
+    else{
+      let res;
+      
+
+      try {
+        res=await axios.post(`http://localhost:8000/operation/update_treatment/${data.treatmentID}`,{
+        
+          StDateTime:`${formatDateTime(data?.startDate,data?.startTime)}`,
+          EndDateTime:`${formatDateTime(data?.endDate,data?.endTime)}`,
+          TrName:data?.name
+          
+        }) 
+        console.log(res);
+      } catch (error) {
+        console.log(error)
       }
-      setSnackBarInfo({ message: 'Added treatment successfully', severity: 'success' });
-      setSnackbarOpen(true);
-      return [...prev, { ...data, id: (prev.length + 1).toString() }];
-    });
-    setEditingTreatment(null);
+
+         
+        
+        
+
+      if(res?.data?.success){
+        fetchAllTreatments();
+        dispatch(setSnackBarInfo({message:`Uploaded Treatment Successfully! Updating Treatments here`,severity:'success',open:true}))
+      }
+
+        
+
+        // setSnackbarOpen(true);
+        // setSnackBarInfo({'message':'Updated Operation Information Successfully','severity':'success'})
+    }
   };
 
   const filteredTreatments = treatments.filter((t) =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleDelete = () => {
-    setTreatments((prev) =>
-      prev.filter((t) => t.id !== treatmentToDelete?.id)
-    );
-    setSnackBarInfo({ message: 'Deleted treatment successfully', severity: 'error' });
-    setSnackbarOpen(true);
+  const handleDeleteClick = (trData) => {
+    console.log("trData",trData);
+    setSelectedTreatment(trData);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleEditClick=(trData)=>{
+    setSelectedTreatment(trData);
+    console.log("out ",trData);
+    setEditDilaogOpen(true);
+  }
+
+  const handleDeleteConfirm = async(trID) => {
+    // perform delete using selectedRoom.id or something
+    console.log("Deleting Treatment:", selectedTreatment);
+
+    try {
+      const res=await axios.delete(`http://localhost:8000/treatment/delete/${trID}`);
+      console.log(res);
+      if(res?.data?.success){
+        dispatch(setSnackBarInfo({message:`Deleted Treatment Successfully! Updating Operations here`,severity:'success',open:true}))
+        fetchAllTreatments()
+      }
+    } catch (error) {
+      console.log(error)
+      dispatch(setSnackBarInfo({message:`Failed to Delete Treatment!`,severity:'error',open:true}))
+    }
+    
+
+
+    setDeleteDialogOpen(false);
+
+    // setSnackbarOpen(true);
+    // setSnackBarInfo({'message':'Deleted Successfully','severity':'error'})
     setDeleteDialogOpen(false);
   };
 
+
+  const fetchAllTreatments=async()=>{
+    
+    
+
+    try {
+      const res=await axios.get(`http://localhost:8000/treatment/all`);
+      console.log(res?.data);
+
+      const formattedTrs = res?.data.map((op,index) => ({
+        id:index+1,
+        treatmentID: op.TrID,
+        name:op.TrName,
+        patientName: op.PName,
+        patientPhone: op.PPhNo,
+        startDate: dayjs(op.StDateTime).format("YYYY-MM-DD"),
+        startTime: dayjs(op.StDateTime).format("hh:mm A"),
+        endDate: dayjs(op.EndDateTime).format("YYYY-MM-DD"),
+        endTime: dayjs(op.EndDateTime).format("hh:mm A"),
+        appID:op.AppID,
+        appDocHID:op.HID,
+        appDocName:op.HName 
+      }));
+      console.log("formatted")
+      console.log(formattedTrs)
+
+      // const mergedMap = new Map();
+
+      // formattedTrs.forEach(item => {
+      //     const key = String(item.treatmentID); // ensure uniform key type
+      //     if (!mergedMap.has(key)) {
+      //         mergedMap.set(key, {
+      //             ...item,
+      //         });
+      //     } else {
+      //         const existing = mergedMap.get(key);
+      //         if (!existing.professionals.includes(item.professionals[0])) {
+      //             existing.professionals.push(item.professionals[0]);
+      //             existing.professionalsHID.push(item.professionalsHID[0]);
+      //         }
+      //     }
+      // });
+
+      // const mergedList = Array.from(mergedMap.values());
+      // console.log(mergedList);
+
+      setTreatments(formattedTrs)
+
+    } catch (error) {
+      console.log(error)
+      dispatch(setSnackBarInfo({message:`Failed to Fetch Treatments!`,severity:'error',open:true}))
+    }
+  }
+
+  useEffect(()=>{
+    fetchAllTreatments()
+  },[navigate])
+
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "id", headerName: "S No", flex: 0.5 },
+    { field: "treatmentID", headerName: "Treatment ID", flex: 0.5 },
     { field: "patientName", headerName: "Patient Name", flex: 1 },
     { field: "startDate", headerName: "Start Date", flex: 1 },
     { field: "startTime", headerName: "Start Time", flex: 1 },
     { field: "endDate", headerName: "End Date", flex: 1 },
     { field: "endTime", headerName: "End Time", flex: 1 },
     { field: "name", headerName: "Treatment Name", flex: 1 },
-    { field: "description", headerName: "Description", flex: 1 },
-    { field: "cost", headerName: "Cost ($)", flex: 1 },
+    // { field: "description", headerName: "Description", flex: 1 },
+    { field: "appDocHID", headerName: "Appointment Doctor HID", flex: 1 },
+    { field: "appDocName", headerName: "Appointment Doctor Name", flex: 1 },
+    
+    
     {
       field: "actions",
       headerName: "Actions",
@@ -128,10 +271,7 @@ export default function TreatmentList() {
           <Tooltip title="Edit">
             <IconButton
               size="small"
-              onClick={() => {
-                setEditingTreatment(params.row);
-                setOpenForm(true);
-              }}
+              onClick={()=>handleEditClick(params?.row)}
               sx={{ color: "#0288d1" }}
             >
               <Edit fontSize="small" />
@@ -140,10 +280,9 @@ export default function TreatmentList() {
           <Tooltip title="Delete">
             <IconButton
               size="small"
-              onClick={() => {
-                setTreatmentToDelete(params.row);
-                setDeleteDialogOpen(true);
-              }}
+              onClick={() => 
+                handleDeleteClick(params?.row)
+              }
               sx={{ color: "#e53935" }}
             >
               <Delete fontSize="small" />
@@ -155,11 +294,11 @@ export default function TreatmentList() {
   ];
 
   const deleteFields = [
-    { key: "id", headerName: "ID" },
+    { key: "treatmentID", headerName: "Treatment ID" },
     { key: "patientName", headerName: "Patient Name" },
     { key: "name", label: "Treatment Name" },
     { key: "description", label: "Description" },
-    { key: "cost", label: "Cost ($)" },
+    // { key: "cost", label: "Cost ($)" },
   ];
 
   return (
@@ -268,28 +407,22 @@ export default function TreatmentList() {
       />
 
       <TreatmentForm
-        open={openForm}
+        open={editDialogOpen}
         onClose={() => {
-          setOpenForm(false);
-          setEditingTreatment(null);
+          setEditDilaogOpen(false)
         }}
         onSave={handleSave}
-        initialData={editingTreatment}
+        initialData={selectedTreatment}
       />
 
-      <DeleteDialog
-        open={deleteDialogOpen}
-        title="Are you sure you want to delete this treatment?"
-        data={treatmentToDelete}
-        fields={deleteFields}
-        onCancel={() => {
-          setDeleteDialogOpen(false);
-          setTreatmentToDelete(null);
-        }}
-        onConfirm={handleDelete}
-      />
+      <DeleteTreatmentDialog
+            open={deleteDialogOpen}
+            trData={selectedTreatment}
+            onCancel={() => setDeleteDialogOpen(false)}
+            onConfirm={handleDeleteConfirm}
+        />
 
-      <Snackbar
+      {/* <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
@@ -303,7 +436,7 @@ export default function TreatmentList() {
         >
           {snackbarInfo.message}
         </Alert>
-      </Snackbar>
+      </Snackbar> */}
     </Box>
   );
 }

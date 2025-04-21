@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material";
 import DoctorForm from "./DoctorForm";
 import DeleteDialog from "./DeleteDialog";
+import { useNavigate } from "react-router-dom";
 
 export default function DoctorsTable() {
   const [doctors, setDoctors] = useState([]);
@@ -38,20 +39,23 @@ export default function DoctorsTable() {
 
   const apiRef = useGridApiRef();
   const open = Boolean(anchorEl);
+  const navigate=useNavigate()
 
   // Fetch doctors from API
   useEffect(() => {
     const fetchDoctors = async () => {
       console.log("fetching");
       try {
+        console.log("fetching_2")
         const response = await axios.get("http://localhost:8000/admin/doctor_profiles");
+        console.log(response)
         setDoctors(response.data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
       }
     };
     fetchDoctors();
-  }, []);
+  }, [navigate]);
 
   const addDoctor = async (formData) => {
     try {

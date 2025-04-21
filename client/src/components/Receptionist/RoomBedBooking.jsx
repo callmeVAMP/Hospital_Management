@@ -29,7 +29,7 @@ export default function RoomBookingForm() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/occupancy/available-rooms")
+      .get("http://localhost:8000/occupancy/available-rooms")
       .then((res) => {
         setRoomsData(res.data);
       })
@@ -87,11 +87,11 @@ export default function RoomBookingForm() {
     };
 
     axios
-      .post("http://localhost:3000/occupancy/book-room", bookingData)
+      .post("http://localhost:8000/occupancy/book-room", bookingData)
       .then((res) => {
         console.log("Room booked successfully:", res.data);
         setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+        setTimeout(() => setSuccess(false), 8000);
         setFormData({
           PName: "",
           PPhNo: "",

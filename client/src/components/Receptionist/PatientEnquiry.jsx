@@ -58,8 +58,8 @@ export default function PatientEnquiry() {
   useEffect(() => {
     const endpoint =
       tab === "Current"
-        ? "http://localhost:3000/occupancy/current"
-        : "http://localhost:3000/occupancy/discharged";
+        ? "http://localhost:8000/occupancy/current"
+        : "http://localhost:8000/occupancy/discharged";
 
     axios
       .get(endpoint)
@@ -97,7 +97,7 @@ export default function PatientEnquiry() {
     const { RNo, PName, PPhNo } = patientToDischarge;
       const formattedDate = new Date().toISOString().slice(0, 19).replace("T", " ");
   axios
-    .post(`http://localhost:3000/occupancy/discharge_patient/`, {
+    .post(`http://localhost:8000/occupancy/discharge_patient/`, {
       PName,
       PPhNo,
       EndDateTime: formattedDate

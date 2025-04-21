@@ -12,9 +12,10 @@ import {
 export default function TreatmentForm({ open, onClose, onSave, initialData }) {
   const [treatment, setTreatment] = useState({
     id: "",
+    treatmentID: null,
     name: "",
-    description: "",
-    cost: "",
+    // description: "",
+    // cost: "",
     startDate: "",
     endDate: "",
     startTime: "",
@@ -28,9 +29,10 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
     } else {
       setTreatment({
         id: "",
+        treatmentID: null,
         name: "",
-        description: "",
-        cost: "",
+        // description: "",
+        // cost: "",
         startDate: "",
         endDate: "",
         startTime: "",
@@ -40,20 +42,40 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
     }
   }, [initialData]);
 
+  const type=initialData? "edit" : "add"
+
+  function convertTo24Hour(time12h) {
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+  
+    if (modifier === 'PM' && hours !== '12') {
+      hours = String(parseInt(hours) + 12);
+    }
+    if (modifier === 'AM' && hours === '12') {
+      hours = '00';
+    }
+  
+    return `${hours.padStart(2, '0')}:${minutes}`;
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setTreatment((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = () => {
-    if (!treatment.name || !treatment.patientName) {
-      alert("Please fill required fields: Treatment Name and Patient Name");
-      return;
+    // if (!treatment.name || !treatment.patientName) {
+    //   alert("Please fill required fields: Treatment Name and Patient Name");
+    //   return;
+    // }
+    // if (!treatment.id) {
+    //   treatment.id = Date.now().toString(); // auto-generate ID if not provided
+    // }
+    // onSave(treatment);
+    // onClose();
+    if (onSave) {
+      onSave(treatment,type);
     }
-    if (!treatment.id) {
-      treatment.id = Date.now().toString(); // auto-generate ID if not provided
-    }
-    onSave(treatment);
     onClose();
   };
 
@@ -64,10 +86,12 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={6}>
             <TextField
+            type="number"
               fullWidth
               label="Treatment ID"
               name="id"
-              value={treatment.id}
+              value={treatment.treatmentID}
+              disabled={initialData}
               onChange={handleChange}
             />
           </Grid>
@@ -86,6 +110,7 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
               label="Patient Name *"
               name="patientName"
               value={treatment.patientName}
+              disabled={initialData}
               onChange={handleChange}
             />
           </Grid>
@@ -107,7 +132,7 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
               name="startTime"
               type="time"
               InputLabelProps={{ shrink: true }}
-              value={treatment.startTime}
+              value={convertTo24Hour(treatment.startTime)}
               onChange={handleChange}
             />
           </Grid>
@@ -129,11 +154,11 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
               name="endTime"
               type="time"
               InputLabelProps={{ shrink: true }}
-              value={treatment.endTime}
+              value={convertTo24Hour(treatment.endTime)}
               onChange={handleChange}
             />
           </Grid>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <TextField
               fullWidth
               label="Cost"
@@ -143,8 +168,8 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
               onChange={handleChange}
               inputProps={{ min: 0 }}
             />
-          </Grid>
-          <Grid item xs={12} sx={{ width: '497px' }}>
+          </Grid> */}
+          {/* <Grid item xs={12} sx={{ width: '497px' }}>
             <TextField
               fullWidth
               multiline
@@ -154,14 +179,28 @@ export default function TreatmentForm({ open, onClose, onSave, initialData }) {
               onChange={handleChange}
               rows={3}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="inherit">
           Cancel
         </Button>
-        <Button variant="contained" onClick={handleSubmit}>
+        <Button variant="contained" onClick={handleSubmit}
+       disabled={
+        
+        !treatment.patientName ||
+        
+        !treatment.startDate ||
+        !treatment.startTime ||
+        !treatment.endDate ||
+        !treatment.endTime ||
+        !treatment.name 
+        
+      }
+        
+        
+        >
           {initialData ? "Update" : "Add"}
         </Button>
       </DialogActions>

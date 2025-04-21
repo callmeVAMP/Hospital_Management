@@ -125,6 +125,25 @@ router.post('/update_healthcare_prof/:id',async(req,res)=>{
 
 })
 
+router.delete('/delete/:id',async(req,res)=>{
+    const TrID=req.params.id;
+    console.log(TrID);
+
+    try {
+        const [results]=await connection.query(
+            `
+            DELETE FROM Treatment
+            WHERE TrID=${TrID}
+            `
+        )
+        console.log(results);
+        return res.status(200).json({...results,success:true})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({error:error,success:false})
+    }
+})
+
 
 
 export default router;

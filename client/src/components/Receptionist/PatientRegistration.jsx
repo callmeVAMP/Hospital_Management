@@ -34,7 +34,7 @@ export default function PatientRegistrationForm() {
     try {
       console.log(formData);
       // Send the form data to your backend API using Axios
-      const response = await axios.post("http://localhost:3000/patient/add", formData);
+      const response = await axios.post("http://localhost:8000/patient/add", formData);
       console.log("output dataa");
       console.log(response.status);
       if (response.status === 200) {
@@ -62,7 +62,7 @@ export default function PatientRegistrationForm() {
         // Auto-hide success message after 3 seconds
         setTimeout(() => {
           setSuccess(false);
-        }, 3000);
+        }, 8000);
       }
     } catch (error) {
       // Show error alert if there was an issue with the API request

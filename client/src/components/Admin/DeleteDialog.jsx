@@ -10,7 +10,7 @@ import {
 
 const DeleteDialog = ({
   open,
-  title = "Are you sure?",
+  title = "Are you sure you want to delete?",
   data = {},
   fields = [],
   onCancel,
