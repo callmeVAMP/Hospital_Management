@@ -24,8 +24,10 @@ const professionalsList = [
   'Dr. Taylor'
 ];
 
-const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
+const AddOrEditOperation = ({ open, onClose, onSave, operationData, professionalsList=[] }) => {
   const dispatch=useDispatch()
+
+  console.log(professionalsList)
 
   // console.log("op data ",operationData)
   const [formData, setFormData] = useState({
@@ -41,20 +43,20 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
     reportUrl: null
   });
 
-  const [professionalsList,setProfessionalsList]=useState([]);
+  // const [professionalsList,setProfessionalsList]=useState([]);
 
-  const fetchProfessionals=async()=>{
-    try {
-      const res=await axios.get(`http://localhost:8000/admin/all_employees`)
-      console.log("hprof",res);
-      setProfessionalsList(res?.data);
+  // const fetchProfessionals=async()=>{
+  //   try {
+  //     const res=await axios.get(`http://localhost:8000/admin/all_employees`)
+  //     console.log("hprof",res);
+  //     setProfessionalsList(res?.data);
 
-    } catch (error) {
-      console.log(error)
-      dispatch(setSnackBarInfo({message:`Error loading HealthCare Professionals Data`,severity:'error',open:true}))
+  //   } catch (error) {
+  //     console.log(error)
+  //     dispatch(setSnackBarInfo({message:`Error loading HealthCare Professionals Data`,severity:'error',open:true}))
       
-    }
-  }
+  //   }
+  // }
   
 
   // const [report,setReport]=useState(null);
@@ -74,10 +76,10 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
         professionalsHID: Array.isArray(operationData?.professionalsHID) ? operationData.professionalsHID : [],
         reportUrl: operationData?.reportUrl,
         reportFile: null,
-        appID:operationData?.appID
+        appID:operationData?.appID? operationData?.appID : null
       });
     }
-    fetchProfessionals()
+    // fetchProfessionals()
   }, [operationData]);
 
   // console.log("formData",formData);
@@ -349,7 +351,7 @@ const AddOrEditOperation = ({ open, onClose, onSave, operationData }) => {
         <Button onClick={onClose} color="error">Cancel</Button>
         <Button onClick={handleSubmit} variant="contained" color="primary"
         disabled={
-          !formData.appID ||
+          // !formData.appID ||
           !formData.patientName ||
           !formData.patientPhone ||
           !formData.startDate ||

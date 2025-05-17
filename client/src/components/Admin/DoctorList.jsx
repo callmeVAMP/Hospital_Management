@@ -48,7 +48,7 @@ export default function DoctorsTable() {
       try {
         console.log("fetching_2")
         const response = await axios.get("http://localhost:8000/admin/doctor_profiles");
-        console.log(response)
+        console.log("res ",response)
         setDoctors(response.data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -194,14 +194,14 @@ export default function DoctorsTable() {
         return renderLabel(params.row.gender, bg, text);
       },
     },
-    { field: "department", headerName: "Department", flex: 1 },
+    // { field: "department", headerName: "Department", flex: 1 },
     { field: "specialization", headerName: "Specialization", flex: 1 },
-    { field: "degree", headerName: "Degree", flex: 1 },
+    // { field: "degree", headerName: "Degree", flex: 1 },
     { field: "mobile", headerName: "Mobile", flex: 1 },
     { field: "email", headerName: "Email", flex: 1 },
-    { field: "joiningDate", headerName: "Joining Date", flex: 1 },
-    { field: "consultationFee", headerName: "Fee", flex: 0.7 },
-    { field: "availability", headerName: "Availability", flex: 1 },
+    // { field: "joiningDate", headerName: "Joining Date", flex: 1 },
+    // { field: "consultationFee", headerName: "Fee", flex: 0.7 },
+    // { field: "availability", headerName: "Availability", flex: 1 },
     { field: "clinicLocation", headerName: "Clinic", flex: 1 },
     {
       field: "actions",

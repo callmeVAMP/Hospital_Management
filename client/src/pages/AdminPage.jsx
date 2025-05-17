@@ -27,7 +27,7 @@ const AdminPage = () => {
         navigate("/login",{replace:true});
       }
       else if(authState?.role!="admin"){
-        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${cookieAuth?.role}`,severity:'error',open:true}))
+        dispatch(setSnackBarInfo({message:`You are not authorised to access this! Redirecting to ${authState?.role}`,severity:'error',open:true}))
         console.log("not authorised");
         navigate(`/${authState?.role}`,{replace:true});
       }
@@ -121,7 +121,7 @@ const AdminPage = () => {
 
   return (
     <div>
-      AdminPage
+      
       <Box sx={{ display: 'flex', height: '100vh' }}>
         {/* Sidebar */}
         <Paper
@@ -224,7 +224,7 @@ const AdminPage = () => {
         <Box sx={{ flexGrow: 1, p: 4 }}>
           <Typography variant="h5" gutterBottom>
             {/* The content can be rendered via the respective routes */}
-            Admin Panel Content
+            
             <Outlet />
           </Typography>
           {/* The content will now be rendered based on routing */}

@@ -30,7 +30,7 @@ router.get('/all', async (req, res) => {
 });
 
 
-router.post('/update_operation/:id',async(req,res)=>{
+router.post('/update_treatment/:id',async(req,res)=>{
     const TrID=req.params.id;
     console.log(TrID);
     const {StDateTime,EndDateTime,TrName}=req.body;
@@ -88,40 +88,7 @@ router.post('/insert_operation',async(req,res)=>{
 
 })
 
-router.post('/update_healthcare_prof/:id',async(req,res)=>{
-    const TrID=req.params.id;
-    console.log(TrID);
-    const hid_list=req.body?.hid_list;
-    console.log(req.body);
 
-    try {
-        const [results] = await connection.query(`
-            DELETE FROM Performed_By
-            WHERE TrID=${TrID}
-        `);
-
-        console.log(results)
-
-
-
-        const values = hid_list.map(hid => [TrID, hid]); // [[TrID, hid1], [TrID, hid2], ...]
-        console.log(values);
-        const [results2] = await connection.query(
-        `INSERT INTO Performed_By (TrID, HID) VALUES ?`,
-        [values]);
-
-        console.log(results2);
-
-
-
-        res.status(200).json({...results2,success:true});
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({error:error})
-    }
-
-
-})
 
 router.delete('/delete/:id',async(req,res)=>{
     const TrID=req.params.id;

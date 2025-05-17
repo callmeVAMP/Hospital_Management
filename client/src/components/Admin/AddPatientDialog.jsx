@@ -15,10 +15,11 @@ import {
 import { PersonAdd } from "@mui/icons-material";
 
 const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
+  console.log("data" ,patientData)
   const [formData, setFormData] = useState({
-    name: patientData.patientName || "",
+    patientName: patientData.patientName || "",
     gender: "",
-    mobile: patientData.patientPhone || "",
+    patientPhone: patientData.patientPhone || "",
     address: "",
     dob: "",
   });
@@ -36,11 +37,12 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
   };
 
   const handleSubmit = () => {
-    
-    onSave(formData);
-    setSuccess(true);
+    if(onSave)
+    console.log({...formData,...patientData})
+      onSave({...formData,...patientData});
+    // setSuccess(true);
 
-    setTimeout(() => setSuccess(false), 3000);
+    // setTimeout(() => setSuccess(false), 3000);
 
     setFormData({
       name: "",
@@ -71,7 +73,7 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
               <TextField
                 label="Patient Name"
                 name="name"
-                value={formData.name}
+                value={formData.patientName}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -101,7 +103,7 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
               <TextField
                 label="Phone Number"
                 name="mobile"
-                value={formData.mobile}
+                value={formData.patientPhone}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -149,9 +151,9 @@ const AddPatientDialog = ({ open, onClose, onSave, patientData }) => {
           onClick={handleSubmit}
           variant="contained"
           disabled={
-            !formData.name ||
+            !formData.patientName ||
             !formData.gender ||
-            !formData.mobile ||
+            !formData.patientPhone ||
             !formData.address ||
             !formData.dob
           }

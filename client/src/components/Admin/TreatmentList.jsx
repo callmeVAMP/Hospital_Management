@@ -109,18 +109,31 @@ export default function TreatmentList() {
 
   // };
 
-  const handleSave = async (data, type) => {
-    setActiveOp(data);
-    console.log('Operation Data:', data,type);  
-    if(type=="add"){
+  const formatDateTime = (date, time) => {
+    const [timePart, modifier] = time.split(" ");
+    let [hours, minutes] = timePart.split(":").map(Number);
+  
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+  
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+  
+    return `${date} ${hh}:${mm}:00`;
+  };
 
+  const handleSave = async (data, type) => {
+    // setActiveOp(data);
+    console.log('Treament Data:', data,type);  
+    if(type=="add"){
+      
     }   
     else{
       let res;
       
 
       try {
-        res=await axios.post(`http://localhost:8000/operation/update_treatment/${data.treatmentID}`,{
+        res=await axios.post(`http://localhost:8000/treatment/update_treatment/${data.treatmentID}`,{
         
           StDateTime:`${formatDateTime(data?.startDate,data?.startTime)}`,
           EndDateTime:`${formatDateTime(data?.endDate,data?.endTime)}`,
@@ -130,6 +143,7 @@ export default function TreatmentList() {
         console.log(res);
       } catch (error) {
         console.log(error)
+        dispatch(setSnackBarInfo({message:`Some Error Occured! Failed to Update`,severity:'error',open:true}))
       }
 
          

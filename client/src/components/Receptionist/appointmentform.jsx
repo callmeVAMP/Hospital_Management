@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { Snackbar, Alert } from "@mui/material"; // ✅ import Snackbar and Alert
+import { useNavigate } from "react-router-dom";
 // Modified to accept props for integration with parent component
 export default function AppointmentForm({ initialData = {}, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -39,7 +40,10 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
       });
   }, []);
 
+  const navigate=useNavigate();
+
   useEffect(() => {
+    
     const savedData = localStorage.getItem("pendingAppointment");
     console.log(savedData)
     if (savedData) {
@@ -55,7 +59,7 @@ export default function AppointmentForm({ initialData = {}, onSave, onCancel }) 
      
 
     }
-  }, []);
+  }, [navigate]);
   
   useEffect(() => {
     if (shouldAutoSubmit) {

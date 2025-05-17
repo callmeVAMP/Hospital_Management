@@ -22,6 +22,7 @@ router.get('/all', async (req, res) => {
             LEFT JOIN Performed_By pb ON pb.TrID=t.TrID
             LEFT JOIN HealthcareProf h ON h.HID=pb.HID
             LEFT JOIN Report r on r.TrID=t.TrID
+            WHERE t.TrType='Operation'
             ORDER BY t.StDateTime DESC
         `);
         res.status(200).json(results);
@@ -68,7 +69,15 @@ router.post('/insert_operation',async(req,res)=>{
 
         `);
         
-        if(results.length==0) return res.status(400).json({'error':'Patient Does not Exist',success:false})
+        if(results.length==0) return res.status(200).json({'error':'Patient Does not Exist',patientFound:false})
+
+        // const [results2] = await connection.query(`
+        //     SELECT * FROM Appintment
+        //     WHERE AppID'
+
+        // `);
+        
+        // if(results2.length==0) return res.status(400).json({'error':'Patient Does not Exist',success:false})
     } catch (error) {
         console.log(error);
         return res.status(500).json({error:error})

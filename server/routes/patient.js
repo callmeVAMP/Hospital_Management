@@ -177,6 +177,167 @@ router.get('/treatments/:pid',async(req,res)=>{
 
 })
 
+// router.post('/add-test', async (req, res) => {
+//     console.log(req.body);
+//     // const DTime=NOW();
+    
+//     // Validate required fields
+//     const { TestName, PName, PPhNo, DTime } = req.body;
+//     if (!TestName || !PName || !PPhNo || !DTime) {
+//         return res.status(400).json({ "error": "Missing required fields" });
+//     }
+
+//     // Generate unique IDs
+//     const TestID = await getUniquePID(); // You'll need to implement this similar to getUniquePID()
+    
+//     try {
+//         // Start transaction
+//         // await connection.beginTransaction();
+
+//         // 1. Get LabRNo
+//         const [labResults] = await connection.query(
+//             `SELECT LabRNo FROM Lab WHERE TestName = ?`,
+//             [TestName]
+//         );
+//         if (labResults.length === 0) {
+//             return res.status(400).json({ "error": "Invalid TestName" });
+//         }
+//         const LabRNo = labResults[0].LabRNo;
+
+//         // 2. Get PID
+//         const [patientResults] = await connection.query(
+//             `SELECT PID FROM Patient 
+//             WHERE PName = ? AND PPhNo = ?`,
+//             [PName, PPhNo]
+//         );
+//         if (patientResults.length === 0) {
+//             return res.status(404).json({ "error": "Patient not found" });
+//         }
+//         const PID = patientResults[0].PID;
+
+//         // 3. Get AppID
+//         const [appointmentResults] = await connection.query(
+//             `SELECT AppID FROM Appointment 
+//             WHERE PID = ? AND DTime = ?`,
+//             [PID, new Date(DTime)]
+//         );
+//         if (appointmentResults.length === 0) {
+//             return res.status(404).json({ "error": "Appointment not found" });
+//         }
+//         const AppID = appointmentResults[0].AppID;
+
+//         // 4. Insert test
+//         const [testResults] = await connection.query(
+//             `INSERT INTO Tests 
+//             (TestID, AppID, TestName, ScheduledDTime, LabRNo)
+//             VALUES (?, ?, ?, ?, ?)`,
+//             [TestID, AppID, TestName, new Date(DTime), LabRNo]
+//         );
+
+//         // Commit transaction
+//         // await connection.commit();
+        
+//         res.status(200).json({
+//             "success": true,
+//             "TestID": TestID,
+//             "results": testResults
+//         });
+
+//     } catch (err) {
+//         // await connection.rollback();
+//         console.error(err);
+        
+//         if (err.code === "ER_DUP_ENTRY") {
+//             return res.status(400).json({ "error": "Duplicate entry" });
+//         }
+//         return res.status(500).json({ "error": "Server error" });
+//     }
+// });
+
+router.post('/add-test', async (req, res) => {
+    console.log(req.body);
+    
+    // Validate required fields
+    const { TestName, PName, PPhNo, DTime, Drugs, Treatment } = req.body;
+    if (!TestName || !PName || !PPhNo || !DTime || !Drugs || !Treatment) {
+        return res.status(400).json({ "error": "Missing required fields" });
+    }
+
+    // Generate unique IDs
+    const TestID = await getUniquePID();
+    
+    try {
+        // Start transaction
+        // await connection.beginTransaction();
+
+        // 1. Get LabRNo
+        const [labResults] = await connection.query(
+            `SELECT LabRNo FROM Lab WHERE TestName = '${TestName}'`
+            // [TestName]
+        );
+        if (labResults.length === 0) {
+            return res.status(400).json({ "error": "Invalid TestName" });
+        }
+        const LabRNo = labResults[0].LabRNo;
+
+        // 2. Get PID
+        const [patientResults] = await connection.query(
+            `SELECT PID FROM Patient 
+            WHERE PName = ? AND PPhNo = ?`,
+            [PName, PPhNo]
+        );
+        if (patientResults.length === 0) {
+            return res.status(404).json({ "error": "Patient not found" });
+        }
+        const PID = patientResults[0].PID;
+
+        // 3. Get AppID using appointment's original DTime
+        const [appointmentResults] = await connection.query(
+            `SELECT AppID FROM Appointment 
+            WHERE PID = ? AND DTime = ?`,
+            [PID, new Date(DTime)]
+        );
+        if (appointmentResults.length === 0) {
+            return res.status(404).json({ "error": "Appointment not found" });
+        }
+        const AppID = appointmentResults[0].AppID;
+
+        // 4. Insert test with CURRENT timestamp
+        const [testResults] = await connection.query(
+            `INSERT INTO Tests 
+            (TestID, AppID, TestName, ScheduledDTime, LabRNo)
+            VALUES (?, ?, ?, NOW(), ?)`,
+            [TestID, AppID, TestName, LabRNo]
+        );
+
+        // 5. Update DrugsPrescribed in Appointment
+        await connection.query(
+            `UPDATE Appointment 
+            SET Drugs = ?, TreatmentSuggested= ?
+            WHERE AppID = ?`,
+            [Drugs, Treatment, AppID]
+        );
+
+        // Commit transaction
+        // await connection.commit();
+        
+        res.status(200).json({
+            "success": true,
+            "TestID": TestID,
+            "results": testResults
+        });
+
+    } catch (err) {
+        // await connection.rollback();
+        console.error(err);
+        
+        if (err.code === "ER_DUP_ENTRY") {
+            return res.status(400).json({ "error": "Duplicate entry" });
+        }
+        return res.status(500).json({ "error": "Server error" });
+    }
+});
+
 
 export default router;
   

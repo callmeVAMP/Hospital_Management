@@ -135,7 +135,10 @@ const ReceptionistPage = () => {
             <ListItemText primary="Patient Registration" />
           </ListItemButton>
           <ListItemButton
-            onClick={() => handleNavigation('appointment')}
+            onClick={() =>{ 
+              localStorage.removeItem("pendingAppointment");
+  
+              handleNavigation('appointment')}}
             sx={{
               backgroundColor: isActive('AppointmentForm') ? 'rgba(25, 118, 210, 0.2)' : 'transparent',
               '&:hover': {

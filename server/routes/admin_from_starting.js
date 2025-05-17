@@ -3,22 +3,22 @@ import connection from "../index.js";
 const router=Router();
 
 // ALL Healthcare Professionals
-router.get('/all_employees', async (req, res) => {
+// router.get('/all_employees', async (req, res) => {
 // ALL Healthcare Professionals
 router.get('/all_employees', async (req, res) => {
 
-try {
-    const [results, fields] = await connection.query(
-    'SELECT * FROM HealthcareProf'
-    );
-    
-    
-    console.log(results); // results contains rows returned by server
-    console.log(fields); // fields contains extra meta data about results, if available
-    res.json(results);
-} catch (err) {
-    console.log(err);
-    res.status(500).send('error');
+    try {
+        const [results, fields] = await connection.query(
+        'SELECT * FROM HealthcareProf'
+        );
+        
+        
+        console.log(results); // results contains rows returned by server
+        console.log(fields); // fields contains extra meta data about results, if available
+        res.json(results);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('error');
 }
 });
 
@@ -135,7 +135,8 @@ router.get('/doctor_profiles', async (req, res) => {
                 d.CabinNo as CabinNo, 
                 hp.HGender AS Gender,
                 hp.HPhNo AS PhoneNo,
-                hp.HAddr AS Address
+                hp.HAddr AS Address,
+                hp.Email AS Email
             FROM Doctor d
             JOIN HealthcareProf hp ON d.HID = hp.HID
         `);
@@ -148,7 +149,7 @@ router.get('/doctor_profiles', async (req, res) => {
             specialization: doc.Specialisation,
             degree: "-",               // Placeholder, fill if available
             mobile: doc.PhoneNo,
-            email: "-",                // Placeholder, fill if available
+            email: doc.Email,                // Placeholder, fill if available
             experience: "-",           // Placeholder, fill if available
             joiningDate: "-",          // Placeholder, fill if available
             consultationFee: "-",      // Placeholder, fill if available
@@ -307,7 +308,8 @@ router.get('/all_nurses', async (req, res) => {
                 hp.HName AS NurseName, 
                 hp.HAddr AS Address, 
                 hp.HPhNo AS PhoneNo, 
-                hp.HGender AS Gender
+                hp.HGender AS Gender,
+                hp.Email AS Email
             FROM Nurse n
             JOIN HealthcareProf hp ON n.HID = hp.HID
         `);
@@ -716,7 +718,7 @@ router.delete('/delete_treatment/:trid', async (req, res) => {
         res.status(500).send("Error deleting treatment");
     }
 });
-});
+
 
 
 

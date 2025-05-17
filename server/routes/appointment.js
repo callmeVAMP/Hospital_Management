@@ -179,5 +179,36 @@ router.put('/update_appointment/:AppID', async (req, res) => {
   });
   
 
+//to show all the appoinments for side bar;
+router.get('/all', async (req, res) => {
+
+  try {
+      const [results, fields] = await connection.query(
+      // 'SELECT a.AppID, p.PName, a.DTime, a.Priority, t.TestName,a.Problem, a.TreatmentSuggested,a.Drugs, o.BedID from Appointment a join Patient p on a.PID = p.PID join Tests t on t.AppID= a.AppID join Occupancy o on o.PID = a.PID order by a.DTime desc, a.Priority'
+      //  'SELECT  p.PName, a.DTime, a.Priority, t.TestName,a.Problem, a.TreatmentSuggested,a.Drugs, o.BedID from Appointment a join Patient p on a.PID = p.PID join Tests t on t.AppID= a.AppID join Occupancy o on o.PID = a.PID order by a.DTime desc, a.Priority'
+      ` SELECT p.PName,p.PAddr, p.PPhNo, a.DTime, a.Priority, a.Problem FROM Appointment a JOIN Patient p ON a.PID = p.PID ORDER BY a.DTime DESC, a.Priority`
+      );
+      
+      
+      console.log(results); // results contains rows returned by server
+      console.log(fields); // fields contains extra meta data about results, if available
+      res.json(results);
+  } catch (err) {
+      console.log(err);
+      res.status(500).send('error');
+  }
+  });
+
+  router.get('/tests/all', async (req, res) => {
+    try {
+      const [results] = await connection.query('SELECT Distinct TestName FROM Lab');
+      // results: [{ TestName: 'Blood Test' }, ...]
+      res.json(results);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to fetch tests" });
+    }
+  });
+
 export default router;
   

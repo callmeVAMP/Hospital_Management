@@ -110,6 +110,21 @@ export default function OperationInfo() {
   // const [snackBarInfo,setSnackBarInfo]=useState({'message':'','severity':''})
   // const [snackbarOpen, setSnackbarOpen] = useState(false);
 
+  const [professionalsList,setProfessionalsList]=useState([]);
+
+  const fetchProfessionals=async()=>{
+    try {
+      const res=await axios.get(`http://localhost:8000/admin/all_employees`)
+      console.log("hprof",res);
+      setProfessionalsList(res?.data);
+
+    } catch (error) {
+      console.log(error)
+      dispatch(setSnackBarInfo({message:`Error loading HealthCare Professionals Data`,severity:'error',open:true}))
+      
+    }
+  }
+
 
   const fetchAllOperations=async()=>{
     
@@ -161,6 +176,7 @@ export default function OperationInfo() {
 
     } catch (error) {
       console.log(error)
+      dispatch(setSnackBarInfo({message:`Failed to Fetch Operations!`,severity:'error',open:true}))
     }
   }
   
@@ -242,27 +258,51 @@ export default function OperationInfo() {
           
         }) 
         console.log(res);
+        console.log(res?.status," status")
+
+        if(!res?.data?.patientFound){
+          setAddOpenOperation(false)
+          setAddOpenPatient(true);
+
+          return;
+          
+
+        }
+
         if(res?.data?.success){
           data.treatmentID=res?.data?.TrID;
           console.log(data.treatmentID)
         }
 
-        else if(res?.data?.status==400){
+        
+        
+        // else if(res?.data?.success){
+        //   data.treatmentID=res?.data?.TrID;
+        //   console.log(data.treatmentID)
+        // }
+      } catch (error) {
+
+        
+        console.log(error)
+
+        if(res?.status==400){
+          
           // open dialog of insert patient
 
+          // setAddOpenPatient(true)
+          console.log("activeOp ----------------",activeOp)
+
+
 
 
 
         }
-        else if(res?.data?.success){
-          data.treatmentID=res?.data?.TrID;
-          console.log(data.treatmentID)
-        }
-      } catch (error) {
-        console.log(error)
+        dispatch(setSnackBarInfo({message:`Update Operation Failed!`,severity:'error',open:true}))
       }
 
       try {
+          console.log("HealthcareProf")
+
           res2=await axios.post(`http://localhost:8000/operation/update_healthcare_prof/${data.treatmentID}`,{
           
             hid_list:data?.professionalsHID,
@@ -272,6 +312,7 @@ export default function OperationInfo() {
         console.log(res2);
       } catch (error) {
         console.log(error)
+        dispatch(setSnackBarInfo({message:`Failed to update Healthcare Professionals!`,severity:'error',open:true}))
       }
 
       //for report
@@ -294,7 +335,7 @@ export default function OperationInfo() {
             })
             console.log(res)
             if(res3?.data?.success) {
-                dispatch(setSnackBarInfo({message:`Uploaded Report Successfully! Updating Operations here`,severity:'success',open:true}))
+                // dispatch(setSnackBarInfo({message:`Uploaded Report Successfully! Updating Operations here`,severity:'success',open:true}))
                 fetchAllOperations()
             }
         } catch (error) {
@@ -304,7 +345,7 @@ export default function OperationInfo() {
       }
       
 
-      if(res?.data?.success && res2?.data?.success){
+      if(res?.data?.success && res2?.data?.success && res3?.data?.success){
         fetchAllOperations();
         dispatch(setSnackBarInfo({message:`Uploaded Operation Successfully! Updating Operations here`,severity:'success',open:true}))
       }
@@ -389,10 +430,14 @@ export default function OperationInfo() {
     console.log(data);
 
     
+
+
+    
   }
 
   useEffect(()=>{
     fetchAllOperations()
+    fetchProfessionals()
   },[navigate])
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -582,10 +627,10 @@ export default function OperationInfo() {
       />
 
       {/* Edit Operation */}
-      <AddOrEditOperation open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} operationData={selectedOperation} />
+      <AddOrEditOperation open={editDialogOpen} onClose={() => setEditDilaogOpen(false)} onSave={handleSave} operationData={selectedOperation} professionalsList={professionalsList} />
       
       {/* Add op */}
-      <AddOrEditOperation open={openAddOperation} onClose={() => setAddOpenOperation(false)} onSave={handleSave}/>
+      <AddOrEditOperation open={openAddOperation} onClose={() => setAddOpenOperation(false)} onSave={handleSave} professionalsList={professionalsList}/>
         
 
       {/* Delete Dialog */}

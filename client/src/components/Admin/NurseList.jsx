@@ -69,6 +69,8 @@ export default function NurseList() {
           gender: n.Gender,
           email: n.Email || "",
         })));
+        console.log(res.data)
+        
       })
       .catch(err => {
         setSnackBarInfo({ message: 'Failed to fetch nurses', severity: 'error' });
